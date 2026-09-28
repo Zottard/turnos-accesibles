@@ -5,7 +5,16 @@
     <header class="border-b-2 border-default">
       <div class="w-full max-w-5xl flex flex-wrap items-center gap-4 mx-auto px-4 py-3">
         <NuxtLink to="/" class="text-xl font-bold no-underline">{{ appName }}</NuxtLink>
-        <AccessibilityMenu class="ml-auto" />
+        <div class="flex flex-wrap items-center gap-3 ml-auto">
+          <AccessibilityMenu />
+          <nav aria-label="Tu cuenta" class="flex flex-wrap gap-3">
+            <template v-if="user">
+              <UButton to="/inicio" label="Mi inicio" icon="i-lucide-house" size="lg" />
+              <UButton label="Salir" icon="i-lucide-log-out" size="lg" @click="cerrarSesion" />
+            </template>
+            <UButton v-else to="/ingresar" label="Ingresar" icon="i-lucide-log-in" size="lg" />
+          </nav>
+        </div>
       </div>
     </header>
 
@@ -35,4 +44,12 @@ const FOOTER_LINKS = [
 ]
 
 const { appName } = useAppConfig()
+const { user, salir } = useSesion()
+const { announce } = useAnuncio()
+
+async function cerrarSesion() {
+  await salir()
+  await navigateTo('/')
+  announce('Saliste de tu cuenta.')
+}
 </script>

@@ -16,7 +16,7 @@ Acordadas con el grupo al arrancar (2026-09-28). Donde choquen con `docs/CONTEXT
 - Las preferencias de accesibilidad se guardan en la **cookie `ta_prefs`** (no en localStorage):
   el server renderiza `<html>` con los atributos correctos y no hay flash. Supabase se suma en la Fase 3.
 - **TypeScript 5.9**, no 7: `vue-tsc` todavía no funciona con TS 7.
-- Validación con vee-validate + zod 4 vía Standard Schema, sin `@vee-validate/zod` (pide zod 3).
+- Validación con `UForm` de Nuxt UI + zod 4 (schemas en `utils/validacion.ts`). Sin vee-validate.
 - `pnpm` como gestor de paquetes.
 - El manual de front dice "sin Paso 1 de 2" y "front en JS": acá **no aplica**. Rige el CONTEXTO
   (progreso visible en el asistente, TS strict).
@@ -45,11 +45,35 @@ pnpm test:e2e         # Playwright + axe, levanta build + preview
 - `overflow-wrap: anywhere` + `hyphens: auto` en el body: sin eso, a 360 px con texto al 200 %
   las palabras largas desbordan los items flex.
 
+## Auth (Fase 2)
+
+- Proyecto Supabase `turnos-accesibles` (`ynolirfzjcjsvesnfpes`, sa-east-1). Migraciones en
+  `supabase/migrations/`, usuarios demo en `supabase/seed.sql`, tipos en `app/types/database.ts`
+  (regenerarlos después de cada migración).
+- Toda la lógica de sesión vive en `useSesion()`: devuelve `{ ok }` o `{ ok: false, motivo, aviso }`,
+  y `aviso` ya viene en lenguaje simple (qué pasó + qué hacer).
+- `useSupabaseUser()` devuelve los claims del JWT: el id es `user.sub`, no `user.id`.
+- Bloqueo tras 5 intentos: funciones `estado_bloqueo` / `registrar_fallo` / `limpiar_intentos` en la base.
+  Se cuenta por correo (exista o no la cuenta). **Límite conocido:** alguien que llame a la API de
+  Supabase directo se lo saltea. La solución de fondo es el Password Verification Hook, que es del plan Teams.
+- `es_admin()` vive en el schema `privado`, no expuesto en la API.
+- Middlewares: `auth` (pide sesión), `invitado` (saca a quien ya tiene sesión), `rol` (lee `meta.roles`,
+  por defecto `['admin']`). El `?volver=` pasa siempre por `rutaSegura()`.
+- Formularios: `UForm` con `method="post"` y `:validate-on="['input']"`. El POST evita que un envío
+  antes de hidratar mande datos en la URL. Sin validar en blur, porque el error que desaparece al salir
+  del campo mueve el botón entre el mousedown y el mouseup, y el click se pierde.
+  Errores de envío: `useFormulario().alFallar` (lleva el foco al primer campo y lo anuncia).
+- Sin sesiones que venzan mientras la app está abierta: Supabase renueva el token solo (WCAG 2.2.1).
+
 ## Notas
 
 - Sin `NUXT_PUBLIC_SUPABASE_URL` el SSR se cae. Copiar `.env.example` a `.env` (tiene placeholders).
   En Vitest se pasa como `overrides` en `vitest.config.ts`; sin eso la app no arranca y Pinia no existe.
 - `@vite-pwa/nuxt` se excluye cuando corre Vitest (rompe el entorno de tests).
 - `/demo-ui` se saca del build de producción salvo con `DEMO_UI=1`, que es como lo corre Playwright.
+- E2E: importar `test`/`expect` de `tests/e2e/fixtures.ts` (espera la hidratación en `goto`/`reload`).
+  Las sesiones de solicitante y admin se crean una vez en `sesiones.setup.ts` (Supabase limita
+  a ~30 ingresos cada 5 minutos por IP). `auth.spec.ts` corre solo en escritorio.
+- CI necesita las variables de repo `NUXT_PUBLIC_SUPABASE_URL` y `NUXT_PUBLIC_SUPABASE_KEY`.
 - Flechas en radios (Reka): elige la opción solo si la tecla sigue apretada al recibir foco.
   En Playwright usar `keyboard.down/up`, no `press`.

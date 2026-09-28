@@ -11,6 +11,16 @@ cp .env.example .env
 pnpm dev
 ```
 
+## Usuarios de prueba
+
+Todos con la contraseña `demo1234`. Se crean con `supabase/seed.sql`, ya confirmados.
+
+| Correo | Rol |
+|---|---|
+| solicitante@demo.ar | Solicitante (Rosa Gómez) |
+| acompanante@demo.ar | Acompañante (Lucía Gómez) |
+| admin@demo.ar | Administración |
+
 ## Verificar
 
 ```bash

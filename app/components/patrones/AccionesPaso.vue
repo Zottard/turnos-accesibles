@@ -7,7 +7,8 @@
       class="sm:w-auto"
       :label="confirmar ?? t('accion.continuar')"
       :loading="cargando"
-      @click="emit('confirmar')"
+      :type="submit ? 'submit' : 'button'"
+      @click="!submit && emit('confirmar')"
     />
     <UButton
       v-if="!sinVolver"
@@ -26,6 +27,7 @@ defineProps<{
   volver?: string
   cargando?: boolean
   sinVolver?: boolean
+  submit?: boolean
 }>()
 
 const emit = defineEmits<{ confirmar: [], volver: [] }>()

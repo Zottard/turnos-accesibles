@@ -26,3 +26,6 @@ logs
 # Tests
 test-results
 playwright-report
+
+# Sesiones de Playwright
+tests/e2e/.auth

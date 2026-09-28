@@ -9,8 +9,8 @@ jobs:
   verificar:
     runs-on: ubuntu-latest
     env:
-      NUXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
-      NUXT_PUBLIC_SUPABASE_KEY: placeholder
+      NUXT_PUBLIC_SUPABASE_URL: ${{ vars.NUXT_PUBLIC_SUPABASE_URL }}
+      NUXT_PUBLIC_SUPABASE_KEY: ${{ vars.NUXT_PUBLIC_SUPABASE_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

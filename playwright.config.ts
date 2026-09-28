@@ -12,8 +12,13 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   projects: [
-    { name: 'escritorio', use: { ...devices['Desktop Chrome'] } },
-    { name: 'celular', use: { ...devices['Pixel 7'], viewport: { width: 360, height: 780 } } },
+    { name: 'sesiones', testMatch: /sesiones\.setup\.ts/ },
+    { name: 'escritorio', use: { ...devices['Desktop Chrome'] }, dependencies: ['sesiones'] },
+    {
+      name: 'celular',
+      use: { ...devices['Pixel 7'], viewport: { width: 360, height: 780 } },
+      testIgnore: /auth\.spec\.ts/,
+    },
   ],
   webServer: {
     command: 'pnpm build && pnpm preview',

@@ -1,6 +1,6 @@
 <template>
   <UPopover>
-    <UButton icon="i-lucide-accessibility" color="neutral" variant="outline" label="Cómo se ve" />
+    <UButton icon="i-lucide-accessibility" label="Cómo se ve" size="lg" />
 
     <template #content>
       <div class="w-[min(24rem,calc(100vw-2rem))] flex flex-col gap-6 p-5">
