@@ -31,7 +31,25 @@ pnpm test:unit        # Vitest + vitest-axe
 pnpm test:e2e         # Playwright + axe, levanta build + preview
 ```
 
+## Design system (Fase 1)
+
+- El tema de Nuxt UI se ajusta en `app/app.config.ts`. Ojo: las clases de `variants.size.xl` pisan a
+  las de `slots`, así que los tamaños van en la variante, no en el slot.
+- Componentes propios: `a11y/` (SkipLink, LiveRegion, AccessibilityMenu, ReadAloudButton,
+  VoiceInputButton), `patrones/` (AccionesPaso, VistaEstados, OpcionesTarjeta), `asistente/AsistentePaso`,
+  `turnos/EstadoBadge`. Los estados de dominio viven en `utils/estados.ts` con fallback.
+- Textos con variante de lenguaje simple: `utils/copys.ts` + `useLenguajeSimple().t()`.
+- El botón de confirmar nunca se deshabilita por falta de datos: se deja activo y al tocarlo se
+  explica qué falta (error en el campo + `alert` en la live region).
+- Radios y checkboxes van en variante tarjeta: toda la tarjeta es el objetivo táctil.
+- `overflow-wrap: anywhere` + `hyphens: auto` en el body: sin eso, a 360 px con texto al 200 %
+  las palabras largas desbordan los items flex.
+
 ## Notas
 
 - Sin `NUXT_PUBLIC_SUPABASE_URL` el SSR se cae. Copiar `.env.example` a `.env` (tiene placeholders).
+  En Vitest se pasa como `overrides` en `vitest.config.ts`; sin eso la app no arranca y Pinia no existe.
 - `@vite-pwa/nuxt` se excluye cuando corre Vitest (rompe el entorno de tests).
+- `/demo-ui` se saca del build de producción salvo con `DEMO_UI=1`, que es como lo corre Playwright.
+- Flechas en radios (Reka): elige la opción solo si la tecla sigue apretada al recibir foco.
+  En Playwright usar `keyboard.down/up`, no `press`.

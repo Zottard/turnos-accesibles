@@ -50,7 +50,7 @@
     font-family: var(--font-sans);
     font-size: var(--text-base);
     line-height: var(--leading-body);
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
     hyphens: auto;
   }
 

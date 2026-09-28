@@ -1,11 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { configureAxe } from 'vitest-axe'
+import { axe } from './axe'
 import SkipLink from '~/components/a11y/SkipLink.vue'
 import LiveRegion from '~/components/a11y/LiveRegion.vue'
-
-const axe = configureAxe({ rules: { region: { enabled: false } } })
 
 describe('SkipLink', () => {
   it('apunta al contenido principal', async () => {

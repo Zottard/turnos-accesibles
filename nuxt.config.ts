@@ -59,6 +59,7 @@ export default defineNuxtConfig({
   $production: {
     hooks: {
       'pages:extend'(pages) {
+        if (process.env.DEMO_UI) return
         for (let i = pages.length - 1; i >= 0; i--) {
           if (pages[i]?.path.startsWith('/demo-ui')) pages.splice(i, 1)
         }
