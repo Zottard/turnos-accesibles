@@ -1,7 +1,7 @@
 import { expect, test } from './fixtures'
 import AxeBuilder from '@axe-core/playwright'
 
-const ROUTES = ['/', '/ayuda', '/accesibilidad', '/terminos', '/ingresar', '/registrarme', '/recuperar-clave', '/confirmar-correo', '/restablecer-clave']
+const ROUTES = ['/', '/ayuda', '/accesibilidad', '/terminos', '/ingresar', '/registrarme', '/recuperar-clave', '/confirmar-correo', '/restablecer-clave', '/demo']
 
 const THEMES = [
   { name: 'claro', prefs: { contrast: 'normal', textScale: '100' } },

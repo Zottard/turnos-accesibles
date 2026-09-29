@@ -21,6 +21,9 @@ Todos con la contraseña `demo1234`. Se crean con `supabase/seed.sql`, ya confir
 | acompanante@demo.ar | Acompañante (Lucía Gómez) |
 | admin@demo.ar | Administración |
 
+Con `NUXT_PUBLIC_DEMO=true` aparece arriba una barra para entrar como cada uno con un click,
+y `/demo` muestra todas las pantallas del trabajo con su estado.
+
 ## Verificar
 
 ```bash

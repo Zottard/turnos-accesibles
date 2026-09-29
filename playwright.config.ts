@@ -23,7 +23,7 @@ export default defineConfig({
   webServer: {
     command: 'pnpm build && pnpm preview',
     url: 'http://localhost:3000',
-    env: { DEMO_UI: '1' },
+    env: { DEMO_UI: '1', NUXT_PUBLIC_DEMO: 'true' },
     reuseExistingServer: !process.env.CI,
     timeout: 300_000,
   },

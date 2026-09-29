@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-dvh flex flex-col">
     <SkipLink />
+    <BarraDemo v-if="demo" />
 
     <header class="border-b-2 border-default">
       <div class="w-full max-w-5xl flex flex-wrap items-center gap-4 mx-auto px-4 py-3">
@@ -44,6 +45,7 @@ const FOOTER_LINKS = [
 ]
 
 const { appName } = useAppConfig()
+const { demo } = useRuntimeConfig().public
 const { user, salir } = useSesion()
 const { announce } = useAnuncio()
 

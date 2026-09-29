@@ -15,6 +15,10 @@ export default defineNuxtConfig({
 
   typescript: { strict: true },
 
+  runtimeConfig: {
+    public: { demo: false },
+  },
+
   components: [{ path: '~/components', pathPrefix: false }],
 
   ui: { fonts: false, colorMode: false },
@@ -59,7 +63,7 @@ export default defineNuxtConfig({
   $production: {
     hooks: {
       'pages:extend'(pages) {
-        if (process.env.DEMO_UI) return
+        if (process.env.DEMO_UI || process.env.NUXT_PUBLIC_DEMO === 'true') return
         for (let i = pages.length - 1; i >= 0; i--) {
           if (pages[i]?.path.startsWith('/demo-ui')) pages.splice(i, 1)
         }

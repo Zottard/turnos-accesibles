@@ -64,8 +64,8 @@ test('las opciones se eligen con teclado y el foco se ve', async ({ page }) => {
 
   await page.keyboard.down('ArrowDown')
   await expect(page.getByRole('radio', { name: 'Médico de familia' })).toBeFocused()
-  await page.keyboard.up('ArrowDown')
   await expect(page.getByRole('radio', { name: 'Médico de familia' })).toBeChecked()
+  await page.keyboard.up('ArrowDown')
 })
 
 test('continuar sin elegir explica qué falta, sin deshabilitar el botón', async ({ page }) => {

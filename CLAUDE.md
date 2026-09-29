@@ -65,6 +65,12 @@ pnpm test:e2e         # Playwright + axe, levanta build + preview
   Errores de envío: `useFormulario().alFallar` (lleva el foco al primer campo y lo anuncia).
 - Sin sesiones que venzan mientras la app está abierta: Supabase renueva el token solo (WCAG 2.2.1).
 
+## Modo demo
+
+- `NUXT_PUBLIC_DEMO=true` muestra la barra de demo (entrar como cada usuario de prueba) y `/demo`
+  (alcance completo). También deja `/demo-ui` en el build. En el deploy real va apagado.
+- **Al terminar cada fase, actualizar el `estado` de sus pantallas en `app/utils/alcance.ts`.**
+
 ## Notas
 
 - Sin `NUXT_PUBLIC_SUPABASE_URL` el SSR se cae. Copiar `.env.example` a `.env` (tiene placeholders).

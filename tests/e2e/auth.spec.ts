@@ -175,3 +175,11 @@ test.describe('registro paso a paso', () => {
     await expect(page.getByLabel('Tu correo', { exact: true })).toHaveValue('rosa.prueba@demo.ar')
   })
 })
+
+test('la barra demo entra como admin y marca con quién estás', async ({ page }) => {
+  await page.goto('/')
+  const barra = page.getByRole('complementary', { name: 'Modo demo' })
+  await barra.getByRole('button', { name: 'Administración' }).click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Panel de administración')
+  await expect(barra.getByRole('button', { name: 'Administración' })).toHaveAttribute('aria-current', 'true')
+})
