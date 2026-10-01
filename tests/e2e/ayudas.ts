@@ -24,7 +24,7 @@ export async function reservarAunqueSeSuperponga(page: Page) {
 
 export async function turnoLibre(request: APIRequestContext, diasMinimos = 3) {
   const desde = new Date(Date.now() + diasMinimos * 86_400_000).toISOString()
-  const libres = await turnos(request, `estado=eq.disponible&fecha_hora=gt.${desde}&limit=50`)
+  const libres = await turnos(request, `estado=eq.disponible&fecha_hora=gt.${desde}&limit=300`)
   return libres[Math.floor(Math.random() * libres.length)]!
 }
 

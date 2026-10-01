@@ -52,7 +52,7 @@ test.describe('con sesión', () => {
     await reservarAunqueSeSuperponga(page)
     await expect(page).toHaveURL(/\/reservas\/[0-9a-f-]+\?nuevo=1/)
     await expect(page.locator('main').getByText('Número de turno:')).toBeVisible()
-    await expect(page.getByText('Confirmado')).toBeVisible()
+    await expect(page.locator('main').getByText('Confirmado')).toBeVisible()
     await expect(page.getByRole('button', { name: 'Agregar a mi calendario' })).toBeVisible()
     await sinViolaciones(page)
 
