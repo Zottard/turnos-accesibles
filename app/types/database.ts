@@ -252,6 +252,57 @@ export type Database = {
         }
         Relationships: []
       }
+      notificaciones: {
+        Row: {
+          canal: string
+          correo_enviado_en: string | null
+          creado_en: string
+          cuerpo: string
+          enviada_en: string | null
+          error: string | null
+          estado: string
+          id: string
+          leida_en: string | null
+          profile_id: string
+          programada_para: string
+          reserva_id: string | null
+          tipo: string
+          titulo: string
+        }
+        Insert: {
+          canal?: string
+          correo_enviado_en?: string | null
+          creado_en?: string
+          cuerpo: string
+          enviada_en?: string | null
+          error?: string | null
+          estado?: string
+          id?: string
+          leida_en?: string | null
+          profile_id: string
+          programada_para?: string
+          reserva_id?: string | null
+          tipo: string
+          titulo: string
+        }
+        Update: {
+          canal?: string
+          correo_enviado_en?: string | null
+          creado_en?: string
+          cuerpo?: string
+          enviada_en?: string | null
+          error?: string | null
+          estado?: string
+          id?: string
+          leida_en?: string | null
+          profile_id?: string
+          programada_para?: string
+          reserva_id?: string | null
+          tipo?: string
+          titulo?: string
+        }
+        Relationships: []
+      }
       preferencias_accesibilidad: {
         Row: {
           actualizado_en: string
@@ -508,6 +559,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      marcar_leidas: { Args: { p_id?: string }; Returns: undefined }
       cancelar_reserva: { Args: { p_motivo?: string; p_reserva: string }; Returns: Json }
       reprogramar_reserva: {
         Args: { p_confirmar_superposicion?: boolean; p_reserva: string; p_turno_nuevo: string }

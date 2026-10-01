@@ -18,6 +18,7 @@ const ACCIONES = [
   { to: '/turnos/asistente', label: 'Sacar un turno', icon: 'i-lucide-calendar-plus', principal: true },
   { to: '/mis-turnos', label: 'Mis turnos', icon: 'i-lucide-list' },
   { to: '/turnos/buscar', label: 'Ver todos los turnos libres', icon: 'i-lucide-search' },
+  { to: '/notificaciones', label: 'Mis avisos', icon: 'i-lucide-bell' },
   { to: '/perfil', label: 'Mi perfil', icon: 'i-lucide-user' },
   { to: '/perfil/accesibilidad', label: 'Cómo quiero usar la app', icon: 'i-lucide-accessibility' },
 ]

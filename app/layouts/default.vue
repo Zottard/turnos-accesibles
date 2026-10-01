@@ -11,6 +11,10 @@
           <nav aria-label="Tu cuenta" class="flex flex-wrap gap-3">
             <template v-if="user">
               <UButton to="/inicio" label="Mi inicio" icon="i-lucide-house" size="lg" />
+              <UButton to="/notificaciones" icon="i-lucide-bell" size="lg" :aria-label="noLeidas ? `Avisos, ${noLeidas} sin leer` : 'Avisos'">
+                Avisos
+                <UBadge v-if="noLeidas" color="primary" variant="solid" :label="String(noLeidas)" size="md" aria-hidden="true" />
+              </UButton>
               <UButton label="Salir" icon="i-lucide-log-out" size="lg" @click="cerrarSesion" />
             </template>
             <UButton v-else to="/ingresar" label="Ingresar" icon="i-lucide-log-in" size="lg" />
@@ -18,6 +22,19 @@
         </div>
       </div>
     </header>
+
+    <div v-if="avisoNuevo" class="w-full max-w-5xl mx-auto px-4 pt-4">
+      <UAlert
+        color="info"
+        icon="i-lucide-bell-ring"
+        :title="`Aviso nuevo: ${avisoNuevo.titulo}`"
+        :description="avisoNuevo.cuerpo"
+        :actions="[
+          { label: 'Ver mis avisos', icon: 'i-lucide-bell', size: 'lg', to: '/notificaciones', onClick: () => { avisoNuevo = null } },
+          { label: 'Cerrar el aviso', icon: 'i-lucide-x', size: 'lg', onClick: () => { avisoNuevo = null } },
+        ]"
+      />
+    </div>
 
     <main id="contenido" tabindex="-1" class="w-full max-w-5xl flex-1 mx-auto px-4 py-8">
       <slot />
@@ -47,6 +64,8 @@ const FOOTER_LINKS = [
 const { appName } = useAppConfig()
 const { demo } = useRuntimeConfig().public
 const { user, salir } = useSesion()
+const { noLeidas } = useNotificaciones()
+const avisoNuevo = useState<{ titulo: string, cuerpo: string } | null>('aviso-nuevo', () => null)
 const { announce } = useAnuncio()
 
 async function cerrarSesion() {

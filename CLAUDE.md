@@ -119,6 +119,19 @@ pnpm test:e2e         # Playwright + axe, levanta build + preview
 - pg_cron `completar-reservas-pasadas` (minuto 15 de cada hora) pasa a `completada` las confirmadas viejas.
 - `tests/e2e/ayudas.ts`: helpers para crear turnos y reservas desde los tests.
 
+## Avisos (Fase 7)
+
+- `notificaciones`: un trigger en `reservas` crea el aviso inmediato (reserva, cambio, cancelación) y
+  programa el recordatorio para el día anterior a las 10 (hora de Argentina). Cancelar o cambiar borra
+  los recordatorios pendientes. La bandeja solo ve lo que ya salió (`estado <> 'programada'`).
+- pg_cron `despachar-avisos` (cada 10 min) libera los programados; `enviar-correos` (cada 10 min, minuto 5)
+  llama a la Edge Function `enviar-correos` con la clave de Vault `clave_cron`.
+- **Correo:** la función necesita el secreto `RESEND_API_KEY` (y opcional `CORREO_REMITENTE`) en
+  Supabase → Edge Functions → Secrets. Sin eso deja el error anotado en el aviso y la app sigue igual.
+- En la app: `plugins/avisos.client.ts` revisa cada minuto y en cada navegación. Si hay uno nuevo, según
+  la preferencia muestra un aviso fijo bajo el header (no toast: los toasts de Reka meten spans
+  focuseables con `aria-hidden` y además se van solos) y/o suena un tono.
+
 ## Modo demo
 
 - `NUXT_PUBLIC_DEMO=true` muestra la barra de demo (entrar como cada usuario de prueba) y `/demo`

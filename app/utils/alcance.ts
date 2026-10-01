@@ -75,7 +75,7 @@ export const ALCANCE: GrupoAlcance[] = [
     titulo: 'Recordatorios',
     requerimiento: 'RF 6',
     pantallas: [
-      { nombre: 'Mis avisos', ruta: '/notificaciones', descripcion: 'Recordatorio el día anterior, visual y sonoro.', fase: 7, estado: 'pendiente' },
+      { nombre: 'Mis avisos', ruta: '/notificaciones', descripcion: 'Recordatorio el día anterior, visual y sonoro.', fase: 7, estado: 'lista' },
     ],
   },
   {
