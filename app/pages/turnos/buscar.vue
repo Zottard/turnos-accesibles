@@ -138,6 +138,7 @@ const { especialidades, localidades, localidadPorNombre, buscar } = useTurnos()
 const { perfil, cargarPerfil } = useSesion()
 const { alFallar } = useFormulario()
 const { announce } = useAnuncio()
+const { registrar } = useEventos()
 const ubicacionActual = useState<{ lat: number, lng: number } | null>('ubicacion-actual', () => null)
 
 const idOrden = useId()
@@ -281,6 +282,7 @@ async function cargar() {
   estado.value = 'cargando'
   try {
     const resultado = await buscar(nuevos)
+    registrar('busqueda', { especialidad: especialidadElegida.value?.slug ?? '', origen: 'menus' })
     turnos.value = resultado.turnos
     total.value = resultado.total
     estado.value = resultado.turnos.length ? 'contenido' : 'vacio'

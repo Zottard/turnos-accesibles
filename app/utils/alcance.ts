@@ -97,7 +97,7 @@ export const ALCANCE: GrupoAlcance[] = [
       { nombre: 'Especialidades', ruta: '/admin/especialidades', descripcion: 'Nombre común y nombre técnico de cada una.', fase: 9, estado: 'lista', rol: 'admin' },
       { nombre: 'Profesionales', ruta: '/admin/profesionales', descripcion: 'Médicos y su especialidad.', fase: 9, estado: 'lista', rol: 'admin' },
       { nombre: 'Agendas', ruta: '/admin/agendas', descripcion: 'Genera los turnos sin superposiciones.', fase: 9, estado: 'lista', rol: 'admin' },
-      { nombre: 'Métricas', ruta: '/admin/metricas', descripcion: 'Turnos buscados, reservados y cancelados, con tabla y exportación.', fase: 10, estado: 'pendiente', rol: 'admin' },
+      { nombre: 'Métricas', ruta: '/admin/metricas', descripcion: 'Turnos buscados, reservados y cancelados, con tabla y exportación.', fase: 10, estado: 'lista', rol: 'admin' },
     ],
   },
   {

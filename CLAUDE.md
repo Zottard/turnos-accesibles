@@ -157,6 +157,14 @@ pnpm test:e2e         # Playwright + axe, levanta build + preview
 - Listas de filas de Supabase en `shallowRef` (con `ref` el typecheck explota por `Json`).
 - Los tests de admin crean datos con nombres `Prueba <timestamp>` y agendas a +100 días.
 
+## Métricas (Fase 10)
+
+- `eventos_uso` guarda eventos anónimos (`busqueda`, `asistente_inicio`, `reserva_asistente` con
+  `segundos`): cualquiera inserta, nadie lee. `useEventos().registrar()` es fire-and-forget.
+- `metricas(p_desde, p_hasta)` (solo admin) junta eventos y reservas por día de Buenos Aires.
+- El gráfico de barras es `aria-hidden`: la tabla de abajo tiene los mismos datos. CSV con BOM y `;`
+  para que Excel en español lo abra bien. El layout oculta header/footer al imprimir (`print:hidden`).
+
 ## Modo demo
 
 - `NUXT_PUBLIC_DEMO=true` muestra la barra de demo (entrar como cada usuario de prueba) y `/demo`

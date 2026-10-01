@@ -47,10 +47,14 @@ test('la bienvenida configura todo de a una pregunta y lo guarda en la cuenta', 
 })
 
 test('mis preferencias se guardan solas', async ({ page, context }) => {
+  const guardar = () => page.waitForResponse((r) => r.url().includes('preferencias_accesibilidad') && r.request().method() === 'POST')
   await page.goto('/perfil/accesibilidad')
+  const previo = guardar()
+  await page.getByRole('radio', { name: /Muy grande/ }).click()
+  await previo
   await page.getByRole('radio', { name: /^Grande/ }).click()
   await page.getByRole('radio', { name: /Fondo negro/ }).click()
-  const guardado = page.waitForResponse((r) => r.url().includes('preferencias_accesibilidad') && r.request().method() === 'POST')
+  const guardado = guardar()
   await page.getByRole('radio', { name: /No, prefiero leer yo/ }).click()
   expect((await guardado).ok()).toBe(true)
 

@@ -135,6 +135,7 @@ const BORRADOR_VACIO = {
   franja: 'cualquiera',
   turnoId: '',
   para: '',
+  inicio: 0,
 }
 
 useHead({ title: 'Sacar un turno' })
@@ -145,6 +146,7 @@ const { asistiendo } = useAcompanamiento()
 const supabase = useSupabaseClient()
 const { especialidades, localidades, buscar, obtenerTurno, centrosConEspecialidad } = useTurnos()
 const { announce, alert } = useAnuncio()
+const { registrar } = useEventos()
 
 const borrador = useSessionStorage('ta_asistente', { ...BORRADOR_VACIO }, { initOnMounted: true, mergeDefaults: true })
 const estado = reactive({ ...BORRADOR_VACIO })
@@ -293,6 +295,7 @@ async function buscarTurnos(desde: number) {
     ? (perfil.value?.lat && perfil.value.lng ? { lat: perfil.value.lat, lng: perfil.value.lng } : loc ? { lat: loc.lat, lng: loc.lng } : undefined)
     : undefined
   try {
+    registrar('busqueda', { especialidad: especialidades.value.find((e) => e.id === estado.especialidad)?.slug ?? '', origen: 'asistente' })
     const r = await buscar({
       especialidad: estado.especialidad,
       centro: estado.donde === 'lista' ? estado.centro : undefined,
@@ -325,6 +328,7 @@ async function cargarTurno() {
 }
 
 function terminar(reservaId: string) {
+  if (estado.inicio) registrar('reserva_asistente', { segundos: Math.round((Date.now() - estado.inicio) / 1000) })
   borrador.value = { ...BORRADOR_VACIO }
   Object.assign(estado, BORRADOR_VACIO)
   navigateTo(`/reservas/${reservaId}?nuevo=1`)
@@ -355,6 +359,11 @@ watch(borrador, (guardado) => {
 watch(estado, (valor) => { borrador.value = { ...valor } }, { deep: true })
 
 onMounted(async () => {
+  await nextTick()
+  if (!estado.inicio) {
+    estado.inicio = Date.now()
+    registrar('asistente_inicio')
+  }
   await cargarPerfil()
   estado.para = paraQuien.value?.id ?? ''
   if (paraQuien.value) {

@@ -315,6 +315,12 @@ export type Database = {
         }
         Relationships: []
       }
+      eventos_uso: {
+        Row: { creado_en: string; id: number; payload: Json; tipo_evento: string }
+        Insert: { creado_en?: string; id?: never; payload?: Json; tipo_evento: string }
+        Update: { creado_en?: string; id?: never; payload?: Json; tipo_evento?: string }
+        Relationships: []
+      }
       intentos_login: {
         Row: {
           bloqueado_hasta: string | null
@@ -685,6 +691,7 @@ export type Database = {
         }
         Returns: Json
       }
+      metricas: { Args: { p_desde: string; p_hasta: string }; Returns: Json }
       marcar_leidas: { Args: { p_id?: string }; Returns: undefined }
       cancelar_reserva: { Args: { p_motivo?: string; p_reserva: string }; Returns: Json }
       reprogramar_reserva: {

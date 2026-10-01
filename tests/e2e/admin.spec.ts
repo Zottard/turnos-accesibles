@@ -7,7 +7,7 @@ test.use({ storageState: SESIONES.admin })
 
 const enDias = (dias: number) => new Date(Date.now() + dias * 86_400_000).toISOString().slice(0, 10)
 
-for (const ruta of ['/admin', '/admin/centros', '/admin/especialidades', '/admin/profesionales', '/admin/agendas']) {
+for (const ruta of ['/admin', '/admin/centros', '/admin/especialidades', '/admin/profesionales', '/admin/agendas', '/admin/metricas']) {
   test(`${ruta} no tiene violaciones críticas ni serias`, async ({ page }) => {
     await page.goto(ruta)
     await expect(titulo(page)).toBeVisible()
@@ -89,4 +89,22 @@ test('genera una agenda y avisa si se superpone', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Generar la agenda' }).click()
   await expect(page.getByText('Se superpone con otra agenda de este profesional.').first()).toBeVisible()
+})
+
+test('las métricas muestran resumen, tabla equivalente y se descargan', async ({ page }) => {
+  await page.goto('/admin/metricas')
+  await expect(page.getByRole('heading', { level: 2, name: 'Resumen del período' })).toBeVisible()
+  await expect(page.locator('li', { hasText: 'Turnos reservados' }).first()).toBeVisible()
+  await expect(page.getByText('Reservados por un acompañante')).toBeVisible()
+  const tabla = page.getByRole('table', { name: 'Turnos reservados por médico en el período' })
+  await expect(tabla.getByRole('row').nth(1)).toBeVisible()
+
+  const descarga = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Descargar en Excel (CSV)' }).click()
+  const archivo = await descarga
+  expect(archivo.suggestedFilename()).toMatch(/^metricas-\d{4}-\d{2}-\d{2}-a-\d{4}-\d{2}-\d{2}\.csv$/)
+
+  await page.getByLabel('Desde').fill('2020-01-01')
+  await page.getByLabel('Hasta').fill('2020-01-31')
+  await expect(page.getByText('No hubo reservas en este período.')).toBeVisible()
 })

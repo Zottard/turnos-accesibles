@@ -1,9 +1,9 @@
 <template>
   <div class="min-h-dvh flex flex-col">
     <SkipLink />
-    <BarraDemo v-if="demo" />
+    <BarraDemo v-if="demo" class="print:hidden" />
 
-    <header class="border-b-2 border-default">
+    <header class="border-b-2 border-default print:hidden">
       <div class="w-full max-w-5xl flex flex-wrap items-center gap-4 mx-auto px-4 py-3">
         <NuxtLink to="/" class="text-xl font-bold no-underline">{{ appName }}</NuxtLink>
         <div class="flex flex-wrap items-center gap-3 ml-auto">
@@ -23,7 +23,7 @@
       </div>
     </header>
 
-    <div v-if="user && asistiendo" class="border-b-2 border-primary bg-primary/10">
+    <div v-if="user && asistiendo" class="border-b-2 border-primary bg-primary/10 print:hidden">
       <div class="w-full max-w-5xl flex flex-wrap items-center gap-x-4 gap-y-2 mx-auto px-4 py-3">
         <p class="flex items-center gap-2 text-lg font-bold">
           <UIcon name="i-lucide-hand-heart" class="size-6 shrink-0" aria-hidden="true" />
@@ -36,7 +36,7 @@
       </div>
     </div>
 
-    <div v-if="avisoNuevo" class="w-full max-w-5xl mx-auto px-4 pt-4">
+    <div v-if="avisoNuevo" class="w-full max-w-5xl mx-auto px-4 pt-4 print:hidden">
       <UAlert
         color="info"
         icon="i-lucide-bell-ring"
@@ -53,7 +53,7 @@
       <slot />
     </main>
 
-    <footer class="border-t-2 border-default">
+    <footer class="border-t-2 border-default print:hidden">
       <nav aria-label="Información" class="w-full max-w-5xl mx-auto px-4 py-6">
         <ul class="flex flex-wrap gap-x-6 gap-y-2">
           <li v-for="link in FOOTER_LINKS" :key="link.to">
