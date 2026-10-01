@@ -177,6 +177,12 @@ pnpm test:e2e         # Playwright + axe, levanta build + preview
   Ley 25.326). Insertan anon y autenticados, lee solo admin (`/admin`, "Mensajes recibidos").
 - `/ayuda` queda en borrador en el alcance: falta el video con subtítulos y LSA.
 
+## Deploy
+
+- Vercel, proyecto `turnos-accesibles` (https://turnos-accesibles.vercel.app), deploy con
+  `npx vercel deploy --prod`. Variables en el proyecto (producción): las 3 de Supabase y `NUXT_PUBLIC_DEMO=true`.
+- `.vercelignore` deja afuera `.env` y lo que no hace falta para el build.
+
 ## Modo demo
 
 - `NUXT_PUBLIC_DEMO=true` muestra la barra de demo (entrar como cada usuario de prueba) y `/demo`

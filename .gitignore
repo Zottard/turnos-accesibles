@@ -29,3 +29,6 @@ playwright-report
 
 # Sesiones de Playwright
 tests/e2e/.auth
+
+.vercel
+.env*
