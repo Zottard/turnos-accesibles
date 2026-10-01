@@ -1,6 +1,7 @@
 <template>
   <div class="flex flex-col gap-3 sm:flex-row sm:items-start">
     <UInput
+      :id="id"
       v-model="clave"
       :type="visible ? 'text' : 'password'"
       :autocomplete="autocomplete"
@@ -18,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ autocomplete: 'current-password' | 'new-password' }>()
+defineProps<{ id: string, autocomplete: 'current-password' | 'new-password' }>()
 
 const clave = defineModel<string>({ default: '' })
 

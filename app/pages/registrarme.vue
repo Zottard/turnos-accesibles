@@ -13,40 +13,40 @@
       >
         <div v-if="estado.paso === 0" class="flex flex-col gap-6">
           <UFormField label="Tu nombre" name="nombre">
-            <UInput v-model="estado.nombre" autocomplete="given-name" class="w-full" />
+            <UInput id="registro-nombre" v-model="estado.nombre" autocomplete="given-name" class="w-full" />
           </UFormField>
           <UFormField label="Tu apellido" name="apellido">
-            <UInput v-model="estado.apellido" autocomplete="family-name" class="w-full" />
+            <UInput id="registro-apellido" v-model="estado.apellido" autocomplete="family-name" class="w-full" />
           </UFormField>
         </div>
 
         <UFormField v-else-if="estado.paso === 1" label="Número de documento" name="documento" description="Por ejemplo: 12345678">
-          <UInput v-model="estado.documento" inputmode="numeric" autocomplete="off" class="w-full" />
+          <UInput id="registro-documento" v-model="estado.documento" inputmode="numeric" autocomplete="off" class="w-full" />
         </UFormField>
 
         <fieldset v-else-if="estado.paso === 2" class="min-w-0 flex flex-col gap-6">
           <legend class="sr-only">Fecha de nacimiento</legend>
           <UFormField label="Día" name="dia" description="Por ejemplo: 14">
-            <UInput v-model="estado.dia" inputmode="numeric" autocomplete="bday-day" maxlength="2" class="w-full sm:w-32" />
+            <UInput id="registro-dia" v-model="estado.dia" inputmode="numeric" autocomplete="bday-day" maxlength="2" class="w-full sm:w-32" />
           </UFormField>
           <UFormField label="Mes" name="mes">
-            <USelect v-model="estado.mes" :items="ITEMS_MESES" placeholder="Elegí el mes" class="w-full sm:w-72" />
+            <USelect id="registro-mes" v-model="estado.mes" :items="ITEMS_MESES" placeholder="Elegí el mes" class="w-full sm:w-72" />
           </UFormField>
           <UFormField label="Año" name="anio" description="Por ejemplo: 1955">
-            <UInput v-model="estado.anio" inputmode="numeric" autocomplete="bday-year" maxlength="4" class="w-full sm:w-40" />
+            <UInput id="registro-anio" v-model="estado.anio" inputmode="numeric" autocomplete="bday-year" maxlength="4" class="w-full sm:w-40" />
           </UFormField>
         </fieldset>
 
-        <UFormField v-else-if="estado.paso === 3" label="Tu localidad" name="localidad" description="Por ejemplo: General Pacheco">
-          <UInput v-model="estado.localidad" autocomplete="address-level2" class="w-full" />
+        <UFormField v-else-if="estado.paso === 3" label="Tu localidad" name="localidad" description="Podés escribir para buscar. Por ejemplo: General Pacheco.">
+          <USelectMenu id="registro-localidad" v-model="estado.localidad" :items="itemsLocalidades" value-key="value" placeholder="Elegí tu localidad" class="w-full" />
         </UFormField>
 
         <UFormField v-else-if="estado.paso === 4" label="Tu correo" name="email" description="Por ejemplo: nombre@gmail.com">
-          <UInput v-model="estado.email" type="email" autocomplete="email" class="w-full" />
+          <UInput id="registro-email" v-model="estado.email" type="email" autocomplete="email" class="w-full" />
         </UFormField>
 
         <UFormField v-else-if="estado.paso === 5" label="Tu contraseña nueva" name="clave">
-          <CampoClave v-model="estado.clave" autocomplete="new-password" />
+          <CampoClave id="registro-clave" v-model="estado.clave" autocomplete="new-password" />
         </UFormField>
 
         <div v-else class="flex flex-col gap-6">
@@ -61,7 +61,7 @@
           </dl>
 
           <UFormField name="terminos">
-            <UCheckbox v-model="estado.terminos" label="Leí y acepto los términos de uso" />
+            <UCheckbox id="registro-terminos" v-model="estado.terminos" label="Leí y acepto los términos de uso" />
           </UFormField>
           <p class="text-lg">
             <NuxtLink to="/terminos" target="_blank" class="underline">Leer los términos de uso (se abre en otra pestaña)</NuxtLink>
@@ -107,6 +107,7 @@ useHead({ title: 'Crear una cuenta' })
 
 const { borrador, descartar } = useRegistro()
 const { registrar } = useSesion()
+const { localidades } = useTurnos()
 const { alFallar } = useFormulario()
 const { alert } = useAnuncio()
 const correoRegistrado = useState('correo-registrado', () => '')
@@ -115,13 +116,16 @@ const estado = reactive({ ...borrador.value, clave: '', terminos: false })
 const enviando = ref(false)
 const aviso = ref<Aviso>()
 
+const itemsLocalidades = computed(() => localidades.value.map((l) => ({ label: l.nombre, description: l.partido, value: l.id })))
+const localidadElegida = computed(() => localidades.value.find((l) => l.id === estado.localidad))
+
 const actual = computed(() => PASOS[estado.paso] ?? PASOS[0]!)
 
 const resumen = computed(() => [
   { paso: 0, etiqueta: 'Nombre', valor: `${estado.nombre} ${estado.apellido}` },
   { paso: 1, etiqueta: 'Documento', valor: limpiarDocumento(estado.documento) },
   { paso: 2, etiqueta: 'Fecha de nacimiento', valor: `${Number(estado.dia)} de ${MESES[Number(estado.mes) - 1]} de ${estado.anio}` },
-  { paso: 3, etiqueta: 'Localidad', valor: estado.localidad },
+  { paso: 3, etiqueta: 'Localidad', valor: localidadElegida.value?.nombre ?? '' },
   { paso: 4, etiqueta: 'Correo', valor: estado.email },
   { paso: 5, etiqueta: 'Contraseña', valor: 'La que elegiste' },
 ])
@@ -154,7 +158,8 @@ async function avanzar() {
     apellido: estado.apellido.trim(),
     documento: limpiarDocumento(estado.documento),
     fechaNacimiento: fechaIso(estado.dia, estado.mes, estado.anio),
-    localidad: estado.localidad.trim(),
+    localidadId: estado.localidad,
+    localidad: localidadElegida.value?.nombre ?? '',
     email: estado.email.trim(),
     clave: estado.clave,
   })

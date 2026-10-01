@@ -16,14 +16,14 @@ test('una página privada manda a ingresar y después vuelve', async ({ page }) 
   await page.goto('/inicio')
   await expect(page).toHaveURL(/\/ingresar\?volver=%2Finicio|\/ingresar\?volver=\/inicio/)
   await ingresar(page, 'solicitante@demo.ar')
-  await expect(page).toHaveURL(/\/inicio$/)
+  await expect(page).toHaveURL((u) => u.pathname === '/inicio')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Hola, Rosa')
 })
 
 test('la sesión sobrevive a recargar y se puede salir', async ({ page }) => {
   await page.goto('/ingresar')
   await ingresar(page, 'solicitante@demo.ar')
-  await expect(page).toHaveURL(/\/inicio$/)
+  await expect(page).toHaveURL((u) => u.pathname === '/inicio')
   await page.reload()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Hola, Rosa')
 
@@ -39,7 +39,7 @@ test.describe('como solicitante', () => {
 
   test('ingresar manda al inicio', async ({ page }) => {
     await page.goto('/ingresar')
-    await expect(page).toHaveURL(/\/inicio$/)
+    await expect(page).toHaveURL((u) => u.pathname === '/inicio')
   })
 
   test('el volver no permite ir a otro sitio', async ({ page }) => {
@@ -135,14 +135,16 @@ test.describe('registro paso a paso', () => {
     await continuar.click()
 
     await expect(titulo).toHaveText('¿En qué localidad vivís?')
-    await page.getByLabel('Tu localidad', { exact: true }).fill('General Pacheco')
+    await page.getByRole('button', { name: 'Tu localidad' }).click()
+    await page.keyboard.type('pacheco')
+    await page.getByRole('option', { name: /General Pacheco/ }).click()
     await continuar.click()
 
     await expect(titulo).toHaveText('¿Cuál es tu correo electrónico?')
     await page.getByLabel('Tu correo', { exact: true }).fill('rosa.prueba@demo.ar')
     await page.getByRole('button', { name: 'Volver atrás' }).click()
     await expect(titulo).toHaveText('¿En qué localidad vivís?')
-    await expect(page.getByLabel('Tu localidad', { exact: true })).toHaveValue('General Pacheco')
+    await expect(page.getByRole('button', { name: 'Tu localidad' })).toContainText('General Pacheco')
     await continuar.click()
     await expect(page.getByLabel('Tu correo', { exact: true })).toHaveValue('rosa.prueba@demo.ar')
     await continuar.click()
@@ -161,10 +163,12 @@ test.describe('registro paso a paso', () => {
 
     await page.getByRole('button', { name: 'Cambiar localidad' }).click()
     await expect(titulo).toHaveText('¿En qué localidad vivís?')
-    await page.getByLabel('Tu localidad', { exact: true }).fill('Tigre')
+    await page.getByRole('button', { name: 'Tu localidad' }).click()
+    await page.keyboard.type('tigre')
+    await page.getByRole('option', { name: /^Tigre/ }).click()
     await continuar.click()
     await expect(titulo).toHaveText('Revisá tus datos')
-    await expect(page.getByText('Tigre', { exact: true })).toBeVisible()
+    await expect(page.locator('dd', { hasText: /^Tigre$/ })).toBeVisible()
 
     await page.getByRole('button', { name: 'Sí, crear mi cuenta' }).click()
     await expect(page.getByText('tenés que aceptar los términos de uso').first()).toBeVisible()

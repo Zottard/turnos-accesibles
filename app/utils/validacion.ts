@@ -59,11 +59,17 @@ export const SCHEMA_NACIMIENTO = z.object({
 })
 
 export const SCHEMA_LOCALIDAD = z.object({
-  localidad: z.string().trim().min(1, 'Escribí tu localidad. Por ejemplo: General Pacheco.'),
+  localidad: z.number({ error: 'Elegí tu localidad de la lista.' }).min(1, 'Elegí tu localidad de la lista.'),
 })
 
 export const SCHEMA_REGISTRO_CORREO = z.object({ email: correo })
 
 export const SCHEMA_TERMINOS = z.object({
   terminos: z.literal(true, { error: 'Para crear la cuenta tenés que aceptar los términos de uso.' }),
+})
+
+export const SCHEMA_PERFIL = SCHEMA_NOMBRE.extend({
+  telefono: z.string().trim()
+    .refine((v) => v === '' || /^[\d\s()+-]{8,20}$/.test(v), 'Escribí el teléfono con números. Por ejemplo: 11 4567 8901.'),
+  localidad: z.number({ error: 'Elegí tu localidad.' }),
 })

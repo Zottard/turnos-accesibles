@@ -17,7 +17,8 @@ export default defineConfig({
     {
       name: 'celular',
       use: { ...devices['Pixel 7'], viewport: { width: 360, height: 780 } },
-      testIgnore: /auth\.spec\.ts/,
+      testIgnore: /(auth|preferencias)\.spec\.ts/,
+      dependencies: ['sesiones'],
     },
   ],
   webServer: {

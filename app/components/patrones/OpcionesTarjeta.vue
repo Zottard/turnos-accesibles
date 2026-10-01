@@ -1,5 +1,5 @@
 <template>
-  <URadioGroup v-model="seleccion" :legend="legend" :items="opciones">
+  <URadioGroup v-model="seleccion" :legend="legend" :items="opciones" :ui="legendOculta ? { legend: 'sr-only' } : undefined">
     <template #label="{ item }">
       <span class="flex flex-wrap items-center gap-x-3 gap-y-1">
         <UIcon v-if="iconOf(item)" :name="iconOf(item)!" class="size-8 shrink-0" aria-hidden="true" />
@@ -17,7 +17,7 @@ export interface Opcion {
   icon?: string
 }
 
-const props = defineProps<{ legend: string, opciones: Opcion[] }>()
+const props = defineProps<{ legend: string, opciones: Opcion[], legendOculta?: boolean }>()
 
 const seleccion = defineModel<string>()
 

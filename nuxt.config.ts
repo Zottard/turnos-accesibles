@@ -68,6 +68,11 @@ export default defineNuxtConfig({
       background_color: '#000000',
       theme_color: '#000000',
     },
+    // Las páginas tienen datos personales y dependen de la sesión: nunca se sirven desde la caché.
+    workbox: {
+      navigateFallback: null,
+      globPatterns: ['**/*.{js,css,ico,png,svg,woff2,webmanifest}'],
+    },
     devOptions: { enabled: false },
   },
 

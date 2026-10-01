@@ -18,7 +18,7 @@
         <UForm method="post" :validate-on="['input']" :schema="SCHEMA_CLAVE_NUEVA" :state="form" class="flex flex-col gap-6" @submit="enviar" @error="alFallar">
           <p class="text-lg">Tiene que tener al menos 8 letras o números. Anotala en un lugar seguro.</p>
           <UFormField label="Tu contraseña nueva" name="clave">
-            <CampoClave v-model="form.clave" autocomplete="new-password" />
+            <CampoClave id="restablecer-clave" v-model="form.clave" autocomplete="new-password" />
           </UFormField>
           <UAlert v-if="aviso" color="error" icon="i-lucide-circle-x" :title="aviso.titulo" :description="aviso.ayuda" />
           <AccionesPaso submit sin-volver confirmar="Guardar la contraseña nueva" :cargando="enviando" />

@@ -7,7 +7,7 @@ const BORRADOR_VACIO = {
   dia: '',
   mes: '',
   anio: '',
-  localidad: '',
+  localidad: 0,
   email: '',
 }
 

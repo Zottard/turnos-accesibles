@@ -39,9 +39,9 @@ export const ALCANCE: GrupoAlcance[] = [
     titulo: 'Preferencias de accesibilidad',
     requerimiento: 'RF 2',
     pantallas: [
-      { nombre: 'Bienvenida', ruta: '/bienvenida', descripcion: 'La primera vez, te pregunta cómo querés ver y escuchar la app.', fase: 3, estado: 'pendiente' },
-      { nombre: 'Mis preferencias', ruta: '/perfil/accesibilidad', descripcion: 'Cambiar las preferencias cuando quieras. Se guardan en tu cuenta.', fase: 3, estado: 'pendiente' },
-      { nombre: 'Mis datos', ruta: '/perfil', descripcion: 'Nombre, documento, teléfono y localidad.', fase: 3, estado: 'pendiente' },
+      { nombre: 'Bienvenida', ruta: '/bienvenida', descripcion: 'La primera vez, te pregunta cómo querés ver y escuchar la app.', fase: 3, estado: 'lista' },
+      { nombre: 'Mis preferencias', ruta: '/perfil/accesibilidad', descripcion: 'Cambiar las preferencias cuando quieras. Se guardan en tu cuenta.', fase: 3, estado: 'lista' },
+      { nombre: 'Mis datos', ruta: '/perfil', descripcion: 'Nombre, documento, teléfono y localidad.', fase: 3, estado: 'lista' },
     ],
   },
   {

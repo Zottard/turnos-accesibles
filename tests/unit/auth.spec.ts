@@ -53,7 +53,7 @@ describe('validaciones del registro', () => {
 
 describe('CampoClave', () => {
   it('muestra y oculta la contraseña', async () => {
-    const wrapper = await mountSuspended(CampoClave, { props: { autocomplete: 'current-password' } })
+    const wrapper = await mountSuspended(CampoClave, { props: { id: 'clave', autocomplete: 'current-password' } })
     const input = wrapper.get('input')
     expect(input.attributes('type')).toBe('password')
     await wrapper.get('button').trigger('click')
@@ -63,7 +63,7 @@ describe('CampoClave', () => {
 
   it('no tiene violaciones de axe', async () => {
     const wrapper = await mountSuspended(CampoClave, {
-      props: { autocomplete: 'current-password' },
+      props: { id: 'clave', autocomplete: 'current-password' },
       attrs: { 'aria-label': 'Contraseña' },
     })
     const resultado = await axe(wrapper.element, { rules: { label: { enabled: false } } })

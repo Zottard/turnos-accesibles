@@ -65,6 +65,24 @@ pnpm test:e2e         # Playwright + axe, levanta build + preview
   Errores de envío: `useFormulario().alFallar` (lleva el foco al primer campo y lo anuncia).
 - Sin sesiones que venzan mientras la app está abierta: Supabase renueva el token solo (WCAG 2.2.1).
 
+## Preferencias (Fase 3)
+
+- Tabla `preferencias_accesibilidad`. Sin fila = no configuró: el middleware `auth` lo manda a
+  `/bienvenida`. Si la consulta falla, el estado queda desconocido y **no** se redirige.
+- La cookie `ta_prefs` se lee solo en el servidor; el cliente usa el estado hidratado y reescribe la cookie.
+  Al ingresar se cargan las de la cuenta (una vez por usuario, `prefs-cargadas-de`) y cada cambio se guarda
+  solo (`plugins/preferencias.client.ts`, debounce 600 ms). Si la persona cambia algo mientras llega la
+  respuesta, gana lo que eligió.
+- `PreferenciaControl` es la pregunta de una preferencia: el wizard muestra una por pantalla,
+  `/perfil/accesibilidad` todas juntas.
+- **Todo campo de formulario lleva `id` explícito** (`<pagina>-<campo>`). Nuxt UI asocia label e input con
+  `useId()` y, con íconos asíncronos en SSR, el contador no coincide entre servidor y cliente: el label
+  queda apuntando a un id que no existe. `a11y.spec.ts` revisa que cada `label[for]` exista.
+- No hacer `await` en el setup de páginas con formularios: cargar en `onMounted` y mostrar `VistaEstados`
+  en `cargando` hasta tener los datos (si no, se puede enviar el formulario a medio llenar).
+- El service worker **no** cachea navegaciones (`navigateFallback: null`): servía el HTML de `/` para
+  cualquier página, con datos y preferencias viejas.
+
 ## Datos y búsqueda (Fase 4)
 
 - Centros **reales** del REFES (diciembre 2025) y localidades de la API Georef. Teléfono, horario y
@@ -92,8 +110,11 @@ pnpm test:e2e         # Playwright + axe, levanta build + preview
 - `@vite-pwa/nuxt` se excluye cuando corre Vitest (rompe el entorno de tests).
 - `/demo-ui` se saca del build de producción salvo con `DEMO_UI=1`, que es como lo corre Playwright.
 - E2E: importar `test`/`expect` de `tests/e2e/fixtures.ts` (espera la hidratación en `goto`/`reload`).
-  Las sesiones de solicitante y admin se crean una vez en `sesiones.setup.ts` (Supabase limita
+  Las sesiones (solicitante, admin, prueba) se crean una vez en `sesiones.setup.ts` (Supabase limita
   a ~30 ingresos cada 5 minutos por IP). `auth.spec.ts` corre solo en escritorio.
+- `prueba@demo.ar` es solo para tests que cambian datos (preferencias, perfil): no usar a Rosa.
+- Para verificar navegación usar `toHaveURL((u) => u.pathname === '/x')`: una regex como `/\/inicio$/`
+  también matchea `?volver=/inicio`.
 - CI necesita las variables de repo `NUXT_PUBLIC_SUPABASE_URL` y `NUXT_PUBLIC_SUPABASE_KEY`.
 - Flechas en radios (Reka): elige la opción solo si la tecla sigue apretada al recibir foco.
   En Playwright usar `keyboard.down/up`, no `press`.

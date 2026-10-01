@@ -1,5 +1,6 @@
 import { expect, test } from './fixtures'
 import AxeBuilder from '@axe-core/playwright'
+import { SESIONES } from './sesiones'
 
 const ROUTES = ['/', '/ayuda', '/accesibilidad', '/terminos', '/ingresar', '/registrarme', '/recuperar-clave', '/confirmar-correo', '/restablecer-clave', '/demo', '/turnos/buscar']
 
@@ -58,4 +59,28 @@ test('el perfil por defecto es el accesible', async ({ page }) => {
   await expect(html).toHaveAttribute('data-theme', 'alto-contraste')
   await expect(html).toHaveAttribute('data-text-scale', '125')
   await expect(html).toHaveAttribute('data-reduce-motion', 'true')
+})
+
+test.describe('pantallas con sesión', () => {
+  test.use({ storageState: SESIONES.solicitante })
+
+  for (const route of ['/inicio', '/perfil', '/perfil/accesibilidad', '/bienvenida']) {
+    test(`${route} no tiene violaciones críticas ni serias`, async ({ page }) => {
+      await page.goto(route)
+      await expect(page.locator('h1')).toBeVisible()
+      const { violations } = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+        .analyze()
+      const graves = violations.filter((v) => v.impact === 'critical' || v.impact === 'serious')
+      expect(graves, JSON.stringify(graves.map((v) => ({ id: v.id, nodes: v.nodes.map((n) => n.target) })), null, 2)).toEqual([])
+    })
+
+    test(`${route}: cada etiqueta apunta a un campo que existe`, async ({ page }) => {
+      await page.goto(route)
+      const huerfanas = await page.evaluate(() => [...document.querySelectorAll('label[for]')]
+        .filter((l) => !document.getElementById((l as HTMLLabelElement).htmlFor))
+        .map((l) => l.textContent?.trim()))
+      expect(huerfanas).toEqual([])
+    })
+  }
 })

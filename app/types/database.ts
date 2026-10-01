@@ -252,6 +252,56 @@ export type Database = {
         }
         Relationships: []
       }
+      preferencias_accesibilidad: {
+        Row: {
+          actualizado_en: string
+          avisos_por_correo: boolean
+          canal_notificacion: string
+          contraste: string
+          id: string
+          lenguaje_simple: boolean
+          profile_id: string
+          reduce_motion: string
+          text_scale: string
+          voz_activa: boolean
+          voz_velocidad: string
+        }
+        Insert: {
+          actualizado_en?: string
+          avisos_por_correo?: boolean
+          canal_notificacion?: string
+          contraste?: string
+          id?: string
+          lenguaje_simple?: boolean
+          profile_id: string
+          reduce_motion?: string
+          text_scale?: string
+          voz_activa?: boolean
+          voz_velocidad?: string
+        }
+        Update: {
+          actualizado_en?: string
+          avisos_por_correo?: boolean
+          canal_notificacion?: string
+          contraste?: string
+          id?: string
+          lenguaje_simple?: boolean
+          profile_id?: string
+          reduce_motion?: string
+          text_scale?: string
+          voz_activa?: boolean
+          voz_velocidad?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preferencias_accesibilidad_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profesionales: {
         Row: {
           apellido: string

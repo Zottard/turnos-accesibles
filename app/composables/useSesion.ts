@@ -13,6 +13,7 @@ export interface DatosRegistro {
   documento: string
   fechaNacimiento: string
   localidad: string
+  localidadId: number
   email: string
   clave: string
 }
@@ -125,6 +126,7 @@ export function useSesion() {
           documento: datos.documento,
           fecha_nacimiento: datos.fechaNacimiento,
           localidad: datos.localidad,
+          localidad_id: datos.localidadId,
         },
       },
     })

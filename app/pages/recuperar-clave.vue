@@ -14,7 +14,7 @@
     <UForm v-else method="post" :validate-on="['input']" :schema="SCHEMA_CORREO" :state="form" class="flex flex-col gap-6" @submit="enviar" @error="alFallar">
       <p class="text-lg">Escribí el correo de tu cuenta. Te vamos a mandar un enlace para que elijas una contraseña nueva.</p>
       <UFormField label="Tu correo" name="email">
-        <UInput v-model="form.email" type="email" autocomplete="email" class="w-full" />
+        <UInput id="recuperar-email" v-model="form.email" type="email" autocomplete="email" class="w-full" />
       </UFormField>
       <UAlert v-if="aviso" color="error" icon="i-lucide-circle-x" :title="aviso.titulo" :description="aviso.ayuda" />
       <AccionesPaso submit confirmar="Mandarme el enlace" :cargando="enviando" @volver="navigateTo('/ingresar')" />

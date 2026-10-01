@@ -16,6 +16,7 @@
         <USwitch v-model="highContrast" label="Alto contraste (fondo negro)" size="xl" />
         <USwitch v-model="reduceMotion" label="Sin animaciones" size="xl" />
         <USwitch v-model="plainLanguage" label="Lenguaje simple" size="xl" />
+        <USwitch v-model="voiceEnabled" label="Leer las pantallas en voz alta" size="xl" />
 
         <UButton color="neutral" variant="ghost" label="Volver a como estaba al principio" @click="reset" />
       </div>
@@ -48,6 +49,11 @@ const highContrast = computed({
 const reduceMotion = computed({
   get: () => prefs.value.reduceMotion === 'siempre',
   set: (value: boolean) => set('reduceMotion', value ? 'siempre' : 'auto'),
+})
+
+const voiceEnabled = computed({
+  get: () => prefs.value.voiceEnabled,
+  set: (value: boolean) => set('voiceEnabled', value),
 })
 
 const plainLanguage = computed({

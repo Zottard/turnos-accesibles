@@ -8,6 +8,7 @@
     <UForm method="post" :validate="validar" :validate-on="['input']" :state="form" class="flex flex-col gap-8" @submit="enviar" @error="alFallar">
       <UFormField label="¿Qué médico necesitás?" name="especialidad" description="Podés escribir para buscar. Por ejemplo: oculista.">
         <USelectMenu
+          id="buscar-especialidad"
           v-model="form.especialidad"
           :items="itemsEspecialidades"
           value-key="value"
@@ -22,7 +23,7 @@
           <URadioGroup v-model="form.desdeDonde" legend="¿Desde dónde vas a ir?" :items="OPCIONES_DESDE" />
         </UFormField>
         <UFormField v-if="form.desdeDonde === 'localidad'" label="Tu localidad" name="localidad">
-          <USelectMenu v-model="form.localidad" :items="itemsLocalidades" value-key="value" placeholder="Elegí tu localidad" class="w-full" />
+          <USelectMenu id="buscar-localidad" v-model="form.localidad" :items="itemsLocalidades" value-key="value" placeholder="Elegí tu localidad" class="w-full" />
         </UFormField>
         <UAlert v-if="avisoUbicacion" color="warning" icon="i-lucide-map-pin-off" :title="avisoUbicacion" />
       </div>
@@ -32,7 +33,7 @@
           <URadioGroup v-model="form.cuando" legend="¿Cuándo podés ir?" :items="OPCIONES_CUANDO" />
         </UFormField>
         <UFormField v-if="form.cuando === 'fecha'" label="Desde qué día" name="desde">
-          <UInput v-model="form.desde" type="date" :min="hoy" class="w-full sm:w-72" />
+          <UInput id="buscar-desde" v-model="form.desde" type="date" :min="hoy" class="w-full sm:w-72" />
         </UFormField>
       </div>
 

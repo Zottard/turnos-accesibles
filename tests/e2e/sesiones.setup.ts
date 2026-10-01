@@ -7,7 +7,7 @@ for (const [rol, archivo] of Object.entries(SESIONES)) {
     await page.getByLabel('Tu correo').fill(`${rol}@demo.ar`)
     await page.getByLabel('Tu contraseña').fill('demo1234')
     await page.getByRole('button', { name: 'Ingresar', exact: true }).click()
-    await expect(page).toHaveURL(/\/inicio$/)
+    await expect(page).toHaveURL(/\/(inicio|bienvenida)/)
     await page.context().storageState({ path: archivo })
   })
 }

@@ -4,11 +4,11 @@
 
     <UForm method="post" :validate-on="['input']" :schema="SCHEMA_INGRESO" :state="form" class="flex flex-col gap-6" @submit="enviar" @error="alFallar">
       <UFormField label="Tu correo" name="email">
-        <UInput v-model="form.email" type="email" autocomplete="email" class="w-full" />
+        <UInput id="ingresar-email" v-model="form.email" type="email" autocomplete="email" class="w-full" />
       </UFormField>
 
       <UFormField label="Tu contraseña" name="clave">
-        <CampoClave v-model="form.clave" autocomplete="current-password" />
+        <CampoClave id="ingresar-clave" v-model="form.clave" autocomplete="current-password" />
       </UFormField>
 
       <UAlert v-if="aviso" color="error" icon="i-lucide-circle-x" :title="aviso.titulo" :description="aviso.ayuda" />

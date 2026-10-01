@@ -1,4 +1,5 @@
 -- Usuarios de prueba. Contraseña de todos: demo1234 (documentada en el README).
+-- prueba@demo.ar lo usan los tests de preferencias y perfil, para no tocar a los usuarios de la demo.
 -- Se crean ya confirmados para no depender del envío de correos.
 do $$
 declare
@@ -9,7 +10,8 @@ begin
     select * from (values
       ('solicitante@demo.ar', 'Rosa', 'Gómez', '12345678', '1950-03-14', 'General Pacheco', 'solicitante'),
       ('acompanante@demo.ar', 'Lucía', 'Gómez', '30123456', '1982-07-02', 'General Pacheco', 'acompanante'),
-      ('admin@demo.ar', 'Admin', 'Demo', '20111222', '1990-01-01', 'Tigre', 'admin')
+      ('admin@demo.ar', 'Admin', 'Demo', '20111222', '1990-01-01', 'Tigre', 'admin'),
+      ('prueba@demo.ar', 'Pablo', 'Prueba', '25333444', '1960-05-20', 'Tigre', 'solicitante')
     ) as t(email, nombre, apellido, documento, nacimiento, localidad, rol)
   loop
     if exists (select 1 from auth.users where email = u.email) then
@@ -41,6 +43,12 @@ begin
     update public.profiles set rol = u.rol::public.rol where id = v_id;
   end loop;
 end $$;
+
+-- Los usuarios demo ya tienen preferencias (con los valores por defecto), así la demo no pasa por /bienvenida.
+insert into public.preferencias_accesibilidad (profile_id)
+select p.id from public.profiles p join auth.users u on u.id = p.id
+where u.email in ('solicitante@demo.ar', 'acompanante@demo.ar', 'admin@demo.ar')
+on conflict (profile_id) do nothing;
 
 -- Datos de la fase 4.
 -- Centros: reales, del Registro Federal de Establecimientos de Salud (REFES, diciembre 2025),
@@ -221,3 +229,8 @@ $$;
 revoke execute on function privado.generar_turnos_demo(int) from public, anon, authenticated;
 
 select privado.generar_turnos_demo(30);
+
+-- Coordenadas de la localidad de cada usuario demo, para "cerca de mi casa".
+update public.profiles p set lat = l.lat, lng = l.lng
+from public.localidades l
+where p.lat is null and l.nombre = p.localidad;

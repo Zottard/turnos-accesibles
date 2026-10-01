@@ -11,7 +11,9 @@ export default defineNuxtPlugin({
       path: '/',
     })
 
-    store.load(cookie.value ?? {})
+    // En el cliente el estado ya llega del servidor: volver a leer la cookie lo pisaría
+    if (import.meta.server) store.load(cookie.value ?? {})
+    else cookie.value = { ...store.prefs }
 
     watch(() => store.prefs, (prefs) => { cookie.value = prefs })
 

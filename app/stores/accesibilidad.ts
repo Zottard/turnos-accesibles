@@ -12,6 +12,7 @@ export interface AccessibilityPrefs {
   reduceMotion: ReduceMotion
   plainLanguage: boolean
   notificationChannel: NotificationChannel
+  emailReminders: boolean
 }
 
 export const DEFAULT_PREFS: AccessibilityPrefs = {
@@ -22,6 +23,7 @@ export const DEFAULT_PREFS: AccessibilityPrefs = {
   reduceMotion: 'siempre',
   plainLanguage: true,
   notificationChannel: 'ambos',
+  emailReminders: true,
 }
 
 export const useAccesibilidadStore = defineStore('accesibilidad', () => {
