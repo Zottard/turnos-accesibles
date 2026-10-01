@@ -234,3 +234,32 @@ select privado.generar_turnos_demo(30);
 update public.profiles p set lat = l.lat, lng = l.lng
 from public.localidades l
 where p.lat is null and l.nombre = p.localidad;
+
+-- Un turno de Pablo de hace una semana: lo usan los tests para verificar que no se cancela un turno que ya pasó.
+do $$
+declare
+  v_pablo uuid := (select id from auth.users where email = 'prueba@demo.ar');
+  v_ce record;
+  v_prof uuid;
+  v_agenda uuid;
+  v_turno uuid;
+  v_fecha date := (now() at time zone 'America/Argentina/Buenos_Aires')::date - 7;
+begin
+  if v_pablo is null or exists (
+    select 1 from public.reservas r join public.turnos_disponibles t on t.id = r.turno_id
+    where r.solicitante_id = v_pablo and t.fecha_hora < now()
+  ) then return; end if;
+
+  select ce.centro_id, ce.especialidad_id into v_ce
+  from public.centro_especialidad ce join public.especialidades e on e.id = ce.especialidad_id
+  where e.slug = 'medicina-general' limit 1;
+  select a.profesional_id into v_prof from public.agendas a
+  where a.centro_id = v_ce.centro_id and a.especialidad_id = v_ce.especialidad_id limit 1;
+
+  insert into public.agendas (centro_id, profesional_id, especialidad_id, fecha, hora_inicio, hora_fin, duracion_min, cupos_totales)
+  values (v_ce.centro_id, v_prof, v_ce.especialidad_id, v_fecha, '06:00', '06:20', 20, 1) returning id into v_agenda;
+  insert into public.turnos_disponibles (agenda_id, centro_id, especialidad_id, profesional_id, fecha_hora, estado)
+  values (v_agenda, v_ce.centro_id, v_ce.especialidad_id, v_prof,
+    (v_fecha + time '06:00')::timestamp at time zone 'America/Argentina/Buenos_Aires', 'reservado') returning id into v_turno;
+  insert into public.reservas (turno_id, solicitante_id, reservada_por_id, estado) values (v_turno, v_pablo, v_pablo, 'completada');
+end $$;

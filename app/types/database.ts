@@ -508,6 +508,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancelar_reserva: { Args: { p_motivo?: string; p_reserva: string }; Returns: Json }
+      reprogramar_reserva: {
+        Args: { p_confirmar_superposicion?: boolean; p_reserva: string; p_turno_nuevo: string }
+        Returns: Json
+      }
       buscar_turnos: {
         Args: {
           p_centro?: string

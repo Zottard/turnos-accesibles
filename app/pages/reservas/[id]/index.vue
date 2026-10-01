@@ -9,7 +9,7 @@
     >
       <div v-if="reserva?.turno" class="flex flex-col gap-8">
         <div class="flex flex-col gap-4">
-          <h1 ref="tituloEl" tabindex="-1" class="text-2xl font-bold">{{ esNueva ? '¡Listo! Reservaste tu turno' : 'Tu turno' }}</h1>
+          <h1 ref="tituloEl" tabindex="-1" class="text-2xl font-bold">{{ titulo }}</h1>
           <EstadoBadge :estado="reserva.estado" class="self-start" />
           <p class="text-lg">
             Número de turno:
@@ -61,13 +61,19 @@ const { speak } = useLecturaEnVozAlta()
 const tituloEl = useTemplateRef<HTMLHeadingElement>('tituloEl')
 
 const id = computed(() => String(route.params.id))
-const esNueva = computed(() => route.query.nuevo === '1')
+const esCambio = computed(() => route.query.cambiado === '1')
+const esNueva = computed(() => route.query.nuevo === '1' || esCambio.value)
 
 const { data: reserva, status, refresh } = await useAsyncData(() => `reserva-${id.value}`, () => obtenerReserva(id.value))
 
 if (status.value === 'success' && !reserva.value) {
   throw createError({ statusCode: 404, statusMessage: 'No encontramos este turno.', fatal: true })
 }
+
+const titulo = computed(() => {
+  if (esCambio.value && reserva.value?.turno) return `Listo. Cambiamos tu turno al ${diaEnPalabras(reserva.value.turno.fecha_hora).replace(/^(hoy|mañana), /, '')}.`
+  return route.query.nuevo === '1' ? '¡Listo! Reservaste tu turno' : 'Tu turno'
+})
 
 useHead({ title: () => (esNueva.value ? 'Turno reservado' : 'Tu turno') })
 
@@ -78,7 +84,7 @@ const sePuedeCambiar = computed(() => reserva.value?.estado === 'confirmada' && 
 const lectura = computed(() => {
   const t = reserva.value?.turno
   if (!t) return ''
-  return `${esNueva.value ? 'Listo. Reservaste tu turno.' : ''} Número de turno ${reserva.value?.numero_correlativo}. Turno de ${t.especialidad?.nombre_comun}, el ${fechaHoraEnPalabras(t.fecha_hora)}, en ${t.centro?.nombre}, ${t.centro?.direccion}. Te vamos a recordar el turno el día anterior.`
+  return `${esNueva.value ? titulo.value : ''} Número de turno ${reserva.value?.numero_correlativo}. Turno de ${t.especialidad?.nombre_comun}, el ${fechaHoraEnPalabras(t.fecha_hora)}, en ${t.centro?.nombre}, ${t.centro?.direccion}. Te vamos a recordar el turno el día anterior.`
 })
 
 function agregarAlCalendario() {

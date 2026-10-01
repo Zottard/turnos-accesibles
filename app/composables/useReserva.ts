@@ -1,6 +1,6 @@
 import type { Aviso } from '~/composables/useSesion'
 
-export type MotivoReserva = 'sin_sesion' | 'sin_permiso' | 'no_existe' | 'vencido' | 'tomado' | 'superpuesto' | 'error'
+export type MotivoReserva = 'sin_sesion' | 'sin_permiso' | 'no_existe' | 'vencido' | 'tomado' | 'superpuesto' | 'no_confirmada' | 'error'
 
 export interface ResultadoReserva {
   ok: boolean
@@ -10,7 +10,12 @@ export interface ResultadoReserva {
   otro?: { fecha_hora: string, centro: string, especialidad: string }
 }
 
-export function avisoReserva(r: ResultadoReserva): Aviso {
+function leerResultado(data: unknown): ResultadoReserva {
+  const r = data as { ok: boolean, reserva_id?: string, numero?: number, motivo?: MotivoReserva, otro?: ResultadoReserva['otro'] }
+  return { ok: r.ok, reservaId: r.reserva_id, numero: r.numero, motivo: r.motivo, otro: r.otro }
+}
+
+export function avisoReserva(r: ResultadoReserva, accion: 'reservar' | 'cancelar' | 'cambiar' = 'reservar'): Aviso {
   switch (r.motivo) {
     case 'tomado':
       return { titulo: 'Ese turno lo tomó otra persona.', ayuda: 'No perdiste nada de lo que elegiste. Te mostramos otros turnos parecidos.' }
@@ -22,7 +27,9 @@ export function avisoReserva(r: ResultadoReserva): Aviso {
           : '¿Querés reservar igual?',
       }
     case 'vencido':
-      return { titulo: 'Ese turno ya pasó.', ayuda: 'Elegí otro turno.' }
+      return { titulo: 'Ese turno ya pasó.', ayuda: 'No se puede cambiar ni cancelar un turno que ya pasó.' }
+    case 'no_confirmada':
+      return { titulo: 'Este turno ya no está reservado.', ayuda: 'Puede que ya lo hayas cancelado o cambiado. Mirá "Mis turnos".' }
     case 'no_existe':
       return { titulo: 'No encontramos ese turno.', ayuda: 'Puede que lo hayan sacado de la agenda. Elegí otro.' }
     case 'sin_sesion':
@@ -30,7 +37,10 @@ export function avisoReserva(r: ResultadoReserva): Aviso {
     case 'sin_permiso':
       return { titulo: 'No podés reservar turnos para esta persona.', ayuda: 'Pedile que te dé permiso para reservar desde "Mis acompañantes".' }
     default:
-      return { titulo: 'No pudimos reservar el turno.', ayuda: 'Revisá tu conexión a internet y probá de nuevo.' }
+      return {
+        titulo: accion === 'cancelar' ? 'No pudimos cancelar el turno.' : accion === 'cambiar' ? 'No pudimos cambiar el turno.' : 'No pudimos reservar el turno.',
+        ayuda: 'Revisá tu conexión a internet y probá de nuevo.',
+      }
   }
 }
 
@@ -43,9 +53,32 @@ export function useReserva() {
       p_confirmar_superposicion: opciones.confirmarSuperposicion ?? false,
       p_solicitante: opciones.solicitante,
     })
-    if (error || !data) return { ok: false, motivo: 'error' }
-    const r = data as { ok: boolean, reserva_id?: string, numero?: number, motivo?: MotivoReserva, otro?: ResultadoReserva['otro'] }
-    return { ok: r.ok, reservaId: r.reserva_id, numero: r.numero, motivo: r.motivo, otro: r.otro }
+    return error || !data ? { ok: false, motivo: 'error' } : leerResultado(data)
+  }
+
+  async function cancelar(reservaId: string, motivo?: string): Promise<ResultadoReserva> {
+    const { data, error } = await supabase.rpc('cancelar_reserva', { p_reserva: reservaId, p_motivo: motivo })
+    return error || !data ? { ok: false, motivo: 'error' } : leerResultado(data)
+  }
+
+  async function reprogramar(reservaId: string, turnoNuevo: string, confirmarSuperposicion = false): Promise<ResultadoReserva> {
+    const { data, error } = await supabase.rpc('reprogramar_reserva', {
+      p_reserva: reservaId,
+      p_turno_nuevo: turnoNuevo,
+      p_confirmar_superposicion: confirmarSuperposicion,
+    })
+    return error || !data ? { ok: false, motivo: 'error' } : leerResultado(data)
+  }
+
+  async function misReservas(solicitante: string) {
+    const { data, error } = await supabase
+      .from('reservas')
+      .select(`id, numero_correlativo, estado, reservada_por_id,
+        turno:turnos_disponibles(fecha_hora, centro:centros(nombre, direccion, localidad), especialidad:especialidades(nombre_comun, nombre_tecnico, icono))`)
+      .eq('solicitante_id', solicitante)
+      .in('estado', ['confirmada', 'completada', 'ausente', 'cancelada'])
+    if (error) throw error
+    return (data ?? []).sort((a, b) => (a.turno?.fecha_hora ?? '').localeCompare(b.turno?.fecha_hora ?? ''))
   }
 
   async function obtenerReserva(id: string) {
@@ -59,7 +92,7 @@ export function useReserva() {
     return data
   }
 
-  return { reservar, obtenerReserva }
+  return { reservar, cancelar, reprogramar, misReservas, obtenerReserva }
 }
 
 export type ReservaDetalle = NonNullable<Awaited<ReturnType<ReturnType<typeof useReserva>['obtenerReserva']>>>

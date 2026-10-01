@@ -1,17 +1,10 @@
-import type { APIRequestContext, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from './fixtures'
 import { SESIONES } from './sesiones'
+import { reservarAunqueSeSuperponga, titulo, turnos } from './ayudas'
 
-const SUPABASE = process.env.NUXT_PUBLIC_SUPABASE_URL ?? 'https://ynolirfzjcjsvesnfpes.supabase.co'
-const CLAVE_PUBLICA = process.env.NUXT_PUBLIC_SUPABASE_KEY ?? 'sb_publishable_MlF21H5LBVIhHQfW6Hx8FA_76fjurU1'
-
-async function turnos(request: APIRequestContext, filtro: string) {
-  const r = await request.get(`${SUPABASE}/rest/v1/turnos_disponibles?select=id,profesional_id,fecha_hora&${filtro}`, {
-    headers: { apikey: CLAVE_PUBLICA },
-  })
-  return (await r.json()) as { id: string, profesional_id: string, fecha_hora: string }[]
-}
+const continuar = (page: Page) => page.getByRole('button', { name: 'Sí, continuar' })
 
 async function sinViolaciones(page: Page) {
   const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
@@ -19,17 +12,6 @@ async function sinViolaciones(page: Page) {
   expect(graves, JSON.stringify(graves.map((v) => ({ id: v.id, nodes: v.nodes.map((n) => n.target) })), null, 2)).toEqual([])
 }
 
-const titulo = (page: Page) => page.getByRole('heading', { level: 1 })
-
-// Las corridas anteriores dejan reservas de Pablo: si aparece el aviso de superposición, se acepta.
-async function reservarAunqueSeSuperponga(page: Page) {
-  await page.getByRole('button', { name: 'Sí, reservar este turno' }).click()
-  const igual = page.getByRole('button', { name: 'Sí, reservar igual' })
-  await expect(titulo(page).filter({ hasText: '¡Listo! Reservaste tu turno' }).or(igual)).toBeVisible()
-  if (await igual.isVisible()) await igual.click()
-  await expect(titulo(page)).toHaveText('¡Listo! Reservaste tu turno')
-}
-const continuar = (page: Page) => page.getByRole('button', { name: 'Sí, continuar' })
 
 test.describe('con sesión', () => {
   test.use({ storageState: SESIONES.prueba })
