@@ -114,6 +114,39 @@ export type Database = {
           },
         ]
       }
+      auditoria: {
+        Row: {
+          accion: string
+          actor_id: string | null
+          antes: Json | null
+          creado_en: string
+          despues: Json | null
+          entidad: string
+          entidad_id: string
+          id: number
+        }
+        Insert: {
+          accion: string
+          actor_id?: string | null
+          antes?: Json | null
+          creado_en?: string
+          despues?: Json | null
+          entidad: string
+          entidad_id: string
+          id?: never
+        }
+        Update: {
+          accion?: string
+          actor_id?: string | null
+          antes?: Json | null
+          creado_en?: string
+          despues?: Json | null
+          entidad?: string
+          entidad_id?: string
+          id?: never
+        }
+        Relationships: []
+      }
       centro_especialidad: {
         Row: {
           centro_id: string
@@ -638,6 +671,20 @@ export type Database = {
       invitar_acompanante: { Args: { p_alcance: string[]; p_email: string }; Returns: Json }
       revocar_acompanamiento: { Args: { p_id: string }; Returns: Json }
       ver_invitacion: { Args: { p_token: string }; Returns: Json }
+      generar_agenda: {
+        Args: {
+          p_centro: string
+          p_desde: string
+          p_dias: number[]
+          p_duracion: number
+          p_especialidad: number
+          p_hasta: string
+          p_hora_fin: string
+          p_hora_inicio: string
+          p_profesional: string
+        }
+        Returns: Json
+      }
       marcar_leidas: { Args: { p_id?: string }; Returns: undefined }
       cancelar_reserva: { Args: { p_motivo?: string; p_reserva: string }; Returns: Json }
       reprogramar_reserva: {

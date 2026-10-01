@@ -75,3 +75,22 @@ export const SCHEMA_PERFIL = SCHEMA_NOMBRE.extend({
 })
 
 export const SCHEMA_INVITACION = z.object({ email: correo })
+
+export const SCHEMA_CENTRO = z.object({
+  nombre: z.string().trim().min(3, 'Escribí el nombre del centro.'),
+  direccion: z.string().trim().min(3, 'Escribí la dirección.'),
+  localidad: z.number({ error: 'Elegí la localidad.' }),
+})
+
+export const SCHEMA_ESPECIALIDAD = z.object({
+  nombreComun: z.string().trim().min(2, 'Escribí cómo lo dice la gente. Por ejemplo: Oculista.'),
+  nombreTecnico: z.string().trim().min(2, 'Escribí el nombre técnico. Por ejemplo: Oftalmología.'),
+  descripcion: z.string().trim().min(5, 'Escribí para qué sirve, en una oración simple.'),
+})
+
+export const SCHEMA_PROFESIONAL = z.object({
+  nombre: z.string().trim().min(1, 'Escribí el nombre.'),
+  apellido: z.string().trim().min(1, 'Escribí el apellido.'),
+  matricula: z.string().trim().min(3, 'Escribí la matrícula.'),
+  especialidad: z.number({ error: 'Elegí la especialidad.' }),
+})

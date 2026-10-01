@@ -146,6 +146,17 @@ pnpm test:e2e         # Playwright + axe, levanta build + preview
 - E2E con dos personas: `acompanantes.spec.ts` abre un contexto por sesión (Pablo y Lucía).
 - Playwright corre con 4 workers en local (con 10 la máquina se quedó sin memoria).
 
+## Administración (Fase 9)
+
+- Escritura de centros, especialidades, profesionales y oferta: políticas `for all` con `privado.es_admin()`.
+- Trigger `impedir_baja_con_reservas`: no deja dar de baja centro/especialidad ni borrar profesional con
+  reservas confirmadas a futuro; el mensaje (`P0001`) se muestra tal cual con `mensajeDeError()`.
+- `generar_agenda()` (RPC, solo admin): rechaza si se superpone con otra agenda del profesional y
+  devuelve las fechas que chocan. Crea la oferta centro-especialidad si no existía.
+- `auditoria`: trigger `privado.auditar()` en centros, especialidades, profesionales, agendas y reservas.
+- Listas de filas de Supabase en `shallowRef` (con `ref` el typecheck explota por `Json`).
+- Los tests de admin crean datos con nombres `Prueba <timestamp>` y agendas a +100 días.
+
 ## Modo demo
 
 - `NUXT_PUBLIC_DEMO=true` muestra la barra de demo (entrar como cada usuario de prueba) y `/demo`
