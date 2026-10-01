@@ -71,5 +71,15 @@ export function useTurnos() {
     return { ...data, requisitos: oferta?.requisitos ?? null }
   }
 
-  return { especialidades, localidades, localidadPorNombre, buscar, obtenerTurno }
+  async function centrosConEspecialidad(especialidad: number) {
+    const { data } = await supabase
+      .from('centro_especialidad')
+      .select('centro:centros(id, nombre, localidad)')
+      .eq('especialidad_id', especialidad)
+    return (data ?? []).flatMap((f) => (f.centro ? [f.centro] : [])).sort((a, b) => a.nombre.localeCompare(b.nombre))
+  }
+
+  return { especialidades, localidades, localidadPorNombre, buscar, obtenerTurno, centrosConEspecialidad }
 }
+
+export type TurnoDetalle = NonNullable<Awaited<ReturnType<ReturnType<typeof useTurnos>['obtenerTurno']>>>

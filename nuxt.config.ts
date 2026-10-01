@@ -16,6 +16,8 @@ export default defineNuxtConfig({
   typescript: { strict: true },
 
   runtimeConfig: {
+    // anon key en formato JWT: la Edge Function `interpretar` la pide (verify_jwt). Es pública por diseño.
+    supabaseAnonJwt: '',
     public: { demo: false },
   },
 

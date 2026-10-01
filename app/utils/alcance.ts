@@ -48,7 +48,7 @@ export const ALCANCE: GrupoAlcance[] = [
     titulo: 'Buscar turnos',
     requerimiento: 'RF 3',
     pantallas: [
-      { nombre: 'Mi inicio', ruta: '/inicio', descripcion: 'Tu próximo turno en grande y el botón "Sacar un turno".', fase: 6, estado: 'borrador', rol: 'solicitante' },
+      { nombre: 'Mi inicio', ruta: '/inicio', descripcion: 'Tu próximo turno en grande y el botón "Sacar un turno".', fase: 6, estado: 'lista', rol: 'solicitante' },
       { nombre: 'Buscar por menús', ruta: '/turnos/buscar', descripcion: 'Elegir médico, lugar y fecha sin escribir. Centros reales, turnos de prueba.', fase: 4, estado: 'lista' },
       { nombre: 'Detalle de un turno', ruta: '/turnos/:id', descripcion: 'Día y hora en palabras, hospital, dirección y cómo llegar. Se abre desde la búsqueda.', fase: 4, estado: 'lista' },
     ],
@@ -57,9 +57,9 @@ export const ALCANCE: GrupoAlcance[] = [
     titulo: 'Reservar con el asistente',
     requerimiento: 'RF 4',
     pantallas: [
-      { nombre: 'Asistente paso a paso', ruta: '/turnos/asistente', descripcion: 'Contame qué necesitás (texto o voz) y te guiamos de a una pregunta.', fase: 5, estado: 'pendiente' },
-      { nombre: 'Confirmar la reserva', ruta: '/turnos/:id/confirmar', descripcion: 'Resumen en oraciones cortas y "Sí, reservar este turno".', fase: 5, estado: 'pendiente' },
-      { nombre: 'Comprobante', ruta: '/reservas/:id', descripcion: 'Número de turno, agregar al calendario y cómo llegar.', fase: 5, estado: 'pendiente' },
+      { nombre: 'Asistente paso a paso', ruta: '/turnos/asistente', descripcion: 'Contame qué necesitás (texto o voz) y te guiamos de a una pregunta. Sin IA paga: reglas, y si no entiende, menús.', fase: 5, estado: 'lista' },
+      { nombre: 'Confirmar la reserva', ruta: '/turnos/:id/confirmar', descripcion: 'Resumen en oraciones cortas y "Sí, reservar este turno".', fase: 5, estado: 'lista' },
+      { nombre: 'Comprobante', ruta: '/reservas/:id', descripcion: 'Número de turno, agregar al calendario y cómo llegar.', fase: 5, estado: 'lista' },
     ],
   },
   {

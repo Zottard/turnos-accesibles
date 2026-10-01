@@ -2,7 +2,7 @@
   <section class="flex flex-col gap-8" :aria-labelledby="tituloId">
     <div class="flex flex-col gap-3">
       <p class="text-lg font-bold">{{ progreso }}</p>
-      <UProgress :model-value="paso" :max="total" aria-hidden="true" />
+      <UProgress v-if="paso >= 1" :model-value="paso" :max="total" aria-hidden="true" />
     </div>
 
     <div class="flex flex-col gap-4">
@@ -33,7 +33,7 @@ const { t } = useLenguajeSimple()
 const { announce } = useAnuncio()
 const { speak } = useLecturaEnVozAlta()
 
-const progreso = computed(() => t('progreso.paso', { actual: props.paso, total: props.total }))
+const progreso = computed(() => (props.paso < 1 ? 'Antes de empezar' : t('progreso.paso', { actual: props.paso, total: props.total })))
 const lectura = computed(() => [props.titulo, props.descripcion].filter(Boolean).join('. '))
 
 function presentar() {

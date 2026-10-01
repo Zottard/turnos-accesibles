@@ -30,7 +30,18 @@
           color="info"
           icon="i-lucide-info"
           title="Este es un turno de prueba."
-          description="El hospital y su dirección son reales. El turno y el nombre del profesional son de ejemplo, porque todavía no estamos conectados con el sistema del hospital."
+          description="El hospital y su dirección son reales. El turno y el nombre del profesional son de ejemplo: si lo reservás, el hospital no se entera."
+        />
+
+        <UButton
+          v-if="turno.estado === 'disponible'"
+          :to="`/turnos/${turno.id}/confirmar`"
+          color="primary"
+          variant="solid"
+          icon="i-lucide-calendar-check"
+          label="Reservar este turno"
+          block
+          class="sm:w-auto sm:self-start"
         />
 
         <section aria-labelledby="titulo-quien" class="flex flex-col gap-3">

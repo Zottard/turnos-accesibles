@@ -376,6 +376,74 @@ export type Database = {
         }
         Relationships: []
       }
+      reservas: {
+        Row: {
+          cancelada_en: string | null
+          creada_en: string
+          estado: Database["public"]["Enums"]["estado_reserva"]
+          id: string
+          motivo_cancelacion: string | null
+          numero_correlativo: number
+          reserva_origen_id: string | null
+          reservada_por_id: string
+          solicitante_id: string
+          turno_id: string
+        }
+        Insert: {
+          cancelada_en?: string | null
+          creada_en?: string
+          estado?: Database["public"]["Enums"]["estado_reserva"]
+          id?: string
+          motivo_cancelacion?: string | null
+          numero_correlativo?: never
+          reserva_origen_id?: string | null
+          reservada_por_id: string
+          solicitante_id: string
+          turno_id: string
+        }
+        Update: {
+          cancelada_en?: string | null
+          creada_en?: string
+          estado?: Database["public"]["Enums"]["estado_reserva"]
+          id?: string
+          motivo_cancelacion?: string | null
+          numero_correlativo?: never
+          reserva_origen_id?: string | null
+          reservada_por_id?: string
+          solicitante_id?: string
+          turno_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservas_turno_id_fkey"
+            columns: ["turno_id"]
+            isOneToOne: false
+            referencedRelation: "turnos_disponibles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservas_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservas_reservada_por_id_fkey"
+            columns: ["reservada_por_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservas_reserva_origen_id_fkey"
+            columns: ["reserva_origen_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       turnos_disponibles: {
         Row: {
           agenda_id: string
@@ -474,8 +542,13 @@ export type Database = {
       estado_bloqueo: { Args: { p_email: string }; Returns: number }
       limpiar_intentos: { Args: never; Returns: undefined }
       registrar_fallo: { Args: { p_email: string }; Returns: Json }
+      reservar_turno: {
+        Args: { p_confirmar_superposicion?: boolean; p_solicitante?: string; p_turno: string }
+        Returns: Json
+      }
     }
     Enums: {
+      estado_reserva: "confirmada" | "cancelada" | "reprogramada" | "completada" | "ausente"
       estado_turno: "disponible" | "reservado" | "bloqueado"
       modo_turnos: "app" | "derivacion"
       rol: "solicitante" | "acompanante" | "admin"
@@ -607,6 +680,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      estado_reserva: ["confirmada", "cancelada", "reprogramada", "completada", "ausente"],
       estado_turno: ["disponible", "reservado", "bloqueado"],
       modo_turnos: ["app", "derivacion"],
       rol: ["solicitante", "acompanante", "admin"],

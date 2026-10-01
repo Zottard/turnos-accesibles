@@ -97,6 +97,21 @@ pnpm test:e2e         # Playwright + axe, levanta build + preview
 - Fechas y horas siempre con `utils/fechas.ts` (zona America/Argentina/Buenos_Aires, en palabras).
 - Íconos que vienen de la base van en `icon.clientBundle.icons` de `nuxt.config.ts`.
 
+## Asistente y reservas (Fase 5)
+
+- `reservas` se escribe **solo** con la RPC `reservar_turno` (transaccional: `UPDATE ... WHERE estado =
+  'disponible'`). Devuelve `{ ok, reserva_id, numero }` o `{ ok: false, motivo }` con motivo `tomado`,
+  `superpuesto` (otro turno de la persona a menos de 2 h; se reintenta con `p_confirmar_superposicion`),
+  `vencido`, `no_existe`, `sin_sesion`, `sin_permiso`. Los textos para cada motivo: `avisoReserva()`.
+- `privado.puede_actuar(actor, solicitante, accion)` decide si alguien reserva por otra persona (fase 8).
+- Paso 0 del asistente: Edge Function `interpretar` (reglas en `supabase/functions/interpretar/reglas.ts`,
+  testeadas en `tests/unit/interpretar.spec.ts`). El front llama a `/api/asistente/interpretar` (proxy con
+  rate limit y timeout de 4 s). Si falla o no entiende: "Vamos paso a paso entonces" y sigue por menús.
+  La función tiene `verify_jwt`: el proxy usa `NUXT_SUPABASE_ANON_JWT` (anon key JWT, pública).
+- Borrador del asistente en `sessionStorage` (`ta_asistente`): sobrevive a recargar y a ir a ingresar.
+- Para los datos de Supabase con tipos profundos usar `shallowRef` (con `ref` el typecheck explota) y
+  `fetch` nativo en vez de `$fetch` para endpoints propios (los tipos de rutas de Nitro también explotan).
+
 ## Modo demo
 
 - `NUXT_PUBLIC_DEMO=true` muestra la barra de demo (entrar como cada usuario de prueba) y `/demo`

@@ -6,7 +6,8 @@ test('el alcance lista todas las pantallas con su estado', async ({ page }) => {
   await expect(page.getByText(/\d+ de \d+ pantallas listas/)).toBeVisible()
   await expect(page.getByRole('heading', { level: 2, name: /Reservar con el asistente/ })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Crear una cuenta' })).toHaveAttribute('href', '/registrarme')
-  await expect(page.getByRole('link', { name: 'Asistente paso a paso' })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Asistente paso a paso' })).toHaveAttribute('href', '/turnos/asistente')
+  await expect(page.getByRole('link', { name: 'Métricas' })).toHaveCount(0)
 })
 
 test('en el celular la barra demo arranca cerrada', async ({ page, isMobile }) => {

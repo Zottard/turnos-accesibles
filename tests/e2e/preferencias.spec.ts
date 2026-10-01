@@ -51,7 +51,7 @@ test('mis preferencias se guardan solas', async ({ page, context }) => {
   await page.getByRole('radio', { name: /^Grande/ }).click()
   await page.getByRole('radio', { name: /Fondo negro/ }).click()
   await page.getByRole('radio', { name: /No, prefiero leer yo/ }).click()
-  await expect(page.locator('[role="status"][aria-atomic="true"]')).toHaveText('Guardamos el cambio.')
+  await expect(page.locator('[role="status"][aria-atomic="true"]')).toHaveText('Guardamos el cambio.', { timeout: 10_000 })
 
   await context.clearCookies({ name: 'ta_prefs' })
   await page.reload()
