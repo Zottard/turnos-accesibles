@@ -112,6 +112,13 @@ pnpm test:e2e         # Playwright + axe, levanta build + preview
 - Para los datos de Supabase con tipos profundos usar `shallowRef` (con `ref` el typecheck explota) y
   `fetch` nativo en vez de `$fetch` para endpoints propios (los tipos de rutas de Nitro también explotan).
 
+## Mis turnos (Fase 6)
+
+- `cancelar_reserva` y `reprogramar_reserva` (RPC): no dejan tocar un turno que ya pasó y liberan el lugar.
+  La reprogramación deja la vieja como `reprogramada` y la nueva con `reserva_origen_id`.
+- pg_cron `completar-reservas-pasadas` (minuto 15 de cada hora) pasa a `completada` las confirmadas viejas.
+- `tests/e2e/ayudas.ts`: helpers para crear turnos y reservas desde los tests.
+
 ## Modo demo
 
 - `NUXT_PUBLIC_DEMO=true` muestra la barra de demo (entrar como cada usuario de prueba) y `/demo`

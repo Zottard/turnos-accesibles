@@ -66,9 +66,9 @@ export const ALCANCE: GrupoAlcance[] = [
     titulo: 'Mis turnos',
     requerimiento: 'RF 5',
     pantallas: [
-      { nombre: 'Mis turnos', ruta: '/mis-turnos', descripcion: 'Próximos y pasados, con su estado en texto e ícono.', fase: 6, estado: 'pendiente' },
-      { nombre: 'Cancelar un turno', ruta: '/reservas/:id/cancelar', descripcion: 'Con confirmación. Libera el lugar para otra persona.', fase: 6, estado: 'pendiente' },
-      { nombre: 'Cambiar de fecha', ruta: '/reservas/:id/reprogramar', descripcion: 'Busca un turno nuevo y libera el anterior.', fase: 6, estado: 'pendiente' },
+      { nombre: 'Mis turnos', ruta: '/mis-turnos', descripcion: 'Próximos y pasados, con su estado en texto e ícono.', fase: 6, estado: 'lista' },
+      { nombre: 'Cancelar un turno', ruta: '/reservas/:id/cancelar', descripcion: 'Con confirmación. Libera el lugar para otra persona.', fase: 6, estado: 'lista' },
+      { nombre: 'Cambiar de fecha', ruta: '/reservas/:id/reprogramar', descripcion: 'Busca un turno nuevo y libera el anterior.', fase: 6, estado: 'lista' },
     ],
   },
   {
