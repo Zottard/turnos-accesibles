@@ -201,6 +201,7 @@ pnpm test:e2e         # Playwright + axe, levanta build + preview
 - `prueba@demo.ar` es solo para tests que cambian datos (preferencias, perfil): no usar a Rosa.
 - Para verificar navegación usar `toHaveURL((u) => u.pathname === '/x')`: una regex como `/\/inicio$/`
   también matchea `?volver=/inicio`.
-- CI necesita las variables de repo `NUXT_PUBLIC_SUPABASE_URL` y `NUXT_PUBLIC_SUPABASE_KEY`.
+- CI necesita las variables de repo `NUXT_PUBLIC_SUPABASE_URL` y `NUXT_PUBLIC_SUPABASE_KEY` y el secreto
+  `NUXT_SUPABASE_ANON_JWT` (sin él, el asistente cae a menús y fallan sus tests).
 - Flechas en radios (Reka): elige la opción solo si la tecla sigue apretada al recibir foco.
   En Playwright usar `keyboard.down/up`, no `press`.

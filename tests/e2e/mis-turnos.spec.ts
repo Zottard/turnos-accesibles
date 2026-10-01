@@ -9,7 +9,7 @@ test('mis turnos separa próximos y anteriores', async ({ page, request }) => {
   const turno = await turnoLibre(request)
   await page.goto(`/turnos/${turno.id}/confirmar`)
   await reservarAunqueSeSuperponga(page)
-  const numero = (await page.getByText('Número de turno:').textContent())?.match(/\d+/)?.[0]
+  const numero = (await page.locator('main').getByText('Número de turno:').textContent())?.match(/\d+/)?.[0]
 
   await page.goto('/mis-turnos')
   const proximos = page.locator('section', { has: page.getByRole('heading', { level: 2, name: /Próximos/ }) })

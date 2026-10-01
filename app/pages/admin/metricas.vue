@@ -124,10 +124,14 @@ const tiles = computed(() => {
   ]
 })
 
+let pedido = 0
+
 async function cargar() {
   if (!desde.value || !hasta.value || hasta.value < desde.value) return
   estado.value = 'cargando'
+  const actual = ++pedido
   const { data, error } = await supabase.rpc('metricas', { p_desde: desde.value, p_hasta: hasta.value })
+  if (actual !== pedido) return
   if (error || !data) {
     estado.value = 'error'
     return

@@ -11,6 +11,7 @@ jobs:
     env:
       NUXT_PUBLIC_SUPABASE_URL: ${{ vars.NUXT_PUBLIC_SUPABASE_URL }}
       NUXT_PUBLIC_SUPABASE_KEY: ${{ vars.NUXT_PUBLIC_SUPABASE_KEY }}
+      NUXT_SUPABASE_ANON_JWT: ${{ secrets.NUXT_SUPABASE_ANON_JWT }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
