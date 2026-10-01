@@ -32,3 +32,4 @@ tests/e2e/.auth
 
 .vercel
 .env*
+!.env.example
