@@ -1,6 +1,7 @@
 import { expect, test } from './fixtures'
 import AxeBuilder from '@axe-core/playwright'
 import { SESIONES } from './sesiones'
+import { turnoLibre } from './ayudas'
 
 const ROUTES = ['/', '/ayuda', '/accesibilidad', '/terminos', '/ingresar', '/registrarme', '/recuperar-clave', '/confirmar-correo', '/restablecer-clave', '/demo', '/turnos/buscar']
 
@@ -83,4 +84,25 @@ test.describe('pantallas con sesión', () => {
       expect(huerfanas).toEqual([])
     })
   }
+
+  test('barrido de axe por el resto de las pantallas con sesión', async ({ page, request }) => {
+    test.setTimeout(120_000)
+    const turno = await turnoLibre(request)
+    await page.goto('/mis-turnos')
+    const ver = page.locator('main').getByRole('link', { name: 'Ver el turno' }).first()
+    const reserva = (await ver.count()) ? (await ver.getAttribute('href'))! : null
+    const rutas = [
+      '/mis-turnos', '/notificaciones', '/acompanantes', '/acompanantes/invitar', '/turnos/asistente',
+      `/turnos/${turno.id}`, `/turnos/${turno.id}/confirmar`, '/invitacion/no-existe',
+      ...(reserva ? [reserva, `${reserva}/cancelar`, `${reserva}/reprogramar`] : []),
+    ]
+    for (const ruta of rutas) {
+      await page.goto(ruta)
+      await expect(page.locator('h1').first()).toBeVisible()
+      await page.waitForLoadState('networkidle')
+      const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+      const graves = violations.filter((v) => v.impact === 'critical' || v.impact === 'serious')
+      expect(graves, `${ruta}: ${JSON.stringify(graves.map((v) => ({ id: v.id, nodes: v.nodes.map((n) => n.target) })), null, 2)}`).toEqual([])
+    }
+  })
 })

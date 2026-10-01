@@ -46,6 +46,8 @@ export default defineNuxtConfig({
         { name: 'description', content: 'Sacá un turno médico en el sistema público, paso a paso y en lenguaje claro.' },
       ],
       link: [
+        { rel: 'icon', href: '/icono.svg', type: 'image/svg+xml' },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon-180x180.png' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap' },
@@ -69,11 +71,22 @@ export default defineNuxtConfig({
       display: 'standalone',
       background_color: '#000000',
       theme_color: '#000000',
+      icons: [
+        { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+        { src: '/maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      ],
     },
     // Las páginas tienen datos personales y dependen de la sesión: nunca se sirven desde la caché.
+    // Sin conexión, cualquier navegación muestra /offline (estática, sin datos).
     workbox: {
       navigateFallback: null,
-      globPatterns: ['**/*.{js,css,ico,png,svg,woff2,webmanifest}'],
+      globPatterns: ['**/*.{js,css,ico,png,svg,woff2,webmanifest}', 'offline/index.html'],
+      runtimeCaching: [{
+        urlPattern: ({ request }) => request.mode === 'navigate',
+        handler: 'NetworkOnly',
+        options: { precacheFallback: { fallbackURL: '/offline' } },
+      }],
     },
     devOptions: { enabled: false },
   },

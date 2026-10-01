@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sin conexión · Turnos Accesibles</title>
+  <link rel="icon" href="/icono.svg" type="image/svg+xml">
+  <style>
+    :root { color-scheme: light dark; --bg: #fff; --text: #10161c; --primary: #0b4f9e; --primary-text: #fff; --focus: #b45309; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #000; --text: #fff; --primary: #ffdd00; --primary-text: #000; --focus: #ffdd00; } }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 1.25rem/1.6 system-ui, sans-serif; overflow-wrap: anywhere; }
+    main { max-width: 40rem; margin: 0 auto; padding: 2rem 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
+    h1 { font-size: 2rem; line-height: 1.25; margin: 0; }
+    p { margin: 0; }
+    button { align-self: flex-start; min-height: 48px; padding: .75rem 1.5rem; font: inherit; font-weight: 700; color: var(--primary-text); background: var(--primary); border: 2px solid var(--primary); border-radius: .5rem; cursor: pointer; }
+    button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>No hay internet</h1>
+    <p>Para buscar o sacar un turno, la app necesita conexión. Revisá que el wifi o los datos del celular estén prendidos.</p>
+    <p>Tus turnos no se perdieron: cuando vuelva la conexión, los vas a ver igual.</p>
+    <button type="button" onclick="location.reload()">Probar de nuevo</button>
+  </main>
+  <script>addEventListener('online', () => location.reload())</script>
+</body>
+</html>

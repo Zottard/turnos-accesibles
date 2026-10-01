@@ -165,6 +165,18 @@ pnpm test:e2e         # Playwright + axe, levanta build + preview
 - El gráfico de barras es `aria-hidden`: la tabla de abajo tiene los mismos datos. CSV con BOM y `;`
   para que Excel en español lo abra bien. El layout oculta header/footer al imprimir (`print:hidden`).
 
+## PWA y contenido (Fase 11)
+
+- Sin conexión, el SW responde cualquier navegación con `public/offline/index.html` (estática, sin datos).
+  Va en una carpeta porque `@vite-pwa/nuxt` le saca el `.html` a las entradas del precache: un
+  `offline.html` suelto quedaba como `/offline`, que Nitro no sirve, y rompía la instalación del SW.
+- Íconos: `public/icono.svg` es la fuente; los PNG se regeneran con `node scripts/generar-iconos.mjs`.
+- `beforeinstallprompt` llega una sola vez al cargar: lo guarda `plugins/instalar.client.ts` y lo usa
+  `<InstalarApp>` (en `/inicio` y `/ayuda`).
+- `consultas`: formulario de `/ayuda#escribinos` (canal de contacto de la Ley 26.653 y pedidos de la
+  Ley 25.326). Insertan anon y autenticados, lee solo admin (`/admin`, "Mensajes recibidos").
+- `/ayuda` queda en borrador en el alcance: falta el video con subtítulos y LSA.
+
 ## Modo demo
 
 - `NUXT_PUBLIC_DEMO=true` muestra la barra de demo (entrar como cada usuario de prueba) y `/demo`

@@ -29,7 +29,7 @@ test('la sesión sobrevive a recargar y se puede salir', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Salir' }).click()
   await expect(page).toHaveURL(/\/$/)
-  await expect(page.getByRole('link', { name: 'Ingresar' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Ingresar', exact: true })).toBeVisible()
   await page.goto('/inicio')
   await expect(page).toHaveURL(/\/ingresar/)
 })

@@ -94,3 +94,10 @@ export const SCHEMA_PROFESIONAL = z.object({
   matricula: z.string().trim().min(3, 'Escribí la matrícula.'),
   especialidad: z.number({ error: 'Elegí la especialidad.' }),
 })
+
+export const SCHEMA_CONSULTA = z.object({
+  mensaje: z.string().trim()
+    .min(10, 'Contanos qué pasó en una o dos oraciones.')
+    .max(2000, 'El mensaje es muy largo. Escribí lo más importante, hasta 2000 letras.'),
+  correo: z.union([z.literal(''), correo]),
+})

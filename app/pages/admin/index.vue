@@ -25,6 +25,21 @@
             </li>
           </ul>
         </section>
+
+        <section aria-labelledby="titulo-consultas" class="flex flex-col gap-4">
+          <h2 id="titulo-consultas" class="text-xl font-bold">Mensajes recibidos</h2>
+          <p v-if="!consultas.length" class="text-lg">Todavía nadie escribió.</p>
+          <ul v-else class="flex flex-col">
+            <li v-for="c in consultas" :key="c.id" class="flex flex-col gap-1 border-b-2 border-default py-3">
+              <span class="flex flex-wrap gap-x-4 gap-y-1">
+                <span class="font-bold">{{ TIPOS_CONSULTA[c.tipo] ?? c.tipo }}</span>
+                <span class="text-muted">{{ fechaHoraEnPalabras(c.creado_en) }}</span>
+                <span v-if="c.correo" class="text-muted">{{ c.correo }}</span>
+              </span>
+              <span class="whitespace-pre-line">{{ c.mensaje }}</span>
+            </li>
+          </ul>
+        </section>
       </div>
     </VistaEstados>
   </div>
@@ -34,6 +49,7 @@
 import type { EstadoVista } from '~/components/patrones/VistaEstados.vue'
 
 const ACCIONES: Record<string, string> = { insert: 'Se agregó', update: 'Se cambió', delete: 'Se borró' }
+const TIPOS_CONSULTA: Record<string, string> = { accesibilidad: 'Accesibilidad', datos: 'Datos personales', otra: 'Otra consulta' }
 const ENTIDADES: Record<string, string> = {
   centros: 'un centro',
   especialidades: 'una especialidad',
@@ -49,6 +65,7 @@ const supabase = useSupabaseClient()
 
 const estado = ref<EstadoVista>('cargando')
 const datos = ref<{ etiqueta: string, valor: number }[]>([])
+const consultas = ref<{ id: number, tipo: string, mensaje: string, correo: string | null, creado_en: string }[]>([])
 const cambios = ref<{ id: number, accion: string, entidad: string, creado_en: string }[]>([])
 
 async function contar(tabla: 'centros' | 'especialidades' | 'profesionales' | 'reservas') {
@@ -60,12 +77,13 @@ async function contar(tabla: 'centros' | 'especialidades' | 'profesionales' | 'r
 async function cargar() {
   estado.value = 'cargando'
   try {
-    const [centros, especialidades, profesionales, reservas, auditoria] = await Promise.all([
+    const [centros, especialidades, profesionales, reservas, auditoria, mensajes] = await Promise.all([
       contar('centros'),
       contar('especialidades'),
       contar('profesionales'),
       contar('reservas'),
       supabase.from('auditoria').select('id, accion, entidad, creado_en').neq('entidad', 'agendas').order('creado_en', { ascending: false }).limit(10),
+      supabase.from('consultas').select('id, tipo, mensaje, correo, creado_en').order('creado_en', { ascending: false }).limit(10),
     ])
     datos.value = [
       { etiqueta: 'Centros', valor: centros },
@@ -74,6 +92,7 @@ async function cargar() {
       { etiqueta: 'Reservas', valor: reservas },
     ]
     cambios.value = auditoria.data ?? []
+    consultas.value = mensajes.data ?? []
     estado.value = 'contenido'
   } catch {
     estado.value = 'error'

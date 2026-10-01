@@ -19,7 +19,7 @@ export const ALCANCE: GrupoAlcance[] = [
   {
     titulo: 'Base accesible',
     pantallas: [
-      { nombre: 'Portada', ruta: '/', descripcion: 'Qué es la app y botones grandes para empezar.', fase: 0, estado: 'borrador' },
+      { nombre: 'Portada', ruta: '/', descripcion: 'Qué es la app y botones grandes para empezar.', fase: 0, estado: 'lista' },
       { nombre: 'Menú "Cómo se ve"', descripcion: 'Tamaño de letra, alto contraste, sin animaciones y lenguaje simple, en todas las pantallas.', fase: 0, estado: 'lista' },
       { nombre: 'Muestra de componentes', ruta: '/demo-ui', descripcion: 'Todos los componentes en tema claro, alto contraste y letra al 200 %.', fase: 1, estado: 'lista' },
     ],
@@ -103,9 +103,9 @@ export const ALCANCE: GrupoAlcance[] = [
   {
     titulo: 'Información',
     pantallas: [
-      { nombre: 'Ayuda', ruta: '/ayuda', descripcion: 'Guía en lenguaje simple, con video corto.', fase: 11, estado: 'borrador' },
-      { nombre: 'Declaración de accesibilidad', ruta: '/accesibilidad', descripcion: 'Lo que pide la Ley 26.653: nivel alcanzado y contacto.', fase: 11, estado: 'borrador' },
-      { nombre: 'Términos de uso', ruta: '/terminos', descripcion: 'Incluye que no es el sistema oficial de turnos.', fase: 11, estado: 'borrador' },
+      { nombre: 'Ayuda', ruta: '/ayuda', descripcion: 'Guía en lenguaje simple y formulario de contacto. Falta el video.', fase: 11, estado: 'borrador' },
+      { nombre: 'Declaración de accesibilidad', ruta: '/accesibilidad', descripcion: 'Lo que pide la Ley 26.653: nivel alcanzado y contacto.', fase: 11, estado: 'lista' },
+      { nombre: 'Términos de uso', ruta: '/terminos', descripcion: 'Incluye que no es el sistema oficial de turnos.', fase: 11, estado: 'lista' },
     ],
   },
 ]

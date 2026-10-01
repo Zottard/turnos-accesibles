@@ -315,6 +315,12 @@ export type Database = {
         }
         Relationships: []
       }
+      consultas: {
+        Row: { correo: string | null; creado_en: string; id: number; mensaje: string; tipo: string; usuario_id: string | null }
+        Insert: { correo?: string | null; creado_en?: string; id?: never; mensaje: string; tipo: string; usuario_id?: string | null }
+        Update: { correo?: string | null; creado_en?: string; id?: never; mensaje?: string; tipo?: string; usuario_id?: string | null }
+        Relationships: []
+      }
       eventos_uso: {
         Row: { creado_en: string; id: number; payload: Json; tipo_evento: string }
         Insert: { creado_en?: string; id?: never; payload?: Json; tipo_evento: string }

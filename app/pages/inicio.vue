@@ -13,6 +13,8 @@
         </li>
       </ul>
     </nav>
+
+    <InstalarApp />
   </div>
 </template>
 
