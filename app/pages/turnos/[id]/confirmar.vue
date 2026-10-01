@@ -11,10 +11,12 @@
         <div class="flex flex-col gap-3">
           <h1 class="text-2xl font-bold">Confirmá que está todo bien</h1>
           <p class="text-lg">Leé el turno. Si está bien, reservalo.</p>
+          <p v-if="asistiendo?.alcance.includes('reservar')" class="text-lg font-bold">Este turno es para {{ asistiendo.nombre }}.</p>
           <ReadAloudButton v-if="prefs.voiceEnabled" :text="lectura" />
         </div>
         <ConfirmarReserva
           :turno="turno"
+          :solicitante="asistiendo?.alcance.includes('reservar') ? asistiendo.id : undefined"
           @reservada="(reserva) => navigateTo(`/reservas/${reserva}?nuevo=1`)"
           @volver="volver"
           @elegir="(otro) => navigateTo(`/turnos/${otro}/confirmar`)"
@@ -34,6 +36,7 @@ const route = useRoute()
 const router = useRouter()
 const { obtenerTurno } = useTurnos()
 const { prefs } = useAccesibilidad()
+const { asistiendo } = useAcompanamiento()
 
 const id = computed(() => String(route.params.id))
 const { data: turno, status, refresh } = await useAsyncData(() => `confirmar-${id.value}`, () => obtenerTurno(id.value))

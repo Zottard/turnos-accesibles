@@ -132,6 +132,20 @@ pnpm test:e2e         # Playwright + axe, levanta build + preview
   la preferencia muestra un aviso fijo bajo el header (no toast: los toasts de Reka meten spans
   focuseables con `aria-hidden` y además se van solos) y/o suena un tono.
 
+## Acompañantes (Fase 8)
+
+- `acompanamientos` (alcance `ver` siempre + `reservar`/`cancelar`, token que vence a los 7 días) y
+  `consentimientos` (registro de lo que se autorizó y cuándo se revocó). Todo se escribe por RPC:
+  `invitar_acompanante`, `ver_invitacion` (también sin sesión), `aceptar_invitacion` (el correo de la
+  cuenta tiene que ser el invitado), `revocar_acompanamiento`.
+- `privado.puede_actuar` ahora incluye `privado.acompana(actor, solicitante, accion)`: las RPC de reservar,
+  cancelar y cambiar respetan el alcance. RLS deja ver turnos y perfil solo con `ver`.
+- "Estás ayudando a X" vive en `sessionStorage` (`ta_asistiendo`) para no perderlo al recargar; el
+  borrador del asistente guarda `para` y se descarta si no coincide con la persona actual.
+- Demo: Lucía acompaña a Rosa con `ver` y `reservar` (sin `cancelar`), para mostrar el límite.
+- E2E con dos personas: `acompanantes.spec.ts` abre un contexto por sesión (Pablo y Lucía).
+- Playwright corre con 4 workers en local (con 10 la máquina se quedó sin memoria).
+
 ## Modo demo
 
 - `NUXT_PUBLIC_DEMO=true` muestra la barra de demo (entrar como cada usuario de prueba) y `/demo`

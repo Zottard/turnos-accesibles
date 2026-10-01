@@ -35,7 +35,10 @@ export function avisoReserva(r: ResultadoReserva, accion: 'reservar' | 'cancelar
     case 'sin_sesion':
       return { titulo: 'Para reservar tenés que ingresar a tu cuenta.', ayuda: 'No vas a perder lo que elegiste.' }
     case 'sin_permiso':
-      return { titulo: 'No podés reservar turnos para esta persona.', ayuda: 'Pedile que te dé permiso para reservar desde "Mis acompañantes".' }
+      return {
+        titulo: `No tenés permiso para ${accion === 'cancelar' ? 'cancelar' : accion === 'cambiar' ? 'cambiar' : 'sacar'} turnos de esta persona.`,
+        ayuda: 'Podés ver sus turnos. Si hace falta, pedile que te dé ese permiso desde "Mis acompañantes".',
+      }
     default:
       return {
         titulo: accion === 'cancelar' ? 'No pudimos cancelar el turno.' : accion === 'cambiar' ? 'No pudimos cambiar el turno.' : 'No pudimos reservar el turno.',

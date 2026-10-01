@@ -263,3 +263,15 @@ begin
     (v_fecha + time '06:00')::timestamp at time zone 'America/Argentina/Buenos_Aires', 'reservado') returning id into v_turno;
   insert into public.reservas (turno_id, solicitante_id, reservada_por_id, estado) values (v_turno, v_pablo, v_pablo, 'completada');
 end $$;
+
+-- Lucía acompaña a Rosa: puede ver y sacar turnos, pero no cancelarlos (sirve para mostrar el "fuera del alcance").
+insert into public.acompanamientos (solicitante_id, acompanante_id, email_invitado, alcance, estado, aceptado_en)
+select r.id, l.id, 'acompanante@demo.ar', array['ver', 'reservar'], 'activo', now()
+from auth.users r, auth.users l
+where r.email = 'solicitante@demo.ar' and l.email = 'acompanante@demo.ar'
+  and not exists (select 1 from public.acompanamientos a where a.solicitante_id = r.id and a.acompanante_id = l.id);
+
+insert into public.consentimientos (acompanamiento_id, solicitante_id, alcance)
+select a.id, a.solicitante_id, a.alcance from public.acompanamientos a
+where a.email_invitado = 'acompanante@demo.ar' and a.estado = 'activo'
+  and not exists (select 1 from public.consentimientos c where c.acompanamiento_id = a.id);

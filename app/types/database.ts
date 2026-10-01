@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      acompanamientos: {
+        Row: {
+          acompanante_id: string | null
+          aceptado_en: string | null
+          alcance: string[]
+          email_invitado: string
+          estado: string
+          id: string
+          invitado_en: string
+          revocado_en: string | null
+          solicitante_id: string
+          token_invitacion: string
+          vence_en: string
+        }
+        Insert: {
+          acompanante_id?: string | null
+          aceptado_en?: string | null
+          alcance: string[]
+          email_invitado: string
+          estado?: string
+          id?: string
+          invitado_en?: string
+          revocado_en?: string | null
+          solicitante_id: string
+          token_invitacion?: string
+          vence_en?: string
+        }
+        Update: {
+          acompanante_id?: string | null
+          aceptado_en?: string | null
+          alcance?: string[]
+          email_invitado?: string
+          estado?: string
+          id?: string
+          invitado_en?: string
+          revocado_en?: string | null
+          solicitante_id?: string
+          token_invitacion?: string
+          vence_en?: string
+        }
+        Relationships: []
+      }
       agendas: {
         Row: {
           centro_id: string
@@ -104,6 +146,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      consentimientos: {
+        Row: {
+          acompanamiento_id: string
+          alcance: string[]
+          id: string
+          ip: string | null
+          otorgado_en: string
+          revocado_en: string | null
+          solicitante_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          acompanamiento_id: string
+          alcance: string[]
+          id?: string
+          ip?: string | null
+          otorgado_en?: string
+          revocado_en?: string | null
+          solicitante_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          acompanamiento_id?: string
+          alcance?: string[]
+          id?: string
+          ip?: string | null
+          otorgado_en?: string
+          revocado_en?: string | null
+          solicitante_id?: string
+          user_agent?: string | null
+        }
+        Relationships: []
       }
       centros: {
         Row: {
@@ -559,6 +634,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      aceptar_invitacion: { Args: { p_token: string; p_user_agent?: string }; Returns: Json }
+      invitar_acompanante: { Args: { p_alcance: string[]; p_email: string }; Returns: Json }
+      revocar_acompanamiento: { Args: { p_id: string }; Returns: Json }
+      ver_invitacion: { Args: { p_token: string }; Returns: Json }
       marcar_leidas: { Args: { p_id?: string }; Returns: undefined }
       cancelar_reserva: { Args: { p_motivo?: string; p_reserva: string }; Returns: Json }
       reprogramar_reserva: {

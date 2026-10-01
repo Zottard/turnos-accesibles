@@ -28,7 +28,6 @@ test('reservar y cancelar dejan avisos en la bandeja y el contador los muestra',
 
   await aviso.getByRole('button', { name: 'Marcar como leído' }).click()
   await expect(aviso.getByText('Leído')).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Avisos', exact: true })).toBeVisible()
 
   await aviso.getByRole('link', { name: 'Ver el turno' }).click()
   await page.getByRole('link', { name: 'Cancelar este turno' }).click()

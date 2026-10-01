@@ -23,6 +23,19 @@
       </div>
     </header>
 
+    <div v-if="user && asistiendo" class="border-b-2 border-primary bg-primary/10">
+      <div class="w-full max-w-5xl flex flex-wrap items-center gap-x-4 gap-y-2 mx-auto px-4 py-3">
+        <p class="flex items-center gap-2 text-lg font-bold">
+          <UIcon name="i-lucide-hand-heart" class="size-6 shrink-0" aria-hidden="true" />
+          Estás ayudando a {{ asistiendo.nombre }}
+        </p>
+        <div class="flex flex-wrap gap-3 sm:ml-auto">
+          <UButton :to="`/asistiendo/${asistiendo.id}`" size="lg" icon="i-lucide-list" :label="`Turnos de ${asistiendo.nombre}`" />
+          <UButton size="lg" icon="i-lucide-log-out" label="Volver a mi cuenta" @click="dejarDeAyudar" />
+        </div>
+      </div>
+    </div>
+
     <div v-if="avisoNuevo" class="w-full max-w-5xl mx-auto px-4 pt-4">
       <UAlert
         color="info"
@@ -65,10 +78,19 @@ const { appName } = useAppConfig()
 const { demo } = useRuntimeConfig().public
 const { user, salir } = useSesion()
 const { noLeidas } = useNotificaciones()
+const { asistiendo } = useAcompanamiento()
+
+async function dejarDeAyudar() {
+  const nombre = asistiendo.value?.nombre
+  asistiendo.value = null
+  await navigateTo('/inicio')
+  announce(`Dejaste de ayudar a ${nombre}. Estás en tu cuenta.`)
+}
 const avisoNuevo = useState<{ titulo: string, cuerpo: string } | null>('aviso-nuevo', () => null)
 const { announce } = useAnuncio()
 
 async function cerrarSesion() {
+  asistiendo.value = null
   await salir()
   await navigateTo('/')
   announce('Saliste de tu cuenta.')

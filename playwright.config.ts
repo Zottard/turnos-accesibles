@@ -3,6 +3,7 @@ import { defineConfig, devices } from '@playwright/test'
 export default defineConfig({
   testDir: 'tests/e2e',
   fullyParallel: true,
+  workers: process.env.CI ? 2 : 4,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',
@@ -17,7 +18,7 @@ export default defineConfig({
     {
       name: 'celular',
       use: { ...devices['Pixel 7'], viewport: { width: 360, height: 780 } },
-      testIgnore: /(auth|preferencias|reserva|mis-turnos|avisos)\.spec\.ts/,
+      testIgnore: /(auth|preferencias|reserva|mis-turnos|avisos|acompanantes)\.spec\.ts/,
       dependencies: ['sesiones'],
     },
   ],

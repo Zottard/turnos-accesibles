@@ -73,3 +73,5 @@ export const SCHEMA_PERFIL = SCHEMA_NOMBRE.extend({
     .refine((v) => v === '' || /^[\d\s()+-]{8,20}$/.test(v), 'Escribí el teléfono con números. Por ejemplo: 11 4567 8901.'),
   localidad: z.number({ error: 'Elegí tu localidad.' }),
 })
+
+export const SCHEMA_INVITACION = z.object({ email: correo })

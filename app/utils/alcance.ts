@@ -82,10 +82,10 @@ export const ALCANCE: GrupoAlcance[] = [
     titulo: 'Modo acompañante',
     requerimiento: 'RF 7',
     pantallas: [
-      { nombre: 'Mis acompañantes', ruta: '/acompanantes', descripcion: 'Ver, invitar y quitar a quien te ayuda.', fase: 8, estado: 'pendiente' },
-      { nombre: 'Invitar a alguien', ruta: '/acompanantes/invitar', descripcion: 'Elegís qué puede hacer: ver, reservar o cancelar.', fase: 8, estado: 'pendiente' },
-      { nombre: 'Aceptar una invitación', ruta: '/invitacion/:token', descripcion: 'El acompañante acepta desde el enlace que le llegó.', fase: 8, estado: 'pendiente' },
-      { nombre: 'Ayudar a otra persona', ruta: '/asistiendo/:id', descripcion: 'Con un aviso fijo: "Estás ayudando a Rosa".', fase: 8, estado: 'pendiente', rol: 'acompanante' },
+      { nombre: 'Mis acompañantes', ruta: '/acompanantes', descripcion: 'Ver, invitar y quitar a quien te ayuda.', fase: 8, estado: 'lista' },
+      { nombre: 'Invitar a alguien', ruta: '/acompanantes/invitar', descripcion: 'Elegís qué puede hacer: ver, reservar o cancelar.', fase: 8, estado: 'lista' },
+      { nombre: 'Aceptar una invitación', ruta: '/invitacion/:token', descripcion: 'El acompañante acepta desde el enlace que le llegó.', fase: 8, estado: 'lista' },
+      { nombre: 'Ayudar a otra persona', ruta: '/asistiendo/:id', descripcion: 'Con un aviso fijo: "Estás ayudando a Rosa".', fase: 8, estado: 'lista', rol: 'acompanante' },
     ],
   },
   {

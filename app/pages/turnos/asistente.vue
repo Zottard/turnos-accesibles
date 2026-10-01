@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-2xl flex flex-col gap-8">
-    <AsistentePaso :paso="estado.paso" :total="TOTAL" :titulo="actual.titulo" :descripcion="actual.descripcion">
+    <AsistentePaso :paso="estado.paso" :total="TOTAL" :titulo="actual.titulo" :descripcion="descripcion">
       <template v-if="estado.paso === 0">
         <div v-if="!entendido" class="flex flex-col gap-4">
           <UFormField label="Contanos qué necesitás" name="texto" :error="error">
@@ -85,6 +85,7 @@
           <ConfirmarReserva
             v-if="turnoElegido"
             :turno="turnoElegido"
+            :solicitante="paraQuien?.id"
             @reservada="terminar"
             @volver="irA(4)"
             @elegir="(otro) => { estado.turnoId = otro; cargarTurno() }"
@@ -133,12 +134,15 @@ const BORRADOR_VACIO = {
   desde: '',
   franja: 'cualquiera',
   turnoId: '',
+  para: '',
 }
 
 useHead({ title: 'Sacar un turno' })
 
 const user = useSupabaseUser()
-const { perfil, cargarPerfil } = useSesion()
+const { perfil: miPerfil, cargarPerfil } = useSesion()
+const { asistiendo } = useAcompanamiento()
+const supabase = useSupabaseClient()
 const { especialidades, localidades, buscar, obtenerTurno, centrosConEspecialidad } = useTurnos()
 const { announce, alert } = useAnuncio()
 
@@ -160,6 +164,13 @@ const turnoElegido = shallowRef<TurnoDetalle | null>(null)
 const estadoTurno = ref<EstadoVista>('cargando')
 
 const actual = computed(() => PASOS[estado.paso] ?? PASOS[0]!)
+
+const paraQuien = computed(() => (asistiendo.value?.alcance.includes('reservar') ? asistiendo.value : null))
+const perfilOtro = ref<{ lat: number | null, lng: number | null, localidad: string | null } | null>(null)
+const perfil = computed(() => (paraQuien.value ? perfilOtro.value : miPerfil.value))
+const descripcion = computed(() => (paraQuien.value && estado.paso < 5
+  ? `Estás sacando un turno para ${paraQuien.value.nombre}. ${actual.value.descripcion}`
+  : actual.value.descripcion))
 
 const especialidadElegida = computed({
   get: () => (estado.especialidad ? String(estado.especialidad) : undefined),
@@ -330,6 +341,11 @@ watch(() => estado.especialidad, (nueva, anterior) => {
 })
 
 watch(borrador, (guardado) => {
+  // un borrador de otra persona (o de la propia cuenta) no se mezcla con el actual
+  if ((guardado.para ?? '') !== (paraQuien.value?.id ?? '')) {
+    Object.assign(estado, BORRADOR_VACIO, { para: paraQuien.value?.id ?? '' })
+    return
+  }
   Object.assign(estado, guardado)
   if (estado.paso === 2 && estado.especialidad) centrosConEspecialidad(estado.especialidad).then((c) => { centros.value = c })
   if (estado.paso === 4) buscarTurnos(0)
@@ -338,5 +354,12 @@ watch(borrador, (guardado) => {
 
 watch(estado, (valor) => { borrador.value = { ...valor } }, { deep: true })
 
-onMounted(() => cargarPerfil())
+onMounted(async () => {
+  await cargarPerfil()
+  estado.para = paraQuien.value?.id ?? ''
+  if (paraQuien.value) {
+    const { data } = await supabase.from('profiles').select('lat, lng, localidad').eq('id', paraQuien.value.id).maybeSingle()
+    perfilOtro.value = data
+  }
+})
 </script>
