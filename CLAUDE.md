@@ -65,6 +65,20 @@ pnpm test:e2e         # Playwright + axe, levanta build + preview
   Errores de envío: `useFormulario().alFallar` (lleva el foco al primer campo y lo anuncia).
 - Sin sesiones que venzan mientras la app está abierta: Supabase renueva el token solo (WCAG 2.2.1).
 
+## Datos y búsqueda (Fase 4)
+
+- Centros **reales** del REFES (diciembre 2025) y localidades de la API Georef. Teléfono, horario y
+  accesibilidad edilicia quedan vacíos porque el REFES no los trae: no se inventan.
+  Especialidades por centro, profesionales, agendas y turnos son **de prueba**, y la ficha lo dice.
+- `privado.generar_turnos_demo(dias)` completa agendas y turnos para los días que falten (~30 %
+  ocupados). Volver a correrla si la demo se queda sin turnos: `select privado.generar_turnos_demo(30);`
+- `buscar_turnos()` (SQL): sin centro devuelve el primer turno libre de cada centro; con centro, sus
+  horarios. Calcula la distancia y filtra la franja en hora de Argentina.
+- Columnas `modo_turnos`/`web_turnos`/`telefono_turnos`/`instrucciones_turno` de `centros`: preparadas
+  para el modo derivación (la ficha ya muestra el bloque si el centro es `derivacion`).
+- Fechas y horas siempre con `utils/fechas.ts` (zona America/Argentina/Buenos_Aires, en palabras).
+- Íconos que vienen de la base van en `icon.clientBundle.icons` de `nuxt.config.ts`.
+
 ## Modo demo
 
 - `NUXT_PUBLIC_DEMO=true` muestra la barra de demo (entrar como cada usuario de prueba) y `/demo`

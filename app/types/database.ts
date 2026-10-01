@@ -14,6 +14,199 @@ export type Database = {
   }
   public: {
     Tables: {
+      agendas: {
+        Row: {
+          centro_id: string
+          cupos_totales: number
+          duracion_min: number
+          especialidad_id: number
+          fecha: string
+          hora_fin: string
+          hora_inicio: string
+          id: string
+          profesional_id: string
+        }
+        Insert: {
+          centro_id: string
+          cupos_totales: number
+          duracion_min: number
+          especialidad_id: number
+          fecha: string
+          hora_fin: string
+          hora_inicio: string
+          id?: string
+          profesional_id: string
+        }
+        Update: {
+          centro_id?: string
+          cupos_totales?: number
+          duracion_min?: number
+          especialidad_id?: number
+          fecha?: string
+          hora_fin?: string
+          hora_inicio?: string
+          id?: string
+          profesional_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agendas_centro_id_fkey"
+            columns: ["centro_id"]
+            isOneToOne: false
+            referencedRelation: "centros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendas_especialidad_id_fkey"
+            columns: ["especialidad_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendas_profesional_id_fkey"
+            columns: ["profesional_id"]
+            isOneToOne: false
+            referencedRelation: "profesionales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      centro_especialidad: {
+        Row: {
+          centro_id: string
+          especialidad_id: number
+          requisitos: string | null
+        }
+        Insert: {
+          centro_id: string
+          especialidad_id: number
+          requisitos?: string | null
+        }
+        Update: {
+          centro_id?: string
+          especialidad_id?: number
+          requisitos?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "centro_especialidad_centro_id_fkey"
+            columns: ["centro_id"]
+            isOneToOne: false
+            referencedRelation: "centros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "centro_especialidad_especialidad_id_fkey"
+            columns: ["especialidad_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      centros: {
+        Row: {
+          accesibilidad_edilicia: Json | null
+          activo: boolean
+          como_llegar: string | null
+          dependencia: string
+          direccion: string
+          fuente: string | null
+          horario_atencion: string | null
+          id: string
+          instrucciones_turno: string | null
+          lat: number
+          lng: number
+          localidad: string
+          modo_turnos: Database["public"]["Enums"]["modo_turnos"]
+          nombre: string
+          partido: string
+          provincia: string
+          refes_id: string | null
+          telefono: string | null
+          telefono_turnos: string | null
+          tipo: Database["public"]["Enums"]["tipo_centro"]
+          web_turnos: string | null
+        }
+        Insert: {
+          accesibilidad_edilicia?: Json | null
+          activo?: boolean
+          como_llegar?: string | null
+          dependencia: string
+          direccion: string
+          fuente?: string | null
+          horario_atencion?: string | null
+          id?: string
+          instrucciones_turno?: string | null
+          lat: number
+          lng: number
+          localidad: string
+          modo_turnos?: Database["public"]["Enums"]["modo_turnos"]
+          nombre: string
+          partido: string
+          provincia?: string
+          refes_id?: string | null
+          telefono?: string | null
+          telefono_turnos?: string | null
+          tipo: Database["public"]["Enums"]["tipo_centro"]
+          web_turnos?: string | null
+        }
+        Update: {
+          accesibilidad_edilicia?: Json | null
+          activo?: boolean
+          como_llegar?: string | null
+          dependencia?: string
+          direccion?: string
+          fuente?: string | null
+          horario_atencion?: string | null
+          id?: string
+          instrucciones_turno?: string | null
+          lat?: number
+          lng?: number
+          localidad?: string
+          modo_turnos?: Database["public"]["Enums"]["modo_turnos"]
+          nombre?: string
+          partido?: string
+          provincia?: string
+          refes_id?: string | null
+          telefono?: string | null
+          telefono_turnos?: string | null
+          tipo?: Database["public"]["Enums"]["tipo_centro"]
+          web_turnos?: string | null
+        }
+        Relationships: []
+      }
+      especialidades: {
+        Row: {
+          activo: boolean
+          descripcion_simple: string
+          icono: string
+          id: number
+          nombre_comun: string
+          nombre_tecnico: string
+          slug: string
+        }
+        Insert: {
+          activo?: boolean
+          descripcion_simple: string
+          icono: string
+          id?: never
+          nombre_comun: string
+          nombre_tecnico: string
+          slug: string
+        }
+        Update: {
+          activo?: boolean
+          descripcion_simple?: string
+          icono?: string
+          id?: never
+          nombre_comun?: string
+          nombre_tecnico?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       intentos_login: {
         Row: {
           bloqueado_hasta: string | null
@@ -34,6 +227,62 @@ export type Database = {
           ultimo_fallo?: string | null
         }
         Relationships: []
+      }
+      localidades: {
+        Row: {
+          id: number
+          lat: number
+          lng: number
+          nombre: string
+          partido: string
+        }
+        Insert: {
+          id?: never
+          lat: number
+          lng: number
+          nombre: string
+          partido: string
+        }
+        Update: {
+          id?: never
+          lat?: number
+          lng?: number
+          nombre?: string
+          partido?: string
+        }
+        Relationships: []
+      }
+      profesionales: {
+        Row: {
+          apellido: string
+          especialidad_id: number
+          id: string
+          matricula: string
+          nombre: string
+        }
+        Insert: {
+          apellido: string
+          especialidad_id: number
+          id?: string
+          matricula: string
+          nombre: string
+        }
+        Update: {
+          apellido?: string
+          especialidad_id?: number
+          id?: string
+          matricula?: string
+          nombre?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profesionales_especialidad_id_fkey"
+            columns: ["especialidad_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -77,17 +326,110 @@ export type Database = {
         }
         Relationships: []
       }
+      turnos_disponibles: {
+        Row: {
+          agenda_id: string
+          centro_id: string
+          especialidad_id: number
+          estado: Database["public"]["Enums"]["estado_turno"]
+          fecha_hora: string
+          id: string
+          profesional_id: string
+        }
+        Insert: {
+          agenda_id: string
+          centro_id: string
+          especialidad_id: number
+          estado?: Database["public"]["Enums"]["estado_turno"]
+          fecha_hora: string
+          id?: string
+          profesional_id: string
+        }
+        Update: {
+          agenda_id?: string
+          centro_id?: string
+          especialidad_id?: number
+          estado?: Database["public"]["Enums"]["estado_turno"]
+          fecha_hora?: string
+          id?: string
+          profesional_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "turnos_disponibles_agenda_id_fkey"
+            columns: ["agenda_id"]
+            isOneToOne: false
+            referencedRelation: "agendas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "turnos_disponibles_centro_id_fkey"
+            columns: ["centro_id"]
+            isOneToOne: false
+            referencedRelation: "centros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "turnos_disponibles_especialidad_id_fkey"
+            columns: ["especialidad_id"]
+            isOneToOne: false
+            referencedRelation: "especialidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "turnos_disponibles_profesional_id_fkey"
+            columns: ["profesional_id"]
+            isOneToOne: false
+            referencedRelation: "profesionales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      buscar_turnos: {
+        Args: {
+          p_centro?: string
+          p_desde?: string
+          p_especialidad: number
+          p_franja?: string
+          p_lat?: number
+          p_limite?: number
+          p_lng?: number
+          p_offset?: number
+          p_orden?: string
+        }
+        Returns: {
+          centro_direccion: string
+          centro_id: string
+          centro_localidad: string
+          centro_nombre: string
+          distancia_km: number
+          especialidad_nombre_comun: string
+          especialidad_nombre_tecnico: string
+          estado: Database["public"]["Enums"]["estado_turno"]
+          fecha_hora: string
+          id: string
+          profesional: string
+          total: number
+        }[]
+      }
+      distancia_km: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number }
+        Returns: number
+      }
       estado_bloqueo: { Args: { p_email: string }; Returns: number }
       limpiar_intentos: { Args: never; Returns: undefined }
       registrar_fallo: { Args: { p_email: string }; Returns: Json }
     }
     Enums: {
+      estado_turno: "disponible" | "reservado" | "bloqueado"
+      modo_turnos: "app" | "derivacion"
       rol: "solicitante" | "acompanante" | "admin"
+      tipo_centro: "hospital" | "caps"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -215,7 +557,10 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      estado_turno: ["disponible", "reservado", "bloqueado"],
+      modo_turnos: ["app", "derivacion"],
       rol: ["solicitante", "acompanante", "admin"],
+      tipo_centro: ["hospital", "caps"],
     },
   },
 } as const

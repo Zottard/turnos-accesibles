@@ -8,7 +8,10 @@ export function useFormulario() {
     if (!primero) return
     // UForm deshabilita los campos mientras valida y los vuelve a habilitar después de emitir el error
     await new Promise((resolve) => setTimeout(resolve))
-    if (primero.id) document.getElementById(primero.id)?.focus()
+    if (primero.id) {
+      const control = document.querySelector<HTMLElement>(`[aria-describedby~="${primero.id}-error"]`) ?? document.getElementById(primero.id)
+      control?.focus()
+    }
     alert(primero.message ?? '')
   }
 

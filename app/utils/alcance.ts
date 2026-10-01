@@ -49,8 +49,8 @@ export const ALCANCE: GrupoAlcance[] = [
     requerimiento: 'RF 3',
     pantallas: [
       { nombre: 'Mi inicio', ruta: '/inicio', descripcion: 'Tu próximo turno en grande y el botón "Sacar un turno".', fase: 6, estado: 'borrador', rol: 'solicitante' },
-      { nombre: 'Buscar por menús', ruta: '/turnos/buscar', descripcion: 'Elegir médico, lugar y fecha sin escribir. Funciona aunque la IA no ande.', fase: 4, estado: 'pendiente' },
-      { nombre: 'Detalle de un turno', ruta: '/turnos/:id', descripcion: 'Día y hora en palabras, hospital, dirección y cómo llegar.', fase: 4, estado: 'pendiente' },
+      { nombre: 'Buscar por menús', ruta: '/turnos/buscar', descripcion: 'Elegir médico, lugar y fecha sin escribir. Centros reales, turnos de prueba.', fase: 4, estado: 'lista' },
+      { nombre: 'Detalle de un turno', ruta: '/turnos/:id', descripcion: 'Día y hora en palabras, hospital, dirección y cómo llegar. Se abre desde la búsqueda.', fase: 4, estado: 'lista' },
     ],
   },
   {

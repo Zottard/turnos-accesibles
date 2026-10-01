@@ -25,6 +25,16 @@ export default defineAppConfig({
       defaultVariants: { size: 'xl' },
     },
 
+    selectMenu: {
+      slots: { base: 'min-h-14 text-lg', item: 'min-h-12 text-lg', itemDescription: 'text-base', input: 'min-h-12 text-lg' },
+      defaultVariants: { size: 'xl' },
+    },
+
+    select: {
+      slots: { base: 'min-h-14 text-lg', item: 'min-h-12 text-lg' },
+      defaultVariants: { size: 'xl' },
+    },
+
     textarea: {
       slots: { base: 'text-lg resize-none' },
       defaultVariants: { size: 'xl' },

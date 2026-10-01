@@ -23,7 +23,18 @@ export default defineNuxtConfig({
 
   ui: { fonts: false, colorMode: false },
 
-  icon: { mode: 'svg', clientBundle: { scan: true } },
+  icon: {
+    mode: 'svg',
+    clientBundle: {
+      scan: true,
+      // íconos que llegan desde la base (especialidades), el escaneo no los ve
+      icons: [
+        'lucide:eye', 'lucide:stethoscope', 'lucide:heart-pulse', 'lucide:smile', 'lucide:hand',
+        'lucide:bone', 'lucide:venus', 'lucide:baby', 'lucide:ear', 'lucide:brain', 'lucide:droplets',
+        'lucide:syringe', 'lucide:wind', 'lucide:test-tube', 'lucide:scan-line',
+      ],
+    },
+  },
 
   app: {
     head: {
