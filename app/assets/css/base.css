@@ -175,6 +175,34 @@ strong {
   margin-top: var(--espacio-3);
 }
 
+/* Tarjeta blanca con borde violeta arriba (formularios, secciones destacadas). */
+.tarjeta {
+  padding: var(--relleno-tarjeta);
+  background: var(--superficie);
+  border: var(--grosor-borde) solid var(--borde);
+  border-top: 8px solid var(--primario);
+  border-radius: var(--radio-tarjeta);
+  box-shadow: var(--sombra);
+}
+
+/* Formularios de cuenta: angostos, para que la vista no tenga que recorrer mucho. */
+.formulario-angosto {
+  max-width: 40rem;
+}
+
+/* Pasos de los asistentes (registro, primer ingreso). */
+.progreso {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+}
+
 /* --- Botones (ver components/Boton.vue) --- */
 .boton {
   display: inline-flex;
