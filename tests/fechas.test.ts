@@ -1,14 +1,19 @@
 import { describe, expect, it } from 'vitest'
 import {
   diaDeCampoEnPalabras,
+  diaDeLaSemana,
   diaEnPalabras,
+  esFechaValida,
   fechaClave,
   franjaDe,
   horaEnPalabras,
+  horasHasta,
+  lunesQueViene,
+  proximoDia,
   sumarDias,
   turnoEnPalabras,
   validarRangoFechas,
-} from '../app/utils/fechas'
+} from '../shared/utils/fechas'
 
 // "Ahora" fijo: miércoles 14 de octubre de 2026, 10:00 en Argentina (13:00 UTC).
 const AHORA = new Date('2026-10-14T13:00:00Z')
@@ -66,6 +71,40 @@ describe('franjaDe', () => {
   it('antes de las 13 es a la mañana; desde las 13, a la tarde', () => {
     expect(franjaDe('2026-10-20T15:40:00Z')).toBe('manana') // 12:40
     expect(franjaDe('2026-10-20T16:00:00Z')).toBe('tarde') // 13:00
+  })
+})
+
+describe('días de la semana', () => {
+  it('sabe qué día de la semana es (0 = domingo)', () => {
+    expect(diaDeLaSemana('2026-10-14')).toBe(3) // miércoles
+    expect(diaDeLaSemana('2026-10-18')).toBe(0) // domingo
+  })
+
+  it('busca el próximo día pedido, contando hoy', () => {
+    expect(proximoDia('2026-10-14', 5)).toBe('2026-10-16') // viernes
+    expect(proximoDia('2026-10-14', 3)).toBe('2026-10-14') // hoy es miércoles
+    expect(proximoDia('2026-10-14', 1)).toBe('2026-10-19') // lunes
+  })
+
+  it('"la semana que viene" empieza el lunes siguiente', () => {
+    expect(lunesQueViene('2026-10-14')).toBe('2026-10-19')
+    expect(lunesQueViene('2026-10-19')).toBe('2026-10-26') // si hoy es lunes, el de la otra semana
+  })
+})
+
+describe('esFechaValida', () => {
+  it('acepta solo días que existen, con formato AAAA-MM-DD', () => {
+    expect(esFechaValida('2026-10-14')).toBe(true)
+    expect(esFechaValida('2026-02-30')).toBe(false)
+    expect(esFechaValida('14/10/2026')).toBe(false)
+    expect(esFechaValida('')).toBe(false)
+  })
+})
+
+describe('horasHasta', () => {
+  it('cuenta las horas que faltan (negativas si ya pasó)', () => {
+    expect(horasHasta('2026-10-15T13:00:00Z', AHORA)).toBe(24)
+    expect(horasHasta('2026-10-14T12:00:00Z', AHORA)).toBe(-1)
   })
 })
 

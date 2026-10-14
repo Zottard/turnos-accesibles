@@ -2,7 +2,8 @@
 // resultados y de la ficha. Las prueba tests/turnos.test.ts.
 
 // Import explícito (y no el automático de Nuxt) para que Vitest lo encuentre.
-import { turnoEnPalabras, type Franja } from './fechas'
+// fechas.ts está en shared/ porque la usan la app y el servidor.
+import { turnoEnPalabras, type Franja } from '../../shared/utils/fechas'
 
 // Un turno tal como lo devuelve la búsqueda (función buscar_turnos de la base).
 export type TurnoEncontrado = {
