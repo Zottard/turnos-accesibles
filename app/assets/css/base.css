@@ -57,6 +57,8 @@ body {
   line-height: 1.6;
   /* Las palabras largas cortan antes de salirse de la pantalla (texto al 200 % en 360 px). */
   overflow-wrap: anywhere;
+  /* Si una palabra no entra, se corta con guion (el navegador usa el idioma de lang="es-AR"). */
+  hyphens: auto;
 }
 
 /* --- Tipografía --- */
@@ -70,13 +72,14 @@ h3 {
   overflow-wrap: break-word;
 }
 
+/* Los títulos no pasan de 10vw (u 8vw): con texto al 200 % en un celular, entran palabras largas. */
 h1 {
-  font-size: 2rem;
+  font-size: max(1rem, min(2rem, 10vw));
   font-weight: 800;
 }
 
 h2 {
-  font-size: 1.5rem;
+  font-size: max(1rem, min(1.5rem, 8vw));
 }
 
 h3 {
@@ -154,6 +157,19 @@ strong {
   color: var(--texto-suave);
 }
 
+/* Páginas de texto (términos, accesibilidad): bloques uno debajo del otro. */
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  padding-block: var(--espacio-5);
+}
+
+.pagina__bajada {
+  font-size: 1.15rem;
+  color: var(--texto-suave);
+}
+
 /* Separación vertical entre bloques hijos. */
 .pila > * + * {
   margin-top: var(--espacio-3);
@@ -167,7 +183,10 @@ strong {
   gap: var(--espacio-2);
   min-height: var(--alto-tactil);
   min-width: var(--alto-tactil);
+  max-width: 100%;
   padding: 0.5rem 1.4rem;
+  /* Corta solo palabras que no entran: el botón no se achica letra por letra. */
+  overflow-wrap: break-word;
   border: var(--grosor-borde) solid transparent;
   border-radius: var(--radio-boton);
   font-family: var(--fuente-titulos);

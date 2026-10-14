@@ -66,6 +66,8 @@
   --espacio-4: 1.5rem;
   --espacio-5: 2rem;
   --espacio-6: 3rem;
+  /* Relleno de tarjetas: en pantallas angostas no crece con el texto, para dejar lugar al contenido. */
+  --relleno-tarjeta: min(var(--espacio-4), 5vw);
 
   --transicion: 150ms ease-out;
 }
