@@ -1,7 +1,17 @@
-// Configuración de Nuxt para Turnos Accesibles (v0.1).
+// Configuración de Nuxt para Turnos Accesibles.
 export default defineNuxtConfig({
   compatibilityDate: '2026-08-01',
   devtools: { enabled: false },
+
+  modules: ['@nuxtjs/supabase'],
+
+  // Cuentas con Supabase. La URL y la clave pública salen de SUPABASE_URL y SUPABASE_KEY (.env).
+  supabase: {
+    // Las redirecciones las hacemos nosotros con middleware/auth.ts y middleware/invitado.ts.
+    redirect: false,
+    // Sin tipos generados de la base: las filas se convierten a mano (utils/preferencias.ts).
+    types: false,
+  },
 
   css: ['~/assets/css/tokens.css', '~/assets/css/base.css'],
 
