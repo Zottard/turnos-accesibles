@@ -120,7 +120,7 @@ on conflict (nombre) do nothing;
 insert into public.especialidades (nombre, nombre_simple, descripcion, palabras_clave) values
   (
     'Clínica médica', 'Médico clínico', 'Te revisa en general y te dice si tenés que ver a otro especialista.',
-    '{clinico,clinica,medico,doctor,generalista,control,chequeo,fiebre,gripe,tos,dolor,cansancio,analisis}'
+    '{clinico,clinica,medico,doctor,generalista,control,chequeo,fiebre,gripe,tos,dolor,cansancio,analisis,panza,estomago,diarrea}'
   ),
   (
     'Pediatría', 'Médico de chicos', 'Atiende a bebés, chicos y adolescentes.',
@@ -155,11 +155,11 @@ insert into public.especialidades (nombre, nombre_simple, descripcion, palabras_
     '{oidos,oido,sordera,nariz,garganta,mareos,vertigo,ronquidos,sinusitis,anginas,otorrino}'
   ),
   (
-    'Kinesiología', 'Rehabilitación (kinesiólogo)', 'Ejercicios y masajes para recuperar el movimiento después de una lesión.',
+    'Kinesiología', 'Rehabilitación', 'Ejercicios y masajes para recuperar el movimiento después de una lesión.',
     '{kinesiologo,kine,rehabilitacion,ejercicios,masajes,contractura,movilidad}'
   ),
   (
-    'Nutrición', 'Alimentación (nutricionista)', 'Te ayuda a comer mejor y a cuidar el peso.',
+    'Nutrición', 'Nutricionista', 'Te ayuda a comer mejor y a cuidar el peso.',
     '{nutricionista,dieta,comida,alimentacion,peso,adelgazar,diabetes,azucar,panza}'
   ),
   (
