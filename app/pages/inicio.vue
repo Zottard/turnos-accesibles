@@ -17,9 +17,10 @@ const saludo = computed(() => (perfil.value?.nombre ? `Hola, ${perfil.value.nomb
     <ul class="tarjetas">
       <li class="tarjeta">
         <h2><span aria-hidden="true">🔎</span> Buscar un turno</h2>
-        <Aviso tipo="info" titulo="Próximamente">
-          <p>Muy pronto vas a poder buscar turnos en los centros de salud cerca de tu casa.</p>
-        </Aviso>
+        <p>Buscá turnos libres en los centros de salud cerca de tu casa.</p>
+        <div>
+          <Boton to="/buscar">Buscar un turno</Boton>
+        </div>
       </li>
       <li class="tarjeta">
         <h2><span aria-hidden="true">📅</span> Mis turnos</h2>
