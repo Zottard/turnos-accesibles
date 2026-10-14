@@ -1,0 +1,286 @@
+/* Estilos globales. Usan solo los tokens de tokens.css. */
+
+/* --- Reset mínimo --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol,
+figure,
+fieldset,
+legend {
+  margin: 0;
+  padding: 0;
+}
+
+fieldset {
+  border: 0;
+  min-width: 0;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* --- Página --- */
+html {
+  background: var(--fondo);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--fuente-texto);
+  font-size: 1rem;
+  line-height: 1.6;
+  /* Las palabras largas cortan antes de salirse de la pantalla (texto al 200 % en 360 px). */
+  overflow-wrap: anywhere;
+}
+
+/* --- Tipografía --- */
+h1,
+h2,
+h3 {
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--texto);
+  overflow-wrap: break-word;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+h2 {
+  font-size: 1.5rem;
+}
+
+h3 {
+  font-size: 1.2rem;
+}
+
+p,
+li {
+  max-width: 70ch;
+}
+
+ul,
+ol {
+  padding-left: 1.4em;
+}
+
+a {
+  color: var(--primario);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--primario-hover);
+  text-decoration-thickness: 3px;
+}
+
+strong {
+  font-weight: 700;
+}
+
+/* --- Foco: anillo de 4 px en sol con borde tinta. Siempre visible. --- */
+:focus-visible {
+  /* Anillo sol (outline) con un borde tinta adentro y afuera (sombra), visible sobre cualquier fondo. */
+  outline: 4px solid var(--foco);
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 2px var(--foco-borde),
+    0 0 0 8px var(--foco-borde);
+}
+
+/* Títulos y <main> reciben foco por código (al cambiar de página): sin anillo con mouse. */
+[tabindex='-1']:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* --- Utilidades --- */
+.contenedor {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+@media (min-width: 48rem) {
+  .contenedor {
+    padding-inline: 32px;
+  }
+}
+
+/* Visible solo para lectores de pantalla. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.texto-suave {
+  color: var(--texto-suave);
+}
+
+/* Separación vertical entre bloques hijos. */
+.pila > * + * {
+  margin-top: var(--espacio-3);
+}
+
+/* --- Botones (ver components/Boton.vue) --- */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-2);
+  min-height: var(--alto-tactil);
+  min-width: var(--alto-tactil);
+  padding: 0.5rem 1.4rem;
+  border: var(--grosor-borde) solid transparent;
+  border-radius: var(--radio-boton);
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.3;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--transicion),
+    color var(--transicion);
+}
+
+.boton--primario {
+  background: var(--primario);
+  color: var(--sobre-primario);
+}
+
+.boton--primario:hover {
+  background: var(--primario-hover);
+  color: var(--sobre-primario);
+}
+
+.boton--secundario {
+  background: var(--superficie);
+  color: var(--primario);
+  border-color: var(--primario);
+}
+
+.boton--secundario:hover {
+  background: var(--color-violeta-suave);
+  color: var(--primario-hover);
+  border-color: var(--primario-hover);
+}
+
+.boton--peligro {
+  background: var(--error);
+  color: var(--sobre-primario);
+}
+
+.boton--peligro:hover {
+  background: var(--texto);
+  color: var(--fondo);
+}
+
+.boton--texto {
+  background: transparent;
+  color: var(--primario);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding-inline: 0.75rem;
+}
+
+.boton--texto:hover {
+  color: var(--primario-hover);
+}
+
+.boton--bloque {
+  display: flex;
+  width: 100%;
+}
+
+/* --- Formularios (ver components/Campo.vue) --- */
+label,
+legend {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+input[type='text'],
+input[type='email'],
+input[type='tel'],
+input[type='password'],
+input[type='number'],
+input[type='date'],
+input[type='search'],
+select,
+textarea {
+  display: block;
+  width: 100%;
+  min-height: var(--alto-tactil);
+  padding: 0.5rem 0.9rem;
+  background: var(--superficie);
+  color: var(--texto);
+  border: var(--grosor-borde) solid var(--borde-campo);
+  border-radius: var(--radio-chico);
+}
+
+input[aria-invalid='true'],
+select[aria-invalid='true'],
+textarea[aria-invalid='true'] {
+  border-color: var(--error);
+  border-width: 3px;
+}
+
+input[type='radio'],
+input[type='checkbox'] {
+  width: 1.4rem;
+  height: 1.4rem;
+  accent-color: var(--primario);
+  flex-shrink: 0;
+}
+
+/* Alto contraste: nada de sombras ni fondos de color, todo con borde blanco. */
+html[data-contraste='alto'] .boton--secundario,
+html[data-contraste='alto'] .boton--texto {
+  border-color: var(--primario);
+}
+
+html[data-contraste='alto'] .boton--peligro {
+  background: #000;
+  color: #fff;
+  border-color: #fff;
+}

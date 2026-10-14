@@ -3,6 +3,8 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-08-01',
   devtools: { enabled: false },
 
+  css: ['~/assets/css/tokens.css', '~/assets/css/base.css'],
+
   app: {
     head: {
       htmlAttrs: { lang: 'es-AR' },
