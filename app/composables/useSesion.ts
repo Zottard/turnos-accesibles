@@ -2,7 +2,11 @@
 // Cada función devuelve { ok: true } o { ok: false, mensaje } con un mensaje en lenguaje simple:
 // la página decide dónde mostrarlo.
 
-export type Resultado = { ok: true } | { ok: false; mensaje: string; ofrecerRecuperar?: boolean }
+// ofrecerRecuperar: mostrar el enlace para crear una contraseña nueva.
+// ofrecerReenvio: mostrar el botón para mandar de nuevo el correo de activación.
+export type Resultado =
+  | { ok: true }
+  | { ok: false; mensaje: string; ofrecerRecuperar?: boolean; ofrecerReenvio?: boolean }
 
 export type Rol = 'solicitante' | 'acompanante'
 
@@ -23,7 +27,7 @@ const MENSAJE_GENERAL = 'No pudimos conectarnos. Revisá tu conexión a internet
 
 // Hora en formato argentino: "15:42".
 function hora(fecha: string): string {
-  return new Date(fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+  return new Date(fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
 }
 
 function mensajeBloqueo(hasta: string): string {
@@ -91,6 +95,7 @@ export function useSesion() {
           mensaje:
             'Todavía no activaste tu cuenta. Abrí el correo que te mandamos y tocá el enlace. ' +
             'Si no lo encontrás, te lo mandamos de nuevo.',
+          ofrecerReenvio: true,
         }
       }
       return { ok: false, mensaje: mensajeDeError(error.code) }
@@ -174,7 +179,7 @@ export function useSesion() {
    * sesión solo (con `?code=`). Si el correo usa `?token_hash=`, la armamos acá.
    * Devuelve si hay sesión.
    */
-  async function sesionDesdeEnlace(tokenHash: unknown, tipo: 'signup' | 'recovery'): Promise<boolean> {
+  async function sesionDesdeEnlace(tokenHash: unknown, tipo: 'email' | 'recovery'): Promise<boolean> {
     if (typeof tokenHash === 'string' && tokenHash !== '') {
       await supabase.auth.verifyOtp({ token_hash: tokenHash, type: tipo })
     }
