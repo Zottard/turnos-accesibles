@@ -13,6 +13,14 @@ export default defineNuxtConfig({
     types: '~/types/database.types.ts',
   },
 
+  // Solo del servidor (nunca llegan al navegador). Se completan al arrancar con variables de
+  // entorno: NUXT_ANTHROPIC_API_KEY (opcional: sin clave, el asistente usa reglas) y
+  // NUXT_ANTHROPIC_BASE_URL (solo para probar con un servidor falso).
+  runtimeConfig: {
+    anthropicApiKey: '',
+    anthropicBaseUrl: 'https://api.anthropic.com',
+  },
+
   css: ['~/assets/css/tokens.css', '~/assets/css/base.css'],
 
   app: {
