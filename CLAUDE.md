@@ -63,3 +63,29 @@ pnpm build
   registro no acepta `admin`.
 - El correo de Supabase por defecto solo llega al equipo del proyecto: para probar el registro
   de punta a punta hace falta un SMTP propio. Los usuarios de `seed.sql` ya están confirmados.
+
+## Convenciones de la v0.3 (búsqueda de turnos)
+
+- Base: `0301_turnos.sql`. El catálogo se lee sin sesión (`anon`): solo centros activos,
+  especialidades activas y turnos futuros (RLS). Nadie lo escribe desde la app todavía
+  (el panel es la v0.6). `avisos_disponibilidad`: cada persona inserta y ve solo los suyos.
+- Búsqueda: una sola llamada, la RPC `buscar_turnos` (security invoker, así respeta RLS).
+  Distancia con haversine en SQL; sin centro elegido trae como mucho 3 turnos por centro.
+  Mañana = antes de las 13, en hora argentina (igual en SQL y en `franjaDe()`).
+- Datos de prueba en la sección v0.3 de `seed.sql`. **Si la demo se queda sin turnos:**
+  `select privado.generar_turnos(30);` en el editor SQL (no duplica los que ya existen).
+  Los requisitos de cada especialidad están en esa función.
+- Datos en `useTurnos()`: `cargarCatalogo`, `buscarTurnos`, `cargarTurno`, `pedirAviso`.
+- Funciones puras (con tests): `utils/fechas.ts` (fechas en palabras con `Intl` y la zona
+  `America/Argentina/Buenos_Aires`, nunca la del navegador), `utils/especialidades.ts`
+  (`normalizar`, `buscarEspecialidades`, `elegirEspecialidad`, `nombreCompleto`) y
+  `utils/turnos.ts` (filtros ↔ query, distancia, resumen para leer).
+- Las especialidades parecidas se calculan en el navegador con `buscarEspecialidades` (son
+  pocas y ya están cargadas): no hace falta `unaccent` ni otra RPC.
+- `/buscar` guarda todo en la query (`esp`, `q`, `loc`, `lat`, `lng`, `centro`, `desde`, `hasta`,
+  `franja`). La dirección manda: el formulario se copia desde ahí y cada cambio de query
+  vuelve a buscar. La ubicación va redondeada a 2 decimales.
+- Los utils que usan otro util lo importan explícito (`import ... from './fechas'`) para que
+  Vitest los encuentre (Nuxt los auto-importa, Vitest no).
+- Siempre mostrar el nombre simple con el técnico: `nombreCompleto()` → "Oculista (Oftalmología)".
+- Las pantallas con datos de prueba lo dicen ("Datos de prueba").

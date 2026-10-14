@@ -45,7 +45,11 @@ Para correr la compilación (`node .output/server/index.mjs`) pasá las mismas v
 - Proyecto `rmvhepjmdxofksdlfvpo` (región São Paulo).
 - `supabase/migrations/0201_cuentas.sql`: tablas `perfiles`, `preferencias` e `intentos_ingreso`,
   con RLS. Cada migración se aplica tal cual está en el archivo.
-- `supabase/seed.sql`: usuarios de prueba, ya confirmados. Se puede correr varias veces.
+- `supabase/migrations/0301_turnos.sql`: catálogo (`localidades`, `centros`, `especialidades`,
+  `profesionales`, `turnos`), `avisos_disponibilidad`, la búsqueda `buscar_turnos` y
+  `privado.generar_turnos(dias)`.
+- `supabase/seed.sql`: usuarios de prueba (ya confirmados) y, en la sección v0.3, el catálogo
+  de prueba con la agenda de los próximos 30 días. Se puede correr varias veces.
 - `app/types/database.types.ts`: tipos de la base. Si cambia una migración, hay que regenerarlos.
 
 ### Usuarios de prueba
@@ -81,8 +85,8 @@ Seis versiones, una feature completa por versión. El detalle está en
 | Versión | Feature | Estado |
 |---|---|---|
 | v0.1 | Base, marca y accesibilidad | Lista |
-| v0.2 | Cuentas y preferencias | Esta rama |
-| v0.3 | Búsqueda de turnos | Pendiente |
+| v0.2 | Cuentas y preferencias | Lista |
+| v0.3 | Búsqueda de turnos | Esta rama |
 | v0.4 | Asistente de reserva y mis turnos | Pendiente |
 | v0.5 | Avisos y modo acompañante | Pendiente |
 | v0.6 | Panel administrativo, métricas y PWA | Pendiente |
@@ -113,6 +117,43 @@ Seis versiones, una feature completa por versión. El detalle está en
 Limitación conocida: el bloqueo por intentos lo controla la app antes de llamar a Supabase
 Auth. Quien llame a la API de Auth directamente se lo saltea. En producción se resuelve con un
 "auth hook" de Supabase (ver el comentario en la migración).
+
+## Qué trae la v0.3
+
+- Búsqueda de turnos (`/buscar`), sin necesidad de cuenta, en una sola página con tres preguntas:
+  1. **¿Qué necesitás?** Se escribe como se habla ("me duele la rodilla", "oculista",
+     "corazón") y aparecen sugerencias. También está la lista de todas las especialidades, con
+     el nombre simple, el técnico y una frase que explica qué atiende.
+  2. **¿Dónde?** "Usar mi ubicación" o elegir la localidad (con cuenta, se propone la del
+     perfil). Opcional: un centro de salud.
+  3. **¿Cuándo?** Opcional: desde y hasta qué día, y a la mañana o a la tarde.
+- Resultados ordenados por cercanía y por fecha, con el día en palabras ("jueves 15 de
+  octubre, a las 8:00"), el centro, la distancia, la especialidad y quién atiende. Se anuncia
+  cuántos hay; con la lectura en voz alta activada, se lee un resumen.
+- La búsqueda queda en la dirección (`/buscar?esp=4&loc=General+Pacheco`): se puede recargar,
+  volver atrás o compartir.
+- Sin resultados: buscar en todas las fechas, a cualquier hora o en otros centros, y
+  "Avisame cuando haya turno" (con cuenta; el aviso se manda en la v0.5). Si lo que se
+  escribió no es una especialidad: "¿Quisiste decir…?".
+- Ficha del turno (`/turnos/:id`): especialidad, día y hora, profesional, dirección, teléfono,
+  horario, cómo es el edificio, qué llevar (para ir tildando) y cómo llegar (Google Maps).
+  "Reservar" llega en la v0.4.
+
+### Datos de prueba
+
+**Los centros, profesionales y turnos son inventados** (zona norte del conurbano: Pacheco,
+Tigre, San Fernando, Escobar...). Las páginas lo dicen. La agenda se arma para los próximos
+30 días; cuando se acabe, en el editor SQL de Supabase:
+
+```sql
+select privado.generar_turnos(30);
+```
+
+Crea solo los turnos que faltan (de lunes a viernes, cada 20 minutos) y deja como tomados
+más o menos 1 de cada 4.
+
+Una búsqueda típica tarda unos 7 ms en la base y se ve en pantalla en unos 250 ms
+(el requisito es menos de 3 segundos).
 
 ## Documentación
 
