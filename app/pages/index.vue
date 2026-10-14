@@ -58,7 +58,10 @@ const AYUDAS = [
         </div>
         <LeerEnVoz objetivo-id="que-es" />
         <Aviso tipo="info" titulo="Próximamente">
-          <p>La búsqueda de turnos llega en la próxima versión. Ya podés probar la accesibilidad.</p>
+          <p>
+            La búsqueda de turnos llega en la próxima versión. Ya podés
+            <NuxtLink to="/registrarme">crear tu cuenta</NuxtLink> y probar la accesibilidad.
+          </p>
         </Aviso>
 
         <!-- Dibujo decorativo: un turno confirmado rodeado de formas de colores. -->

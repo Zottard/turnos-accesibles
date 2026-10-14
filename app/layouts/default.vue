@@ -1,6 +1,13 @@
 <!-- Estructura común de todas las pantallas: encabezado, contenido y pie. -->
 <script setup lang="ts">
-const { anuncio } = useAnuncio()
+const { anuncio, anunciar } = useAnuncio()
+const { conSesion, salir } = useSesion()
+
+async function salirDeLaCuenta() {
+  await salir()
+  anunciar('Saliste de tu cuenta.')
+  await navigateTo('/')
+}
 </script>
 
 <template>
@@ -9,17 +16,27 @@ const { anuncio } = useAnuncio()
 
     <header class="encabezado">
       <div class="contenedor encabezado__interior">
-        <NuxtLink to="/" class="encabezado__marca">
+        <!-- Con la sesión iniciada, el inicio es /inicio (y el logo lleva ahí). -->
+        <NuxtLink :to="conSesion ? '/inicio' : '/'" class="encabezado__marca">
           <picture>
             <source media="(max-width: 30rem)" srcset="/icono.svg" />
             <img src="/logo.svg" alt="Turnos Accesibles, ir al inicio" width="225" height="48" />
           </picture>
         </NuxtLink>
 
+        <!-- Pocas opciones, para que en el celular entren en una sola línea. -->
         <nav class="encabezado__nav" aria-label="Principal">
           <ul>
-            <li><NuxtLink to="/">Inicio</NuxtLink></li>
-            <li><NuxtLink to="/accesibilidad">Ayuda</NuxtLink></li>
+            <li><NuxtLink :to="conSesion ? '/inicio' : '/'">Inicio</NuxtLink></li>
+            <!-- Con sesión, la ayuda sigue en el menú de accesibilidad y en el pie. -->
+            <li v-if="!conSesion"><NuxtLink to="/accesibilidad">Ayuda</NuxtLink></li>
+            <template v-if="conSesion">
+              <li><NuxtLink to="/perfil">Mi cuenta</NuxtLink></li>
+              <li>
+                <button type="button" class="encabezado__salir" @click="salirDeLaCuenta">Salir</button>
+              </li>
+            </template>
+            <li v-else><NuxtLink to="/ingresar">Ingresar</NuxtLink></li>
           </ul>
         </nav>
 
@@ -97,7 +114,8 @@ const { anuncio } = useAnuncio()
   list-style: none;
 }
 
-.encabezado__nav a {
+.encabezado__nav a,
+.encabezado__salir {
   display: inline-flex;
   align-items: center;
   min-height: var(--alto-tactil);
@@ -109,9 +127,17 @@ const { anuncio } = useAnuncio()
   text-decoration: none;
 }
 
-.encabezado__nav a:hover {
+.encabezado__nav a:hover,
+.encabezado__salir:hover {
   color: var(--primario);
   text-decoration: underline;
+}
+
+/* "Salir" es una acción (button), pero se ve igual que los enlaces del menú. */
+.encabezado__salir {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
 }
 
 /* Página actual: subrayado grueso, no solo color. */
@@ -127,6 +153,15 @@ const { anuncio } = useAnuncio()
   .encabezado__nav {
     order: 3;
     width: 100%;
+  }
+
+  .encabezado__nav ul {
+    gap: var(--espacio-1);
+  }
+
+  .encabezado__nav a,
+  .encabezado__salir {
+    padding-inline: 0.5rem;
   }
 }
 
