@@ -17,7 +17,8 @@ export type Preferencias = {
 }
 
 // Perfil accesible por defecto: texto ampliado, sin animaciones y lenguaje simple.
-// Los colores de marca ya cumplen contraste AA, por eso el alto contraste arranca apagado.
+// Los colores de marca ya cumplen contraste AA, por eso el alto contraste arranca apagado
+// (se ofrece en el primer ingreso, en /bienvenida).
 export const PREFERENCIAS_PREDETERMINADAS: Preferencias = {
   tamanoTexto: 125,
   altoContraste: false,
@@ -73,5 +74,72 @@ export function normalizarPreferencias(valor: unknown): Preferencias {
     lecturaVoz: siEsBooleano(valor.lecturaVoz, p.lecturaVoz),
     velocidadVoz: normalizarVelocidad(valor.velocidadVoz),
     lenguajeSimple: siEsBooleano(valor.lenguajeSimple, p.lenguajeSimple),
+  }
+}
+
+// --- Avisos (v0.2): cómo y cuándo avisarle a la persona. Se usan en la v0.5. ---
+
+export const CANALES_AVISO = ['visual', 'sonoro', 'ambos'] as const
+export type CanalAviso = (typeof CANALES_AVISO)[number]
+
+export const ANTELACIONES_HORAS = [2, 24, 48] as const
+export type AntelacionHoras = (typeof ANTELACIONES_HORAS)[number]
+
+export type PreferenciasAviso = {
+  canalAviso: CanalAviso
+  antelacionHoras: AntelacionHoras
+}
+
+export const AVISO_PREDETERMINADO: PreferenciasAviso = {
+  canalAviso: 'ambos',
+  antelacionHoras: 24,
+}
+
+// --- Fila de la tabla `preferencias` (Supabase). Las columnas van en snake_case. ---
+
+export type FilaPreferencias = {
+  tamano_texto: number
+  alto_contraste: boolean
+  reducir_movimiento: boolean
+  lectura_voz: boolean
+  velocidad_voz: number
+  lenguaje_simple: boolean
+  canal_aviso: CanalAviso
+  antelacion_horas: AntelacionHoras
+}
+
+/** Arma la fila para guardar en la base a partir de lo que usa la app. */
+export function aFilaPreferencias(p: Preferencias, aviso: PreferenciasAviso): FilaPreferencias {
+  return {
+    tamano_texto: p.tamanoTexto,
+    alto_contraste: p.altoContraste,
+    reducir_movimiento: p.reducirMovimiento,
+    lectura_voz: p.lecturaVoz,
+    velocidad_voz: p.velocidadVoz,
+    lenguaje_simple: p.lenguajeSimple,
+    canal_aviso: aviso.canalAviso,
+    antelacion_horas: aviso.antelacionHoras,
+  }
+}
+
+/** Lo contrario: convierte una fila de la base (o lo que venga) en preferencias válidas. */
+export function desdeFilaPreferencias(fila: unknown): { preferencias: Preferencias; aviso: PreferenciasAviso } {
+  const f = esObjeto(fila) ? fila : {}
+  const canal = CANALES_AVISO.find((canal) => canal === f.canal_aviso)
+  const antelacion = ANTELACIONES_HORAS.find((horas) => horas === Number(f.antelacion_horas))
+  return {
+    preferencias: normalizarPreferencias({
+      tamanoTexto: f.tamano_texto,
+      altoContraste: f.alto_contraste,
+      reducirMovimiento: f.reducir_movimiento,
+      lecturaVoz: f.lectura_voz,
+      // Postgres guarda la velocidad como `numeric`: por las dudas la pasamos a número.
+      velocidadVoz: f.velocidad_voz === undefined || f.velocidad_voz === null ? undefined : Number(f.velocidad_voz),
+      lenguajeSimple: f.lenguaje_simple,
+    }),
+    aviso: {
+      canalAviso: canal ?? AVISO_PREDETERMINADO.canalAviso,
+      antelacionHoras: antelacion ?? AVISO_PREDETERMINADO.antelacionHoras,
+    },
   }
 }
