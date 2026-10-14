@@ -9,8 +9,8 @@ export default defineNuxtConfig({
   supabase: {
     // Las redirecciones las hacemos nosotros con middleware/auth.ts y middleware/invitado.ts.
     redirect: false,
-    // Sin tipos generados de la base: las filas se convierten a mano (utils/preferencias.ts).
-    types: false,
+    // Tipos de las tablas, generados desde la base (ver el comentario del archivo).
+    types: '~/types/database.types.ts',
   },
 
   css: ['~/assets/css/tokens.css', '~/assets/css/base.css'],
