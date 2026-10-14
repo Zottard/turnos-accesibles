@@ -27,14 +27,14 @@ app/
   components/        componentes chicos y reutilizables (Boton, Campo, Aviso, LeerEnVoz...)
   composables/       lógica con estado: useAccesibilidad, useSesion, useTurnos, useReservas...
   layouts/           default.vue (header, menú de accesibilidad, footer)
-  middleware/        auth.ts (pide sesión), admin.ts (pide rol admin)
+  middleware/        auth.ts (pide sesión), invitado.ts (solo sin sesión), admin.ts (pide rol admin)
   pages/             una página por pantalla
   utils/             funciones puras: validar.ts, fechas.ts, textos.ts
 server/
   api/               endpoints propios (interpretar)
   utils/             reglas del asistente
 supabase/
-  migrations/        un archivo SQL por versión (v02_cuentas.sql, v03_turnos.sql...)
+  migrations/        archivos SQL numerados por versión (0201_cuentas.sql, 0301_turnos.sql...)
   seed.sql           datos de prueba
 public/              logo.svg, icono.svg, karma-tech.svg
 tests/               *.test.ts de Vitest
@@ -93,7 +93,7 @@ auditoria         id, tabla, accion, registro_id, usuario_id, creado_en
 
 ```bash
 pnpm install
-cp .env.example .env     # completar las claves de Supabase
+cp .env.example .env     # completar SUPABASE_URL y SUPABASE_KEY
 pnpm dev                 # http://localhost:3000
 pnpm test                # Vitest
 pnpm typecheck
