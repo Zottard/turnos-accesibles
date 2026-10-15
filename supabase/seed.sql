@@ -229,3 +229,137 @@ where not exists (
   where solicitante_id = '11111111-1111-4111-8111-111111111111' and correo_invitado = 'lucia@demo.ar'
     and estado in ('pendiente', 'activo')
 );
+
+
+-- ===========================================================================
+-- v0.6 — DATOS DE PRUEBA para el tablero de métricas (/admin/metricas).
+--
+-- Para que el tablero no arranque vacío en la demo: los últimos 60 días de
+-- 1. eventos de uso anónimos (búsquedas, asistente, accesibilidad, modo acompañante), marcados con
+--    "demo": true en `datos`;
+-- 2. reservas ya pasadas (cumplidas, canceladas y cambiadas de fecha; 1 de cada 4 asistida) de una
+--    persona de prueba aparte, "Historial de prueba" (historial@demo.ar), sobre turnos pasados.
+-- Todo con fechas pasadas: no toca los turnos que vienen ni las cuentas de Rosa, Lucía y el admin.
+-- Las reservas se cargan directo con su estado final: así no generan avisos ni correos.
+-- Se puede correr varias veces: si ya están, no hace nada. Para empezar de cero, ver el README.
+-- ===========================================================================
+
+insert into auth.users (
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change_token_new, email_change,
+  email_change_token_current, phone_change, phone_change_token, reauthentication_token
+)
+values (
+  '00000000-0000-0000-0000-000000000000', '55555555-5555-4555-8555-555555555555', 'authenticated',
+  'authenticated', 'historial@demo.ar', extensions.crypt('Demo1234!', extensions.gen_salt('bf')), now(),
+  '{"provider":"email","providers":["email"]}'::jsonb,
+  '{"nombre":"Historial","apellido":"de prueba","localidad":"General Pacheco"}'::jsonb, now(), now(),
+  '', '', '', '', '', '', '', ''
+)
+on conflict (id) do nothing;
+
+insert into auth.identities (id, user_id, provider_id, provider, identity_data, last_sign_in_at, created_at, updated_at)
+values (
+  '55555555-5555-4555-8555-555555555555', '55555555-5555-4555-8555-555555555555',
+  '55555555-5555-4555-8555-555555555555', 'email',
+  '{"sub":"55555555-5555-4555-8555-555555555555","email":"historial@demo.ar","email_verified":true}'::jsonb,
+  now(), now(), now()
+)
+on conflict do nothing;
+
+-- 1. Eventos de uso: cada día, una cantidad parecida a la real (menos los fines de semana).
+insert into public.eventos_uso (tipo, datos, creado_en)
+select
+  ev.tipo,
+  case ev.tipo
+    when 'busqueda' then jsonb_strip_nulls(jsonb_build_object(
+      'demo', true,
+      'especialidad_id', (select id from public.especialidades order by random() + n * 0 limit 1),
+      'localidad', case when random() < 0.7 then (select nombre from public.localidades order by random() + n * 0 limit 1) end,
+      'centro_id', case when random() < 0.25 then (select id from public.centros order by random() + n * 0 limit 1) end
+    ))
+    when 'preferencia_tamano' then jsonb_build_object('demo', true, 'valor', (array['125', '150', '175', '200'])[1 + floor(random() * 4)::integer])
+    when 'preferencia_voz' then jsonb_build_object('demo', true, 'valor', 'activado')
+    when 'preferencia_contraste' then jsonb_build_object('demo', true, 'valor', 'activado')
+    else jsonb_build_object('demo', true)
+  end,
+  (dia::date + make_interval(hours => 8 + floor(random() * 12)::integer, mins => floor(random() * 60)::integer))
+    at time zone 'America/Argentina/Buenos_Aires'
+from generate_series(
+  (now() at time zone 'America/Argentina/Buenos_Aires')::date - 60,
+  (now() at time zone 'America/Argentina/Buenos_Aires')::date - 1,
+  interval '1 day'
+) as dia
+cross join (
+  values ('busqueda', 30), ('asistente_inicio', 12), ('asistente_ia', 6), ('preferencia_tamano', 5),
+    ('preferencia_voz', 3), ('preferencia_contraste', 3), ('acompanante_ayudar', 2), ('acompanante_invitar', 1)
+) as ev (tipo, por_dia)
+cross join lateral generate_series(
+  1,
+  greatest(1, round(ev.por_dia * (case when extract(isodow from dia) >= 6 then 0.3 else 1 end) * (0.6 + random() * 0.8))::integer)
+) as n
+where not exists (select 1 from public.eventos_uso where datos ? 'demo');
+
+-- 2. Turnos pasados con su reserva (2 por día hábil para algunos profesionales).
+do $$
+declare
+  v_persona uuid := '55555555-5555-4555-8555-555555555555';
+  v_hoy date := (now() at time zone 'America/Argentina/Buenos_Aires')::date;
+  v_turno record;
+  v_azar double precision;
+  v_creada timestamptz;
+  v_asistida boolean;
+  v_reserva uuid;
+  v_esperando uuid; -- una reserva cambiada de fecha que espera su turno nuevo
+begin
+  if exists (select 1 from public.reservas where solicitante_id = v_persona) then
+    return;
+  end if;
+
+  for v_turno in
+    insert into public.turnos (profesional_id, centro_id, especialidad_id, inicio, estado, requisitos)
+    select p.id, p.centro_id, p.especialidad_id,
+      (dia::date + case when p.id % 2 = 0 then time '08:00' else time '13:00' end + cupo * interval '20 minutes')
+        at time zone 'America/Argentina/Buenos_Aires',
+      'reservado',
+      'Llevá tu DNI.'
+    from public.profesionales as p
+    cross join generate_series(v_hoy - 60, v_hoy - 1, interval '1 day') as dia
+    cross join generate_series(0, 1) as cupo
+    where extract(isodow from dia) between 1 and 5
+      and (extract(doy from dia)::integer + p.id::integer) % 4 = 0
+    on conflict (profesional_id, inicio) do nothing
+    returning id, inicio
+  loop
+    v_azar := random();
+    v_creada := v_turno.inicio - make_interval(days => 1 + floor(random() * 10)::integer, hours => floor(random() * 6)::integer);
+    v_asistida := random() < 0.25;
+
+    if v_azar < 0.12 then
+      -- Cancelada: el cupo quedó libre.
+      insert into public.reservas (turno_id, solicitante_id, creada_por, estado, asistida, segundos,
+        creada_en, actualizada_en, actualizada_por)
+      values (v_turno.id, v_persona, case when v_asistida then null else v_persona end, 'cancelada', v_asistida,
+        60 + floor(random() * 420)::integer, v_creada, v_creada + interval '1 day', v_persona);
+      update public.turnos set estado = 'disponible' where id = v_turno.id;
+    elsif v_azar < 0.20 and v_esperando is null then
+      -- Cambiada de fecha: la reserva nueva es la del próximo turno de esta lista.
+      insert into public.reservas (turno_id, solicitante_id, creada_por, estado, asistida, segundos,
+        creada_en, actualizada_en, actualizada_por)
+      values (v_turno.id, v_persona, case when v_asistida then null else v_persona end, 'reprogramada', v_asistida,
+        60 + floor(random() * 420)::integer, v_creada, v_creada + interval '1 day', v_persona)
+      returning id into v_reserva;
+      update public.turnos set estado = 'disponible' where id = v_turno.id;
+      v_esperando := v_reserva;
+    else
+      -- Cumplida. Si hay una cambiada de fecha esperando, esta es su turno nuevo.
+      insert into public.reservas (turno_id, solicitante_id, creada_por, estado, asistida, segundos,
+        reserva_origen_id, creada_en, actualizada_en)
+      values (v_turno.id, v_persona, case when v_asistida then null else v_persona end, 'completada', v_asistida,
+        case when v_esperando is null then 60 + floor(random() * 420)::integer end,
+        v_esperando, v_creada, v_creada);
+      v_esperando := null;
+    end if;
+  end loop;
+end $$;
