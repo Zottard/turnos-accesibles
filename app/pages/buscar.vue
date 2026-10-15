@@ -12,6 +12,7 @@ const { conSesion } = useSesion()
 const { cargarPerfil } = usePerfil()
 const { preferencias } = useAccesibilidad()
 const { anunciar } = useAnuncio()
+const { registrar } = useEventos()
 
 // --- Catálogo: especialidades, localidades y centros ---
 const { data: catalogo } = await useAsyncData('catalogo-turnos', () => cargarCatalogo())
@@ -235,6 +236,13 @@ async function avisarResultado() {
   } else if (resultado.value.error) {
     anunciar(resultado.value.error, true)
   } else {
+    // Métricas (v0.6): una búsqueda que pidió la persona, sin datos de quién es.
+    const filtros = filtrosActuales.value
+    registrar('busqueda', {
+      especialidad_id: filtros.especialidadId ?? undefined,
+      centro_id: filtros.centroId ?? undefined,
+      localidad: filtros.localidad || undefined,
+    })
     // anunciar() ya lee en voz alta si la preferencia está activada.
     anunciar(preferencias.value.lecturaVoz ? resumenParaLeer(turnos.value) : `${cantidadEnPalabras(turnos.value.length)}.`)
   }

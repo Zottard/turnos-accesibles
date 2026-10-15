@@ -9,6 +9,7 @@ const props = defineProps<{
 
 const { preferencias, cambiar } = useAccesibilidad()
 const { anunciar } = useAnuncio()
+const { registrar } = useEventos()
 
 const idActual = computed(() => `${props.prefijo}-tamano-actual`)
 const posicion = computed(() => TAMANOS_TEXTO.indexOf(preferencias.value.tamanoTexto))
@@ -20,6 +21,7 @@ function cambiarTamano(paso: 1 | -1) {
     return
   }
   cambiar('tamanoTexto', nuevo)
+  registrar('preferencia_tamano', { valor: String(nuevo) })
   anunciar(`Texto en ${nuevo} %`)
 }
 </script>
