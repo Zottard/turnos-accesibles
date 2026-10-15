@@ -67,7 +67,6 @@ function descripcion(turno: TurnoEncontrado): string {
           :valor="turno.id"
           :titulo="conMayuscula(turnoEnPalabras(turno.inicio))"
           :descripcion="descripcion(turno)"
-          icono="📅"
         />
       </div>
     </fieldset>

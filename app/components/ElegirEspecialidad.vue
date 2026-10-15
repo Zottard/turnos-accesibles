@@ -25,16 +25,14 @@ const { anunciar } = useAnuncio()
 
 const elegida = computed(() => props.especialidades.find((especialidad) => especialidad.id === especialidadId.value))
 
-// Al elegir una (o cuando llega la lista), el cuadro muestra su nombre.
-watch(
-  elegida,
-  (especialidad) => {
-    if (especialidad) {
-      texto.value = especialidad.nombreSimple
-    }
-  },
-  { immediate: true },
-)
+// Al elegir una (o si ya venía elegida, como en el asistente), el cuadro muestra su nombre.
+function mostrarElegida() {
+  if (elegida.value && texto.value !== elegida.value.nombreSimple) {
+    texto.value = elegida.value.nombreSimple
+  }
+}
+watch(elegida, mostrarElegida)
+onMounted(mostrarElegida)
 
 // Si cambia lo escrito, la especialidad elegida deja de valer.
 watch(texto, (nuevo) => {

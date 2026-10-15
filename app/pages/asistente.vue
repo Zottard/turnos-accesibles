@@ -517,20 +517,20 @@ async function confirmar(confirmarSuperposicion: boolean) {
         <div id="resultado-pedido" tabindex="-1">
           <Aviso v-if="pedidoFallo" tipo="atencion" titulo="Vamos paso a paso">
             <p>{{ pedidoFallo }} No pasa nada: te hacemos unas preguntas cortas.</p>
-            <div class="acciones">
+            <div class="acciones aviso-acciones">
               <Boton @click="seguirPasoAPaso">Seguir paso a paso</Boton>
             </div>
           </Aviso>
           <Aviso v-else-if="pedido?.entendido" tipo="info" titulo="¿Es así?">
             <p>{{ pedido.explicacion }}</p>
-            <div class="acciones">
+            <div class="acciones aviso-acciones">
               <Boton @click="siEsAsi">Sí, seguir</Boton>
               <Boton variante="secundario" @click="irAPaso(1)">No, elegir yo</Boton>
             </div>
           </Aviso>
           <Aviso v-else-if="pedido" tipo="atencion" titulo="Vamos paso a paso">
             <p>{{ pedido.explicacion }} Te hacemos unas preguntas cortas.</p>
-            <div class="acciones">
+            <div class="acciones aviso-acciones">
               <Boton @click="seguirPasoAPaso">Seguir paso a paso</Boton>
             </div>
           </Aviso>
@@ -784,7 +784,7 @@ async function confirmar(confirmarSuperposicion: boolean) {
             {{ turnoEnPalabras(resultado.conflicto.inicio) }}, en {{ resultado.conflicto.centro }}.
           </p>
           <p>¿Querés reservar este también?</p>
-          <div class="acciones">
+          <div class="acciones aviso-acciones">
             <Boton @click="confirmar(true)">Sí, reservar igual</Boton>
             <Boton variante="secundario" @click="irAPaso(3)">Elegir otro día</Boton>
           </div>
@@ -834,6 +834,11 @@ textarea {
 
 .enlace-boton {
   padding-inline: 0;
+}
+
+/* Botones dentro de un aviso: un poco de aire arriba. */
+.aviso-acciones {
+  margin-block: var(--espacio-3) var(--espacio-2);
 }
 
 .franjas {

@@ -19,8 +19,13 @@ const datos = computed(() => ESTADOS_TURNO[props.estado])
 .estado {
   --color-estado: var(--texto-suave);
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--espacio-2);
+  max-width: 100%;
+  /* Con el texto muy grande corta entre palabras, nunca adentro de una ("Confirma-do"). */
+  overflow-wrap: normal;
+  hyphens: none;
   padding: 0.1rem 0.8rem;
   background: var(--superficie);
   color: var(--texto);

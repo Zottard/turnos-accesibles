@@ -63,7 +63,7 @@ export function armarPedidoClaude(texto: string, especialidades: Especialidad[],
 /**
  * Le pregunta a Claude. Devuelve el JSON que respondió (sin revisar: eso lo hace
  * validarRespuestaIA) o null si no hubo una respuesta usable.
- * `motivo` es para el registro del servidor: nunca incluye el texto de la persona.
+ * `motivo` completa la frase "la IA ..." en el registro del servidor: nunca incluye el texto de la persona.
  */
 export async function preguntarAClaude(
   texto: string,
@@ -86,22 +86,22 @@ export async function preguntarAClaude(
       signal: AbortSignal.timeout(ESPERA_MAXIMA_MS),
     })
     if (!respuesta.ok) {
-      return { respuesta: null, motivo: `la API respondió ${respuesta.status}` }
+      return { respuesta: null, motivo: `respondió con el error ${respuesta.status}` }
     }
     const mensaje = (await respuesta.json()) as {
       stop_reason?: string
       content?: { type: string; text?: string }[]
     }
     if (mensaje.stop_reason === 'refusal') {
-      return { respuesta: null, motivo: 'el modelo no quiso responder' }
+      return { respuesta: null, motivo: 'no quiso responder' }
     }
     const bloque = mensaje.content?.find((item) => item.type === 'text')
     if (!bloque?.text) {
-      return { respuesta: null, motivo: 'respuesta sin texto' }
+      return { respuesta: null, motivo: 'respondió sin texto' }
     }
     return { respuesta: JSON.parse(bloque.text), motivo: '' }
   } catch (error) {
     const corto = error instanceof Error && error.name === 'TimeoutError'
-    return { respuesta: null, motivo: corto ? 'no respondió a tiempo' : 'no se pudo conectar o leer la respuesta' }
+    return { respuesta: null, motivo: corto ? 'no respondió a tiempo' : 'no se pudo conectar o la respuesta no se entendió' }
   }
 }
