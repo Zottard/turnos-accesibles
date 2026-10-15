@@ -209,3 +209,23 @@ on conflict (nombre, centro_id) do nothing;
 
 -- Agenda de los próximos 30 días. Cuando la demo se quede sin turnos, correr esto de nuevo.
 select privado.generar_turnos(30);
+
+
+-- ===========================================================================
+-- v0.5 — Lucía acompaña a Rosa.
+-- Alcance: ver sus turnos y sacarle turnos, pero NO cancelar ni cambiar de fecha (así se ve el
+-- límite en la demo). Es un vínculo ya aceptado; Rosa lo puede revocar desde /acompanantes.
+-- Se puede correr varias veces: si ya hay un vínculo vigente, no hace nada. Si en una demo Rosa lo
+-- revocó, correrlo de nuevo crea uno nuevo (el revocado queda como constancia).
+-- ===========================================================================
+insert into public.acompanamientos (
+  solicitante_id, acompanante_id, nombre_invitado, correo_invitado, alcance, estado, consentido_en, aceptado_en
+)
+select
+  '11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'Lucía', 'lucia@demo.ar',
+  array['ver', 'reservar'], 'activo', now(), now()
+where not exists (
+  select 1 from public.acompanamientos
+  where solicitante_id = '11111111-1111-4111-8111-111111111111' and correo_invitado = 'lucia@demo.ar'
+    and estado in ('pendiente', 'activo')
+);

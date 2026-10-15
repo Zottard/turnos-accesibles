@@ -4,8 +4,10 @@
 // Cambios a mano (Postgres no informa qué puede ser null en lo que devuelve una función):
 // - las funciones de bloqueo pueden devolver null;
 // - en buscar_turnos, distancia_km (sin ubicación) y requisitos pueden ser null;
-// - en mis_reservas, origen_numero, nueva_numero, requisitos y los datos opcionales del centro
-//   (teléfono, horario, accesibilidad) pueden ser null.
+// - en mis_reservas, origen_numero, nueva_numero, requisitos, creada_por_nombre y los datos
+//   opcionales del centro (teléfono, horario, accesibilidad) pueden ser null;
+// - en personas_que_acompano, aceptado_en puede ser null.
+// avisos_por_correo no está: solo la llama el servidor con la clave secreta.
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
@@ -15,6 +17,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      acompanamientos: {
+        Row: {
+          aceptado_en: string | null
+          acompanante_id: string | null
+          alcance: string[]
+          consentido_en: string
+          correo_invitado: string
+          creado_en: string
+          estado: string
+          id: string
+          nombre_invitado: string
+          revocado_en: string | null
+          solicitante_id: string
+          token: string
+          vence_en: string
+        }
+        Insert: {
+          aceptado_en?: string | null
+          acompanante_id?: string | null
+          alcance: string[]
+          consentido_en?: string
+          correo_invitado: string
+          creado_en?: string
+          estado?: string
+          id?: string
+          nombre_invitado: string
+          revocado_en?: string | null
+          solicitante_id: string
+          token?: string
+          vence_en?: string
+        }
+        Update: {
+          aceptado_en?: string | null
+          acompanante_id?: string | null
+          alcance?: string[]
+          consentido_en?: string
+          correo_invitado?: string
+          creado_en?: string
+          estado?: string
+          id?: string
+          nombre_invitado?: string
+          revocado_en?: string | null
+          solicitante_id?: string
+          token?: string
+          vence_en?: string
+        }
+        Relationships: []
+      }
       avisos_disponibilidad: {
         Row: {
           creado_en: string
@@ -166,6 +216,62 @@ export type Database = {
           nombre?: string
         }
         Relationships: []
+      }
+      notificaciones: {
+        Row: {
+          correo_error: string | null
+          correo_estado: string | null
+          creada_en: string
+          datos: Json
+          entregada_en: string | null
+          enviar_desde: string
+          id: string
+          intentos: number
+          leida_en: string | null
+          reserva_id: string | null
+          solicitante_id: string | null
+          tipo: string
+          usuario_id: string
+        }
+        Insert: {
+          correo_error?: string | null
+          correo_estado?: string | null
+          creada_en?: string
+          datos?: Json
+          entregada_en?: string | null
+          enviar_desde?: string
+          id?: string
+          intentos?: number
+          leida_en?: string | null
+          reserva_id?: string | null
+          solicitante_id?: string | null
+          tipo: string
+          usuario_id: string
+        }
+        Update: {
+          correo_error?: string | null
+          correo_estado?: string | null
+          creada_en?: string
+          datos?: Json
+          entregada_en?: string | null
+          enviar_desde?: string
+          id?: string
+          intentos?: number
+          leida_en?: string | null
+          reserva_id?: string | null
+          solicitante_id?: string | null
+          tipo?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'notificaciones_reserva_id_fkey'
+            columns: ['reserva_id']
+            isOneToOne: false
+            referencedRelation: 'reservas'
+            referencedColumns: ['id']
+          },
+        ]
       }
       perfiles: {
         Row: {
@@ -401,6 +507,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      aceptar_invitacion: { Args: { p_token: string }; Returns: Json }
       buscar_turnos: {
         Args: {
           p_centro_id?: number
@@ -427,15 +534,20 @@ export type Database = {
         }[]
       }
       cancelar_reserva: {
-        Args: { p_confirmar_tarde?: boolean; p_reserva_id: string }
+        Args: { p_confirmar_tarde?: boolean; p_para?: string; p_reserva_id: string }
         Returns: Json
       }
       estado_bloqueo: { Args: { p_correo: string }; Returns: string | null }
+      invitar_acompanante: {
+        Args: { p_alcance: string[]; p_consiento?: boolean; p_correo: string; p_nombre: string }
+        Returns: Json
+      }
       limpiar_intentos: { Args: never; Returns: undefined }
       mis_reservas: {
-        Args: { p_numero?: number }
+        Args: { p_numero?: number; p_para?: string }
         Returns: {
           actualizada_en: string
+          asistida: boolean
           cancelada_tarde: boolean
           centro_accesibilidad: string | null
           centro_direccion: string
@@ -448,6 +560,7 @@ export type Database = {
           centro_telefono: string | null
           centro_tipo: string
           creada_en: string
+          creada_por_nombre: string | null
           duracion_min: number
           especialidad_id: number
           especialidad_nombre: string
@@ -463,20 +576,34 @@ export type Database = {
           turno_id: number
         }[]
       }
+      personas_que_acompano: {
+        Args: never
+        Returns: {
+          aceptado_en: string | null
+          acompanamiento_id: string
+          alcance: string[]
+          apellido: string
+          nombre: string
+          solicitante_id: string
+        }[]
+      }
+      rechazar_invitacion: { Args: { p_token: string }; Returns: Json }
       registrar_fallo: { Args: { p_correo: string }; Returns: string | null }
       reprogramar_reserva: {
-        Args: { p_nuevo_turno_id: number; p_reserva_id: string }
+        Args: { p_nuevo_turno_id: number; p_para?: string; p_reserva_id: string }
         Returns: Json
       }
       reservar_turno: {
         Args: {
-          p_asistida?: boolean
           p_confirmar_superposicion?: boolean
+          p_para?: string
           p_segundos?: number
           p_turno_id: number
         }
         Returns: Json
       }
+      revocar_acompanamiento: { Args: { p_id: string }; Returns: Json }
+      ver_invitacion: { Args: { p_token: string }; Returns: Json }
     }
     Enums: {
       [_ in never]: never

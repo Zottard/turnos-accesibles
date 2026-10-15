@@ -39,7 +39,6 @@ export function useReservas() {
     const { data, error } = await supabase.rpc('reservar_turno', {
       p_turno_id: turnoId,
       p_confirmar_superposicion: opciones.confirmarSuperposicion,
-      p_asistida: false,
       p_segundos: opciones.segundos,
     })
     return leerRespuesta(data, error)
