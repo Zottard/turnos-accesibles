@@ -158,6 +158,13 @@ export function enlaceComoLlegar(lat: number, lng: number): string {
   return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
 }
 
+/** Las tres opciones de "¿A qué hora te queda mejor?" (/buscar y el asistente). */
+export const OPCIONES_FRANJA = [
+  { valor: 'manana', titulo: 'A la mañana', descripcion: 'De 8 a 13 h.', icono: '🌅' },
+  { valor: 'tarde', titulo: 'A la tarde', descripcion: 'De 13 a 17 h.', icono: '🌇' },
+  { valor: 'cualquiera', titulo: 'Me da igual', descripcion: 'A cualquier hora.', icono: '🕒' },
+]
+
 export const NOMBRES_TIPO_CENTRO: Record<string, string> = {
   hospital: 'Hospital',
   centro_de_salud: 'Centro de salud',

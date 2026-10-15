@@ -203,6 +203,36 @@ strong {
   gap: var(--espacio-3);
 }
 
+/* Botón grande con nombre y descripción: sugerencias de especialidades (/buscar y el asistente). */
+.sugerencia {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  min-height: var(--alto-tactil);
+  padding: var(--espacio-2) var(--espacio-3);
+  background: var(--superficie);
+  color: var(--texto);
+  border: var(--grosor-borde) solid var(--primario);
+  border-radius: var(--radio-tarjeta);
+  text-align: left;
+  cursor: pointer;
+}
+
+.sugerencia:hover {
+  background: var(--fondo-info);
+}
+
+.sugerencia__nombre {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  color: var(--primario);
+}
+
+.sugerencia__descripcion {
+  color: var(--texto-suave);
+}
+
 /* --- Botones (ver components/Boton.vue) --- */
 .boton {
   display: inline-flex;
@@ -330,4 +360,58 @@ html[data-contraste='alto'] .boton--peligro {
   background: #000;
   color: #fff;
   border-color: #fff;
+}
+
+/*
+  --- Impresión (comprobante del turno: "Imprimir o guardar como PDF") ---
+  Sin encabezado, menú ni pie: solo el contenido, en negro sobre blanco y sin sombras.
+  Lo que no sirve en papel (botones) lleva la clase .no-imprimir.
+*/
+@media print {
+  .encabezado,
+  .pie,
+  .saltar,
+  .no-imprimir {
+    display: none !important;
+  }
+
+  /* Colores de papel, también si la persona usa alto contraste en pantalla. */
+  html,
+  html[data-texto],
+  html[data-contraste='alto'] {
+    --fondo: #fff;
+    --superficie: #fff;
+    --texto: #000;
+    --texto-suave: #333;
+    --primario: #000;
+    --exito: #000;
+    --error: #000;
+    --borde: #000;
+    --fondo-info: #fff;
+    --fondo-exito: #fff;
+    --fondo-atencion: #fff;
+    --fondo-error: #fff;
+    font-size: 12pt;
+  }
+
+  .contenedor {
+    max-width: none;
+    padding-inline: 0;
+  }
+
+  .pagina {
+    padding-block: 0;
+    gap: 0.6rem;
+  }
+
+  .tarjeta {
+    box-shadow: none;
+    border: 1px solid #000;
+    border-top-width: 3px;
+    break-inside: avoid;
+  }
+
+  a {
+    color: #000;
+  }
 }
