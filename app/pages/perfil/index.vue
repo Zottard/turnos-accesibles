@@ -140,6 +140,14 @@ async function guardar() {
           <Boton to="/perfil/accesibilidad" variante="secundario">Cambiar mis preferencias</Boton>
         </div>
       </section>
+
+      <section class="pila" aria-labelledby="titulo-acompanantes">
+        <h2 id="titulo-acompanantes">Personas que te ayudan</h2>
+        <p>Quién puede ver tus turnos o sacarte turnos, y la constancia de cada permiso.</p>
+        <div>
+          <Boton to="/acompanantes" variante="secundario">Ver o invitar</Boton>
+        </div>
+      </section>
     </template>
   </div>
 </template>

@@ -63,6 +63,44 @@ export function esVigente(estado: EstadoVinculo): boolean {
   return estado === 'pendiente' || estado === 'activo'
 }
 
+/**
+ * El mensaje en lenguaje simple para cada `motivo` de invitar_acompanante, aceptar_invitacion,
+ * rechazar_invitacion y revocar_acompanamiento. `nombre`: quien invitó (para el invitado).
+ */
+export function mensajeAcompanamiento(motivo: string, nombre = 'La persona'): string {
+  switch (motivo) {
+    case 'sin_sesion':
+      return 'Para seguir, primero ingresá con tu cuenta.'
+    case 'sin_consentimiento':
+      return 'Para seguir, marcá la casilla de autorización.'
+    case 'datos_invalidos':
+      return 'Revisá el nombre y el correo de la persona.'
+    case 'es_tu_correo':
+      return 'Ese es tu correo. Escribí el correo de la persona que te va a ayudar.'
+    case 'ya_invitado':
+      return 'Ya invitaste a esa persona. La ves en "Personas que te ayudan".'
+    case 'no_existe':
+      return 'No encontramos esta invitación. Revisá que el enlace esté completo.'
+    case 'vencida':
+      return `Esta invitación venció. Pedile a ${nombre} que te mande una nueva.`
+    case 'no_vigente':
+      return 'Esta invitación ya no está vigente: ya se aceptó, se rechazó o se canceló.'
+    case 'otro_correo':
+      return 'Ingresaste con otro correo. La invitación es para el correo al que te llegó: salí e ingresá con ese.'
+    case 'es_tuya':
+      return 'Esta invitación la hiciste vos. Mandale el enlace a la persona que te va a ayudar.'
+    case 'ya_acompanas':
+      return `Ya acompañás a ${nombre}.`
+    default:
+      return 'No pudimos completar el pedido. Revisá tu conexión a internet y probá de nuevo.'
+  }
+}
+
+/** ¿Parece un token de invitación (uuid)? Así no le preguntamos a la base por cualquier cosa. */
+export function esTokenValido(token: unknown): token is string {
+  return typeof token === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)
+}
+
 /** El enlace que abre la invitación: https://sitio/invitacion/<token>. */
 export function enlaceInvitacion(origen: string, token: string): string {
   return `${origen.replace(/\/+$/, '')}/invitacion/${encodeURIComponent(token)}`

@@ -47,6 +47,13 @@ const proxima = computed(() => proximaReserva(reservas.value?.datos ?? []))
         </div>
       </li>
       <li class="tarjeta">
+        <h2><span aria-hidden="true">🤝</span> Personas que te ayudan</h2>
+        <p>Dejá que alguien de confianza vea tus turnos o te saque turnos. Vos decidís qué puede hacer.</p>
+        <div>
+          <Boton to="/acompanantes" variante="secundario">Ver o invitar</Boton>
+        </div>
+      </li>
+      <li class="tarjeta">
         <h2><span aria-hidden="true">👤</span> Mi perfil</h2>
         <p>Revisá tus datos y cómo querés ver la página.</p>
         <div class="acciones">

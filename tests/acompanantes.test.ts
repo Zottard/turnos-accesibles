@@ -3,7 +3,9 @@ import {
   alcanceEnPalabras,
   enlaceInvitacion,
   enlaceWhatsApp,
+  esTokenValido,
   estadoVinculo,
+  mensajeAcompanamiento,
   esVigente,
   normalizarAlcance,
   puede,
@@ -71,6 +73,20 @@ describe('invitación', () => {
 
   it('sin nombre, no queda un hueco', () => {
     expect(textoInvitacion('  ', 'x').startsWith('Una persona te invita')).toBe(true)
+  })
+})
+
+describe('mensajeAcompanamiento y esTokenValido', () => {
+  it('cada motivo en lenguaje simple, con el nombre de quien invitó', () => {
+    expect(mensajeAcompanamiento('vencida', 'Rosa')).toBe('Esta invitación venció. Pedile a Rosa que te mande una nueva.')
+    expect(mensajeAcompanamiento('es_tu_correo')).toContain('Ese es tu correo')
+    expect(mensajeAcompanamiento('cualquier-cosa')).toContain('Revisá tu conexión')
+  })
+
+  it('solo acepta tokens con forma de uuid', () => {
+    expect(esTokenValido('6f1c2a34-0000-4000-8000-000000000001')).toBe(true)
+    expect(esTokenValido('hola')).toBe(false)
+    expect(esTokenValido(undefined)).toBe(false)
   })
 })
 
