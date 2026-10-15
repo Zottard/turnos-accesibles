@@ -25,6 +25,8 @@ const CORREO_CONTACTO = 'contacto@turnos-accesibles.example'
       <PreferenciasFormulario prefijo="pagina" />
     </section>
 
+    <InstalarApp />
+
     <section id="declaracion" aria-labelledby="titulo-declaracion" class="pila">
       <h2 id="titulo-declaracion">Declaración de accesibilidad</h2>
       <LeerEnVoz objetivo-id="declaracion" />

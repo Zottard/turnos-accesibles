@@ -108,6 +108,8 @@ async function verMiTurno(numero: number) {
         </div>
       </li>
     </ul>
+
+    <InstalarApp />
   </div>
 </template>
 
