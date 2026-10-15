@@ -1,0 +1,29 @@
+# Nuxt
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Dependencias
+node_modules
+
+# Logs
+logs
+*.log
+
+# Varios
+.DS_Store
+.fleet
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# Variables de entorno (las claves nunca se suben)
+.env
+.env.*
+!.env.example
+
+# Archivos temporales de Word
+docs/~$*
