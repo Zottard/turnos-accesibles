@@ -31,6 +31,7 @@ async function salirDeLaCuenta() {
             <!-- Con sesión, la ayuda sigue en el menú de accesibilidad y en el pie. -->
             <li v-if="!conSesion"><NuxtLink to="/accesibilidad">Ayuda</NuxtLink></li>
             <template v-if="conSesion">
+              <li><NuxtLink to="/mis-turnos">Mis turnos</NuxtLink></li>
               <li><NuxtLink to="/perfil">Mi cuenta</NuxtLink></li>
               <li>
                 <button type="button" class="encabezado__salir" @click="salirDeLaCuenta">Salir</button>
