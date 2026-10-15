@@ -92,8 +92,9 @@ export function useReservas() {
     })
     if (error) {
       if (error.code === '42501' && ayudando.value && !opciones.propias) {
+        // No salimos del modo ayuda acá (puede estar corriendo en el servidor y la página tiene que
+        // hidratarse igual): lo hace BandaAyuda al montarse, cuando confirma que ya no comparte.
         const mensaje = mensajeReserva('sin_vinculo', { nombre: ayudando.value.nombre, accion: 'ver' })
-        olvidarSiNoComparte()
         return { datos: null, error: mensaje, sinPermiso: true }
       }
       return { datos: null, error: 'No pudimos traer los turnos. Revisá tu conexión a internet y probá de nuevo.' }

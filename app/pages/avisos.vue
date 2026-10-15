@@ -173,6 +173,8 @@ onMounted(async () => {
 <style scoped>
 .bandeja {
   display: grid;
+  /* minmax(0, 1fr): una palabra larga con texto al 200 % no ensancha la página. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--espacio-3);
   padding: 0;
   list-style: none;

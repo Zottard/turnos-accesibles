@@ -107,7 +107,10 @@ onMounted(() => {
         tipo="exito"
         :titulo="ayudando ? `¡Listo! Le reservaste el turno a ${ayudando.nombre}` : '¡Listo! Reservaste tu turno'"
       >
-        <p>Guardá este número: <strong>{{ reserva.numero }}</strong>. Lo vas a ver también en "Mis turnos".</p>
+        <p v-if="ayudando">
+          El número es <strong>{{ reserva.numero }}</strong>. {{ ayudando.nombre }} lo ve en sus turnos y le llega un aviso.
+        </p>
+        <p v-else>Guardá este número: <strong>{{ reserva.numero }}</strong>. Lo vas a ver también en "Mis turnos".</p>
       </Aviso>
       <Aviso v-if="cambiadoDesde && estado === 'proximo'" tipo="exito" titulo="¡Listo! Cambiaste la fecha">
         <p>Este turno reemplaza al N.º {{ cambiadoDesde }}. El horario anterior quedó libre para otra persona.</p>
