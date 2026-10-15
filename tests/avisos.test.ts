@@ -7,7 +7,6 @@ import {
   historialAviso,
   momentoRecordatorio,
   ordenarBandeja,
-  textoContador,
   type Notificacion,
 } from '../app/utils/avisos'
 import { mensajeReserva } from '../app/utils/reservas'
@@ -181,12 +180,6 @@ describe('banda y bandeja', () => {
 
   it('la bandeja pone primero los sin leer', () => {
     expect(ordenarBandeja([leido, viejo, nuevo]).map((a) => a.id)).toEqual(['b', 'a', 'c'])
-  })
-
-  it('el contador se dice en palabras', () => {
-    expect(textoContador(0)).toBe('Avisos, ninguno sin leer')
-    expect(textoContador(1)).toBe('Avisos, 1 sin leer')
-    expect(textoContador(3)).toBe('Avisos, 3 sin leer')
   })
 
   it('el historial dice enviado, visto y leído', () => {

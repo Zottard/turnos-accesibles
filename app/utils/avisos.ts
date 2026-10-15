@@ -63,12 +63,6 @@ export function ordenarBandeja(avisos: Notificacion[]): Notificacion[] {
   })
 }
 
-/** "Avisos (2 sin leer)" para lectores de pantalla; el número se ve en el encabezado. */
-export function textoContador(cantidad: number): string {
-  if (cantidad === 0) return 'Avisos, ninguno sin leer'
-  return cantidad === 1 ? 'Avisos, 1 sin leer' : `Avisos, ${cantidad} sin leer`
-}
-
 /**
  * El historial de un aviso: enviado (llegó su hora), entregado (la app lo mostró) y leído.
  * "Enviado el miércoles 14 de octubre de 2026, a las 9:00."

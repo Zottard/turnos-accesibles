@@ -2,12 +2,40 @@
 <script setup lang="ts">
 const { anuncio, anunciar } = useAnuncio()
 const { conSesion, salir } = useSesion()
+const { sinLeer } = useAvisos()
+const route = useRoute()
+
+const sinLeerCantidad = computed(() => sinLeer.value.length)
 
 async function salirDeLaCuenta() {
   await salir()
   anunciar('Saliste de tu cuenta.')
   await navigateTo('/')
 }
+
+// Menú del celular (v0.5): con la sesión iniciada y la pantalla angosta, Inicio, Mis turnos, Mi cuenta
+// y Salir van dentro de "Menú". Avisos queda siempre a la vista. En pantallas anchas el botón no se
+// ve y todo está en una línea.
+const menuAbierto = ref(false)
+const botonMenu = ref<HTMLButtonElement | null>(null)
+
+function cerrarMenu() {
+  menuAbierto.value = false
+  botonMenu.value?.focus()
+}
+
+function alTocarTeclaEnMenu(evento: KeyboardEvent) {
+  if (evento.key === 'Escape' && menuAbierto.value) {
+    cerrarMenu()
+  }
+}
+
+watch(
+  () => route.fullPath,
+  () => {
+    menuAbierto.value = false
+  },
+)
 </script>
 
 <template>
@@ -24,16 +52,41 @@ async function salirDeLaCuenta() {
           </picture>
         </NuxtLink>
 
-        <!-- Pocas opciones, para que en el celular entren en una sola línea. -->
-        <nav class="encabezado__nav" aria-label="Principal">
-          <ul>
-            <li><NuxtLink :to="conSesion ? '/inicio' : '/'">Inicio</NuxtLink></li>
+        <!-- Sin sesión, pocas opciones: entran en una línea. Con sesión, en el celular van en "Menú". -->
+        <nav
+          class="encabezado__nav"
+          :class="{ 'encabezado__nav--sesion': conSesion, 'encabezado__nav--abierto': menuAbierto }"
+          aria-label="Principal"
+          @keydown="alTocarTeclaEnMenu"
+        >
+          <button
+            v-if="conSesion"
+            ref="botonMenu"
+            type="button"
+            class="encabezado__menu"
+            :aria-expanded="menuAbierto ? 'true' : 'false'"
+            aria-controls="menu-principal"
+            @click="menuAbierto = !menuAbierto"
+          >
+            <span aria-hidden="true">{{ menuAbierto ? '✕' : '☰' }}</span>
+            Menú
+          </button>
+          <ul id="menu-principal">
+            <li class="encabezado__plegable"><NuxtLink :to="conSesion ? '/inicio' : '/'">Inicio</NuxtLink></li>
             <!-- Con sesión, la ayuda sigue en el menú de accesibilidad y en el pie. -->
             <li v-if="!conSesion"><NuxtLink to="/accesibilidad">Ayuda</NuxtLink></li>
             <template v-if="conSesion">
-              <li><NuxtLink to="/mis-turnos">Mis turnos</NuxtLink></li>
-              <li><NuxtLink to="/perfil">Mi cuenta</NuxtLink></li>
+              <li class="encabezado__plegable"><NuxtLink to="/mis-turnos">Mis turnos</NuxtLink></li>
+              <!-- Avisos siempre a la vista, con la cantidad sin leer en número (no solo un color). -->
               <li>
+                <NuxtLink to="/avisos" class="encabezado__avisos">
+                  Avisos
+                  <span v-if="sinLeerCantidad > 0" class="encabezado__contador" aria-hidden="true">{{ sinLeerCantidad }}</span>
+                  <span v-if="sinLeerCantidad > 0" class="sr-only">, {{ sinLeerCantidad }} sin leer</span>
+                </NuxtLink>
+              </li>
+              <li class="encabezado__plegable"><NuxtLink to="/perfil">Mi cuenta</NuxtLink></li>
+              <li class="encabezado__plegable">
                 <button type="button" class="encabezado__salir" @click="salirDeLaCuenta">Salir</button>
               </li>
             </template>
@@ -44,6 +97,8 @@ async function salirDeLaCuenta() {
         <MenuAccesibilidad />
       </div>
     </header>
+
+    <BandaAvisos />
 
     <main id="contenido" tabindex="-1" class="contenido">
       <slot />
@@ -149,6 +204,37 @@ async function salirDeLaCuenta() {
   text-underline-offset: 8px;
 }
 
+/* Cantidad de avisos sin leer: un número en una pastilla (además del texto para lectores). */
+.encabezado__contador {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.7em;
+  height: 1.7em;
+  margin-left: 0.4em;
+  padding-inline: 0.4em;
+  border-radius: var(--radio-boton);
+  background: var(--atencion);
+  color: var(--sobre-primario);
+  font-size: 0.9em;
+  line-height: 1;
+}
+
+/* "Menú": solo en pantallas angostas y con la sesión iniciada. */
+.encabezado__menu {
+  display: none;
+  align-items: center;
+  gap: var(--espacio-2);
+  min-height: var(--alto-tactil);
+  padding-inline: 0.9rem;
+  background: var(--superficie);
+  color: var(--primario);
+  border: var(--grosor-borde) solid var(--primario);
+  border-radius: var(--radio-boton);
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  cursor: pointer;
+}
+
 /* En pantallas angostas la navegación pasa a su propia línea. */
 @media (max-width: 40rem) {
   .encabezado__nav {
@@ -163,6 +249,31 @@ async function salirDeLaCuenta() {
   .encabezado__nav a,
   .encabezado__salir {
     padding-inline: 0.5rem;
+  }
+
+  /* Con sesión: "Menú" y "Avisos" a la vista; el resto se despliega con "Menú". */
+  .encabezado__nav--sesion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--espacio-1) var(--espacio-2);
+  }
+
+  .encabezado__menu {
+    display: inline-flex;
+  }
+
+  .encabezado__nav--sesion .encabezado__plegable {
+    display: none;
+  }
+
+  .encabezado__nav--abierto ul {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .encabezado__nav--abierto .encabezado__plegable {
+    display: block;
   }
 }
 

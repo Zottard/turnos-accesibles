@@ -61,6 +61,8 @@ export function useSesion() {
   const supabase = useSupabaseClient()
   const usuario = useSupabaseUser()
   const cuenta = usePreferenciasCuenta()
+  const avisos = useAvisos()
+  const ayuda = useAyuda()
   const origen = useRequestURL().origin
 
   const conSesion = computed(() => usuario.value !== null)
@@ -156,6 +158,9 @@ export function useSesion() {
     await supabase.auth.signOut()
     usuario.value = null
     cuenta.olvidar()
+    // v0.5: los avisos y el modo "Estás ayudando a..." son de esta cuenta.
+    avisos.olvidar()
+    ayuda.dejar()
   }
 
   // Siempre responde lo mismo: no contamos si el correo tiene cuenta o no.

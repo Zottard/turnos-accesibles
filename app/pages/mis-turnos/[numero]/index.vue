@@ -3,7 +3,8 @@
   en palabras, dirección, qué llevar y cómo llegar. Se puede imprimir o guardar como PDF (la hoja
   de impresión está en base.css). Si es un turno próximo: cambiar de fecha o cancelar.
   ?nuevo=1 viene del asistente (recién reservado). ?cambiado=122 viene de "Cambiar de fecha".
-  La copia del comprobante por correo llega con la v0.5 (avisos).
+  v0.5: el comprobante también llega como aviso (bandeja y, si el correo está configurado, por correo)
+  y se dice cuándo sale el recordatorio.
 -->
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' })
@@ -38,6 +39,15 @@ const titulo = computed(() => {
 useSeoMeta({ title: titulo })
 
 const resumen = computed(() => (reserva.value ? resumenReserva(reserva.value) : ''))
+
+// Cuándo sale el recordatorio (con la antelación que eligió la persona). null si ya pasó ese momento.
+const { aviso: preferenciasAviso } = usePreferenciasCuenta()
+const recordatorio = computed(() => {
+  if (!reserva.value || estado.value !== 'proximo') return null
+  const horas = preferenciasAviso.value.antelacionHoras
+  const momento = momentoRecordatorio(reserva.value.inicio, horas)
+  return momento ? { momento, horas } : null
+})
 
 // "011 4740-1100" → "01147401100" para el enlace tel:
 function enlaceTelefono(telefono: string) {
@@ -181,8 +191,14 @@ onMounted(() => {
         </Boton>
         <LeerEnVoz :texto="resumen" etiqueta="Escuchar el turno" />
       </div>
-      <!-- v0.5: acá se agrega el envío de la copia del comprobante por correo (avisos). -->
-      <p class="texto-suave no-imprimir">La copia del comprobante por correo llega con la próxima versión.</p>
+      <p class="texto-suave no-imprimir">
+        También te dejamos el comprobante en <NuxtLink to="/avisos">Avisos</NuxtLink> y, si el correo está activado, te lo
+        mandamos por correo.
+        <template v-if="recordatorio">
+          Te vamos a mandar un recordatorio {{ recordatorio.horas }} horas antes:
+          {{ turnoEnPalabras(recordatorio.momento) }}.
+        </template>
+      </p>
 
       <section v-if="estado === 'proximo'" class="pila no-imprimir" aria-labelledby="titulo-cambios">
         <h2 id="titulo-cambios">¿Necesitás cambiarlo?</h2>
