@@ -98,6 +98,7 @@ watch(
       </div>
     </header>
 
+    <BandaAyuda />
     <BandaAvisos />
 
     <main id="contenido" tabindex="-1" class="contenido">

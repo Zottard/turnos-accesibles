@@ -39,9 +39,12 @@ export type BorradorAsistente = {
   turnoId: number | null
   // Cuándo empezó (milisegundos), para medir cuánto tardó (métricas de la v0.6).
   inicio: number
+  // v0.5: para quién es el turno (id de la persona que se ayuda) o null si es para uno mismo.
+  // Si al volver ya no se está ayudando a esa persona, el borrador se descarta.
+  para: string | null
 }
 
-export function borradorNuevo(ahora = Date.now()): BorradorAsistente {
+export function borradorNuevo(ahora = Date.now(), para: string | null = null): BorradorAsistente {
   return {
     paso: 0,
     especialidadId: null,
@@ -54,6 +57,7 @@ export function borradorNuevo(ahora = Date.now()): BorradorAsistente {
     cerca: false,
     turnoId: null,
     inicio: ahora,
+    para,
   }
 }
 
@@ -61,13 +65,21 @@ function numeroOnull(valor: unknown): number | null {
   return typeof valor === 'number' && Number.isFinite(valor) ? valor : null
 }
 
-/** Lee un borrador guardado. Lo que no se entiende se descarta (empieza de cero ese dato). */
-export function normalizarBorrador(guardado: unknown, ahora = Date.now()): BorradorAsistente {
-  const nuevo = borradorNuevo(ahora)
+/**
+ * Lee un borrador guardado. Lo que no se entiende se descarta (empieza de cero ese dato).
+ * `para`: a quién se está ayudando ahora (o null). Si el borrador era para otra persona, se
+ * descarta entero: nunca se reserva para alguien distinto del que se ve en pantalla.
+ */
+export function normalizarBorrador(guardado: unknown, ahora = Date.now(), para: string | null = null): BorradorAsistente {
+  const nuevo = borradorNuevo(ahora, para)
   if (typeof guardado !== 'object' || guardado === null) {
     return nuevo
   }
   const datos = guardado as Record<string, unknown>
+  const paraGuardado = typeof datos.para === 'string' ? datos.para : null
+  if (paraGuardado !== para) {
+    return nuevo
+  }
   const paso = Number.isInteger(datos.paso) ? (datos.paso as number) : 0
   const lat = numeroOnull(datos.lat)
   const lng = numeroOnull(datos.lng)
@@ -84,6 +96,7 @@ export function normalizarBorrador(guardado: unknown, ahora = Date.now()): Borra
     cerca: datos.cerca === true,
     turnoId: numeroOnull(datos.turnoId),
     inicio: inicio !== null && inicio <= ahora ? inicio : nuevo.inicio,
+    para,
   }
 }
 

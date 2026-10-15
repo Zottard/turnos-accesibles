@@ -79,14 +79,19 @@ export function useReservas() {
 
   /**
    * Mis turnos (o los de la persona que estoy ayudando). Con `numero`, solo esa reserva.
+   * propias: siempre los míos, aunque esté ayudando a alguien (por ejemplo, en /inicio).
    * sinPermiso: la persona ya no comparte sus turnos (se sale del modo ayuda).
    */
   async function cargarReservas(
     numero?: number,
+    opciones: { propias?: boolean } = {},
   ): Promise<{ datos: Reserva[] | null; error: string | null; sinPermiso?: boolean }> {
-    const { data, error } = await supabase.rpc('mis_reservas', { ...(numero ? { p_numero: numero } : {}), ...para() })
+    const { data, error } = await supabase.rpc('mis_reservas', {
+      ...(numero ? { p_numero: numero } : {}),
+      ...(opciones.propias ? {} : para()),
+    })
     if (error) {
-      if (error.code === '42501' && ayudando.value) {
+      if (error.code === '42501' && ayudando.value && !opciones.propias) {
         const mensaje = mensajeReserva('sin_vinculo', { nombre: ayudando.value.nombre, accion: 'ver' })
         olvidarSiNoComparte()
         return { datos: null, error: mensaje, sinPermiso: true }

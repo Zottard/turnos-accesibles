@@ -2,15 +2,19 @@
   Mis turnos (RF-05): los próximos y los anteriores (cumplidos, cancelados y cambiados de fecha).
   Cada turno lleva a su detalle, que es también el comprobante.
   ?cancelado=123 viene de cancelar un turno: lo confirma con un aviso.
+  v0.5: en modo acompañante ("Estás ayudando a Rosa") son los turnos de Rosa, y "Pedir un turno"
+  aparece solo si Rosa le dio ese permiso.
 -->
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' })
-useSeoMeta({ title: 'Mis turnos' })
-
 const route = useRoute()
 const { cargarReservas } = useReservas()
+const { ayudando, puedoHacer } = useAyuda()
 
-const { data: cargado, refresh } = await useAsyncData('mis-turnos', () => cargarReservas())
+const titulo = computed(() => (ayudando.value ? `Turnos de ${ayudando.value.nombre}` : 'Mis turnos'))
+useSeoMeta({ title: titulo })
+
+const { data: cargado, refresh } = await useAsyncData(`mis-turnos-${ayudando.value?.id ?? 'propios'}`, () => cargarReservas())
 
 const grupos = computed(() => separarReservas(cargado.value?.datos ?? []))
 const cancelado = computed(() => {
@@ -21,13 +25,22 @@ const cancelado = computed(() => {
 
 <template>
   <div class="contenedor pagina">
-    <h1>Mis turnos</h1>
+    <h1>{{ titulo }}</h1>
 
     <Aviso v-if="cancelado" tipo="exito" titulo="Cancelaste el turno">
       <p>El turno N.º {{ cancelado }} quedó cancelado. El horario quedó libre para otra persona.</p>
     </Aviso>
 
-    <template v-if="cargado?.error">
+    <template v-if="cargado?.sinPermiso">
+      <Aviso tipo="atencion">
+        <p>{{ cargado.error }}</p>
+      </Aviso>
+      <div>
+        <Boton to="/inicio">Volver a mi inicio</Boton>
+      </div>
+    </template>
+
+    <template v-else-if="cargado?.error">
       <Aviso tipo="error">
         <p>{{ cargado.error }}</p>
       </Aviso>
@@ -37,13 +50,15 @@ const cancelado = computed(() => {
     </template>
 
     <template v-else>
-      <div>
-        <Boton to="/asistente">Pedir un turno nuevo</Boton>
+      <div v-if="puedoHacer('reservar')">
+        <Boton to="/asistente">{{ ayudando ? `Pedir un turno para ${ayudando.nombre}` : 'Pedir un turno nuevo' }}</Boton>
       </div>
 
       <section class="pila" aria-labelledby="titulo-proximos">
         <h2 id="titulo-proximos">Próximos</h2>
-        <p v-if="grupos.proximos.length === 0">No tenés turnos próximos.</p>
+        <p v-if="grupos.proximos.length === 0">
+          {{ ayudando ? `${ayudando.nombre} no tiene turnos próximos.` : 'No tenés turnos próximos.' }}
+        </p>
         <ul v-else class="lista-reservas">
           <li v-for="reserva in grupos.proximos" :key="reserva.id" class="reserva">
             <EstadoTurno :estado="estadoVisible(reserva)" />
@@ -52,6 +67,7 @@ const cancelado = computed(() => {
               <strong>{{ nombreCompleto(reserva.especialidad) }}</strong><br />
               {{ reserva.centro.nombre }}, {{ reserva.centro.localidad }}
             </p>
+            <p v-if="reserva.asistida && reserva.creadaPorNombre" class="texto-suave">Lo sacó {{ reserva.creadaPorNombre }}.</p>
             <div>
               <Boton :to="`/mis-turnos/${reserva.numero}`" variante="secundario" :aria-describedby="`reserva-${reserva.numero}`">
                 Ver el turno N.º {{ reserva.numero }}
