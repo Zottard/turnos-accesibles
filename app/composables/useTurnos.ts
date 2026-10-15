@@ -39,12 +39,15 @@ const MENSAJE_CONEXION = 'No pudimos conectarnos. Revisá tu conexión a interne
 export function useTurnos() {
   const supabase = useSupabaseClient()
 
-  /** Especialidades, localidades y centros: son pocos, los traemos todos de una vez. */
+  /**
+   * Especialidades, localidades y centros: son pocos, los traemos todos de una vez.
+   * Solo lo activo (v0.6: el admin también ve lo dado de baja, y acá no tiene que aparecer).
+   */
   async function cargarCatalogo(): Promise<{ datos: Catalogo | null; error: string | null }> {
     const [especialidades, localidades, centros] = await Promise.all([
-      supabase.from('especialidades').select('id, nombre, nombre_simple, descripcion, palabras_clave').order('nombre_simple'),
+      supabase.from('especialidades').select('id, nombre, nombre_simple, descripcion, palabras_clave').eq('activa', true).order('nombre_simple'),
       supabase.from('localidades').select('nombre, lat, lng').order('nombre'),
-      supabase.from('centros').select('id, nombre, localidad').order('nombre'),
+      supabase.from('centros').select('id, nombre, localidad').eq('activo', true).order('nombre'),
     ])
     if (especialidades.error || localidades.error || centros.error) {
       return { datos: null, error: MENSAJE_CONEXION }

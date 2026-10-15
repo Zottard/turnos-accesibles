@@ -323,6 +323,7 @@ input[type='password'],
 input[type='number'],
 input[type='date'],
 input[type='search'],
+input[type='time'],
 select,
 textarea {
   display: block;
@@ -362,6 +363,78 @@ html[data-contraste='alto'] .boton--peligro {
   border-color: #fff;
 }
 
+/* --- Panel administrativo (v0.6) --- */
+
+/* Lista de tarjetas (centros, especialidades, profesionales). */
+.lista-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: var(--espacio-3);
+  padding: 0;
+  list-style: none;
+}
+
+.lista-tarjetas > li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  max-width: none;
+}
+
+/* Etiqueta de estado: ícono + palabra, nunca solo color ("✓ Publicado", "! Sin publicar"). */
+.insignia {
+  --color-insignia: var(--texto-suave);
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--espacio-2);
+  max-width: 100%;
+  padding: 0.1rem 0.8rem;
+  background: var(--superficie);
+  border: var(--grosor-borde) solid var(--color-insignia);
+  border-radius: var(--radio-boton);
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  overflow-wrap: normal;
+  hyphens: none;
+}
+
+.insignia--si {
+  --color-insignia: var(--exito);
+  background: var(--fondo-exito);
+}
+
+.insignia--no {
+  --color-insignia: var(--atencion);
+  background: var(--fondo-atencion);
+}
+
+/* Un <select> o <textarea> con su etiqueta (los <input> usan components/Campo.vue). */
+.campo-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+.formulario-admin {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  max-width: 44rem;
+}
+
+.formulario-admin .fila-campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: var(--espacio-3);
+}
+
+/* Lo que solo va en papel (el encabezado del reporte de métricas). */
+.solo-imprimir {
+  display: none;
+}
+
 /*
   --- Impresión (comprobante del turno: "Imprimir o guardar como PDF") ---
   Sin encabezado, menú ni pie: solo el contenido, en negro sobre blanco y sin sombras.
@@ -373,6 +446,10 @@ html[data-contraste='alto'] .boton--peligro {
   .saltar,
   .no-imprimir {
     display: none !important;
+  }
+
+  .solo-imprimir {
+    display: block !important;
   }
 
   /* Colores de papel, también si la persona usa alto contraste en pantalla. */

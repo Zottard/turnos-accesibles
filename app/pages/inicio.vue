@@ -10,6 +10,7 @@ useSeoMeta({ title: 'Mi inicio' })
 const { cargarPerfil } = usePerfil()
 const { cargarReservas } = useReservas()
 const { ayudando, cargarPersonas, empezar, dejar } = useAyuda()
+const { registrar } = useEventos()
 const { data: perfil } = await useAsyncData('perfil-inicio', async () => (await cargarPerfil()).datos)
 const { data: reservas } = await useAsyncData('reservas-inicio', () => cargarReservas(undefined, { propias: true }))
 const { data: personas } = await useAsyncData('personas-que-acompano', () => cargarPersonas())
@@ -19,6 +20,7 @@ const proxima = computed(() => proximaReserva(reservas.value?.datos ?? []))
 
 async function ayudarA(persona: PersonaAcompanada) {
   empezar(persona)
+  registrar('acompanante_ayudar')
   await navigateTo('/mis-turnos')
 }
 
@@ -61,6 +63,15 @@ async function verMiTurno(numero: number) {
           </div>
         </li>
       </ul>
+    </section>
+
+    <!-- v0.6: el admin entra al panel desde acá. -->
+    <section v-if="perfil?.rol === 'admin'" class="tarjeta pila panel" aria-labelledby="titulo-panel">
+      <h2 id="titulo-panel"><span aria-hidden="true">🛠️</span> Panel de administración</h2>
+      <p>Centros, especialidades, agendas, auditoría y métricas.</p>
+      <div>
+        <Boton to="/admin">Ir al panel</Boton>
+      </div>
     </section>
 
     <p class="pagina__bajada">¿Qué querés hacer hoy?</p>
@@ -117,7 +128,8 @@ async function verMiTurno(numero: number) {
 }
 
 .acompano,
-.proximo {
+.proximo,
+.panel {
   border-top-color: var(--exito);
 }
 
