@@ -76,8 +76,8 @@ pnpm build
   `select privado.generar_turnos(30);` en el editor SQL (no duplica los que ya existen).
   Los requisitos de cada especialidad están en esa función.
 - Datos en `useTurnos()`: `cargarCatalogo`, `buscarTurnos`, `cargarTurno`, `pedirAviso`.
-- Funciones puras (con tests): `utils/fechas.ts` (fechas en palabras con `Intl` y la zona
-  `America/Argentina/Buenos_Aires`, nunca la del navegador), `utils/especialidades.ts`
+- Funciones puras (con tests): `shared/utils/fechas.ts` (fechas en palabras con `Intl` y la zona
+  `America/Argentina/Buenos_Aires`, nunca la del navegador), `shared/utils/especialidades.ts`
   (`normalizar`, `buscarEspecialidades`, `elegirEspecialidad`, `nombreCompleto`) y
   `utils/turnos.ts` (filtros ↔ query, distancia, resumen para leer).
 - Las especialidades parecidas se calculan en el navegador con `buscarEspecialidades` (son
@@ -89,3 +89,38 @@ pnpm build
   Vitest los encuentre (Nuxt los auto-importa, Vitest no).
 - Siempre mostrar el nombre simple con el técnico: `nombreCompleto()` → "Oculista (Oftalmología)".
 - Las pantallas con datos de prueba lo dicen ("Datos de prueba").
+
+## Convenciones de la v0.4 (asistente de reserva y mis turnos)
+
+- Base: `0401_reservas.sql`. `reservas` solo tiene política de `select` (cada persona ve las
+  suyas): se escribe únicamente con las RPC `reservar_turno`, `cancelar_reserva` y
+  `reprogramar_reserva` (security definer, validan `auth.uid()` adentro). `mis_reservas` también
+  es security definer porque `turnos` solo deja ver turnos futuros.
+- Las RPC devuelven jsonb `{ ok: true, numero, ... }` o `{ ok: false, motivo }`. Motivos:
+  `sin_sesion`, `no_existe`, `vencido`, `tomado`, `superpuesto` (trae `conflicto`), `ya_paso`,
+  `no_vigente`, `fuera_de_plazo` (trae `horas`), `otra_especialidad`, `mismo_turno`. El mensaje
+  para la persona sale siempre de `mensajeReserva(motivo)` (`utils/reservas.ts`).
+- Atomicidad: el cupo se toma con un único `update ... where estado = 'disponible'`; además hay un
+  índice único de una reserva confirmada por turno. Reprogramar toma primero el turno nuevo.
+- "Cumplido" no se guarda: `estadoVisible()` lo calcula (confirmada + turno pasado). Sin pg_cron.
+- Datos en `useReservas()`: `reservarTurno`, `cancelarReserva`, `reprogramarReserva`,
+  `cargarReservas`, `cargarReserva`.
+- Asistente (`pages/asistente.vue`): un paso por pantalla; al cambiar de paso, foco en el `h1`
+  (la pregunta) y `anunciar()` con la pregunta y el resumen (con lectura en voz alta activada, se
+  lee solo). Borrador en `sessionStorage` con la clave `ta_asistente` (solo ids y opciones, nunca
+  el texto libre). Se borra al reservar. Puras y con tests en `utils/asistente.ts`
+  (`validarPaso`, `normalizarBorrador`, `filtrosDelBorrador`).
+- Intérprete: `POST /api/interpretar` → `PedidoInterpretado` (`shared/utils/reglasAsistente.ts`).
+  Siempre reglas primero; Claude solo si hay `NUXT_ANTHROPIC_API_KEY` (`server/utils/claude.ts`,
+  `fetch` directo, 4 s). La respuesta de la IA pasa por `validarRespuestaIA`; si falla, reglas.
+  Nunca registrar ni guardar el texto de la persona. Límite: 10 pedidos por minuto por IP.
+  `NUXT_ANTHROPIC_BASE_URL` sirve para probar con un servidor falso.
+- `shared/utils/` tiene lo que usan la app y el servidor (`fechas.ts`, `especialidades.ts`,
+  `reglasAsistente.ts`). Nuxt lo auto-importa en los dos lados; entre archivos, import relativo.
+- Componentes nuevos: `ElegirEspecialidad` (cuadro + sugerencias, lo usan `/buscar` y el
+  asistente), `OpcionesTurno` (radios de turnos con "Ver más opciones"), `EstadoTurno` (ícono +
+  palabra), `DictarBoton` (dictado con `dictar()` de `utils/voz.ts`).
+- Impresión: `@media print` en `base.css` oculta encabezado, pie y todo lo que tenga
+  `.no-imprimir`.
+- v0.5 engancha en: `p_para` en `reservar_turno` (acompañante), avisos y recordatorios en las tres
+  RPC (comentarios "v0.5" en la migración) y la copia del comprobante por correo.

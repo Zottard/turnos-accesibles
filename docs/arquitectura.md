@@ -29,10 +29,13 @@ app/
   layouts/           default.vue (header, menú de accesibilidad, footer)
   middleware/        auth.ts (pide sesión), invitado.ts (solo sin sesión), admin.ts (pide rol admin)
   pages/             una página por pantalla
-  utils/             funciones puras: validar.ts, fechas.ts, especialidades.ts, turnos.ts
+  utils/             funciones puras: validar.ts, turnos.ts, reservas.ts, asistente.ts, voz.ts
+shared/
+  utils/             funciones puras de la app y del servidor: fechas.ts, especialidades.ts,
+                     reglasAsistente.ts (reglas del asistente)
 server/
-  api/               endpoints propios (interpretar)
-  utils/             reglas del asistente
+  api/               endpoints propios (interpretar.post.ts)
+  utils/             claude.ts (pedido a la IA), limite.ts (pedidos por minuto)
 supabase/
   migrations/        archivos SQL numerados por versión (0201_cuentas.sql, 0301_turnos.sql...)
   seed.sql           datos de prueba
@@ -82,8 +85,9 @@ profesionales     id, nombre, especialidad_id, centro_id
 turnos            id, profesional_id, centro_id, especialidad_id, inicio, duracion_min,
                   estado (disponible | reservado), requisitos
 avisos_disponibilidad  id, usuario_id, especialidad_id, localidad, creado_en
-reservas          numero (correlativo), turno_id, solicitante_id, creada_por, estado,
-                  asistida, segundos, reserva_origen, creada_en
+reservas          numero (correlativo), id, turno_id, solicitante_id, creada_por, estado
+                  (confirmada | cancelada | reprogramada | completada), asistida, segundos,
+                  reserva_origen_id, cancelada_tarde, creada_en, actualizada_en, actualizada_por
 notificaciones    id, usuario_id, reserva_id, tipo, titulo, mensaje, enviar_desde, leida_en
 acompanamientos   id, solicitante_id, acompanante_id, correo_invitado, alcance[], token,
                   vence_en, estado, consentido_en, revocado_en
@@ -95,7 +99,7 @@ auditoria         id, tabla, accion, registro_id, usuario_id, creado_en
 
 ```bash
 pnpm install
-cp .env.example .env     # completar SUPABASE_URL y SUPABASE_KEY
+cp .env.example .env     # completar SUPABASE_URL y SUPABASE_KEY (y, opcional, NUXT_ANTHROPIC_API_KEY)
 pnpm dev                 # http://localhost:3000
 pnpm test                # Vitest
 pnpm typecheck
