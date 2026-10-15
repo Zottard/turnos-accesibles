@@ -28,6 +28,8 @@ function reserva(numero: number, inicio: string, estado: Reserva['estado'] = 'co
     numero,
     estado,
     canceladaTarde: false,
+    asistida: false,
+    creadaPorNombre: null,
     origenNumero: null,
     nuevaNumero: null,
     turnoId: numero * 10,
