@@ -7,7 +7,7 @@
 // - en mis_reservas, origen_numero, nueva_numero, requisitos, creada_por_nombre y los datos
 //   opcionales del centro (teléfono, horario, accesibilidad) pueden ser null;
 // - en personas_que_acompano, aceptado_en puede ser null.
-// avisos_por_correo no está: solo la llama el servidor con la clave secreta.
+// avisos_por_correo solo la puede llamar el servidor con la clave secreta (service_role).
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
@@ -508,6 +508,17 @@ export type Database = {
     }
     Functions: {
       aceptar_invitacion: { Args: { p_token: string }; Returns: Json }
+      avisos_por_correo: {
+        Args: { p_limite?: number }
+        Returns: {
+          correo: string
+          datos: Json
+          id: string
+          intentos: number
+          tipo: string
+          usuario_id: string
+        }[]
+      }
       buscar_turnos: {
         Args: {
           p_centro_id?: number

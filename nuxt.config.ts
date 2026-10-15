@@ -16,9 +16,19 @@ export default defineNuxtConfig({
   // Solo del servidor (nunca llegan al navegador). Se completan al arrancar con variables de
   // entorno: NUXT_ANTHROPIC_API_KEY (opcional: sin clave, el asistente usa reglas) y
   // NUXT_ANTHROPIC_BASE_URL (solo para probar con un servidor falso).
+  // v0.5, correo (opcional: sin estas claves los avisos quedan solo en la app):
+  // NUXT_CRON_SECRET (protege /api/avisos/enviar), NUXT_SUPABASE_SECRET_KEY (clave secreta de
+  // Supabase, para leer los avisos pendientes de todas las personas), NUXT_RESEND_API_KEY,
+  // NUXT_CORREO_REMITENTE ("Turnos Accesibles <avisos@tu-dominio>") y NUXT_RESEND_BASE_URL (solo
+  // para probar con un servidor falso).
   runtimeConfig: {
     anthropicApiKey: '',
     anthropicBaseUrl: 'https://api.anthropic.com',
+    cronSecret: '',
+    resendApiKey: '',
+    resendBaseUrl: 'https://api.resend.com',
+    correoRemitente: '',
+    supabase: { secretKey: '' },
   },
 
   css: ['~/assets/css/tokens.css', '~/assets/css/base.css'],

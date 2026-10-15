@@ -49,6 +49,8 @@ function mensajeDeError(codigo: string | undefined): string {
       return 'La contraseña nueva tiene que ser distinta de la anterior.'
     case 'email_address_invalid':
       return 'No podemos usar ese correo. Revisalo o probá con otro.'
+    case 'email_exists':
+      return 'Ya hay una cuenta con ese correo. Probá con otro.'
     case 'session_not_found':
     case 'session_expired':
       return 'Pasó mucho tiempo y se cerró la sesión. Pedí un enlace nuevo y probá otra vez.'
@@ -171,6 +173,21 @@ export function useSesion() {
     return { ok: true }
   }
 
+  /**
+   * Cambiar el correo (v0.5: por ejemplo, si un aviso por correo rebotó). Supabase manda un enlace
+   * para confirmar; hasta que se confirme, sigue el correo de antes.
+   */
+  async function cambiarCorreo(nuevo: string): Promise<Resultado> {
+    const { error } = await supabase.auth.updateUser(
+      { email: nuevo.trim().toLowerCase() },
+      { emailRedirectTo: `${origen}/perfil` },
+    )
+    if (error) {
+      return { ok: false, mensaje: mensajeDeError(error.code) }
+    }
+    return { ok: true }
+  }
+
   async function cambiarClave(nueva: string): Promise<Resultado> {
     const { error } = await supabase.auth.updateUser({ password: nueva })
     if (error) {
@@ -201,6 +218,7 @@ export function useSesion() {
     registrarse,
     salir,
     pedirRecuperacion,
+    cambiarCorreo,
     cambiarClave,
     sesionDesdeEnlace,
   }
