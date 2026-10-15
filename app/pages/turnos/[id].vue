@@ -1,12 +1,11 @@
 <!--
   Ficha de un turno (RF-03): cuándo, quién atiende, dónde queda, cómo es el edificio,
-  qué llevar y cómo llegar. La reserva llega en la v0.4.
+  qué llevar y cómo llegar. "Reservar este turno" abre el asistente directo en "Revisá y confirmá".
   ?volver= trae la búsqueda de la que venía, para volver a los mismos resultados.
 -->
 <script setup lang="ts">
 const route = useRoute()
 const { cargarTurno } = useTurnos()
-const { anunciar } = useAnuncio()
 
 const id = Number(route.params.id)
 const volver = computed(() => rutaSegura(route.query.volver, '/buscar'))
@@ -31,15 +30,6 @@ useSeoMeta({ title: titulo })
 // "011 4740-1100" → "01147401100" para el enlace tel:
 function enlaceTelefono(telefono: string) {
   return `tel:${telefono.replace(/[^\d+]/g, '')}`
-}
-
-const mostrarAvisoReserva = ref(false)
-
-async function reservar() {
-  mostrarAvisoReserva.value = true
-  anunciar('La reserva llega en la próxima versión.')
-  await nextTick()
-  document.getElementById('aviso-reserva')?.focus()
 }
 </script>
 
@@ -154,18 +144,9 @@ async function reservar() {
       <LeerEnVoz objetivo-id="ficha-turno" etiqueta="Escuchar los datos del turno" />
 
       <div class="pila">
+        <p>Antes de reservar, te mostramos todo junto para que lo revises.</p>
         <div>
-          <Boton @click="reservar">Reservar este turno</Boton>
-        </div>
-        <div v-if="mostrarAvisoReserva" id="aviso-reserva" tabindex="-1">
-          <Aviso tipo="info" titulo="La reserva llega en la próxima versión">
-            <p>
-              Por ahora, para pedir este turno llamá al centro
-              <template v-if="turno.centro.telefono">
-                al <a :href="enlaceTelefono(turno.centro.telefono)">{{ turno.centro.telefono }}</a></template
-              >.
-            </p>
-          </Aviso>
+          <Boton :to="`/asistente?turno=${turno.id}`">Reservar este turno</Boton>
         </div>
       </div>
     </template>
