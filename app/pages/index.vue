@@ -53,7 +53,8 @@ const AYUDAS = [
         </div>
 
         <div class="portada__acciones">
-          <Boton to="/buscar">Buscar un turno</Boton>
+          <Boton to="/asistente">Pedir un turno paso a paso</Boton>
+          <Boton to="/buscar" variante="secundario">Buscar un turno</Boton>
           <Boton to="/accesibilidad#preferencias" variante="secundario">Configurar accesibilidad</Boton>
         </div>
         <LeerEnVoz objetivo-id="que-es" />

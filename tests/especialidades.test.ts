@@ -6,7 +6,7 @@ import {
   nombreCompleto,
   normalizar,
   type Especialidad,
-} from '../app/utils/especialidades'
+} from '../shared/utils/especialidades'
 
 // Una parte del catálogo de prueba (supabase/seed.sql).
 const LISTA: Especialidad[] = [

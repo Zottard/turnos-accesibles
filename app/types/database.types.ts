@@ -3,7 +3,9 @@
 // Si cambia una migración, hay que volver a generarlos.
 // Cambios a mano (Postgres no informa qué puede ser null en lo que devuelve una función):
 // - las funciones de bloqueo pueden devolver null;
-// - en buscar_turnos, distancia_km (sin ubicación) y requisitos pueden ser null.
+// - en buscar_turnos, distancia_km (sin ubicación) y requisitos pueden ser null;
+// - en mis_reservas, origen_numero, nueva_numero, requisitos y los datos opcionales del centro
+//   (teléfono, horario, accesibilidad) pueden ser null.
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
@@ -276,6 +278,69 @@ export type Database = {
           },
         ]
       }
+      reservas: {
+        Row: {
+          actualizada_en: string
+          actualizada_por: string | null
+          asistida: boolean
+          cancelada_tarde: boolean
+          creada_en: string
+          creada_por: string | null
+          estado: string
+          id: string
+          numero: number
+          reserva_origen_id: string | null
+          segundos: number | null
+          solicitante_id: string
+          turno_id: number
+        }
+        Insert: {
+          actualizada_en?: string
+          actualizada_por?: string | null
+          asistida?: boolean
+          cancelada_tarde?: boolean
+          creada_en?: string
+          creada_por?: string | null
+          estado?: string
+          id?: string
+          numero?: never
+          reserva_origen_id?: string | null
+          segundos?: number | null
+          solicitante_id: string
+          turno_id: number
+        }
+        Update: {
+          actualizada_en?: string
+          actualizada_por?: string | null
+          asistida?: boolean
+          cancelada_tarde?: boolean
+          creada_en?: string
+          creada_por?: string | null
+          estado?: string
+          id?: string
+          numero?: never
+          reserva_origen_id?: string | null
+          segundos?: number | null
+          solicitante_id?: string
+          turno_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'reservas_reserva_origen_id_fkey'
+            columns: ['reserva_origen_id']
+            isOneToOne: false
+            referencedRelation: 'reservas'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'reservas_turno_id_fkey'
+            columns: ['turno_id']
+            isOneToOne: false
+            referencedRelation: 'turnos'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       turnos: {
         Row: {
           centro_id: number
@@ -361,9 +426,57 @@ export type Database = {
           requisitos: string | null
         }[]
       }
+      cancelar_reserva: {
+        Args: { p_confirmar_tarde?: boolean; p_reserva_id: string }
+        Returns: Json
+      }
       estado_bloqueo: { Args: { p_correo: string }; Returns: string | null }
       limpiar_intentos: { Args: never; Returns: undefined }
+      mis_reservas: {
+        Args: { p_numero?: number }
+        Returns: {
+          actualizada_en: string
+          cancelada_tarde: boolean
+          centro_accesibilidad: string | null
+          centro_direccion: string
+          centro_horario: string | null
+          centro_id: number
+          centro_lat: number
+          centro_lng: number
+          centro_localidad: string
+          centro_nombre: string
+          centro_telefono: string | null
+          centro_tipo: string
+          creada_en: string
+          duracion_min: number
+          especialidad_id: number
+          especialidad_nombre: string
+          especialidad_nombre_simple: string
+          estado: string
+          id: string
+          inicio: string
+          nueva_numero: number | null
+          numero: number
+          origen_numero: number | null
+          profesional: string
+          requisitos: string | null
+          turno_id: number
+        }[]
+      }
       registrar_fallo: { Args: { p_correo: string }; Returns: string | null }
+      reprogramar_reserva: {
+        Args: { p_nuevo_turno_id: number; p_reserva_id: string }
+        Returns: Json
+      }
+      reservar_turno: {
+        Args: {
+          p_asistida?: boolean
+          p_confirmar_superposicion?: boolean
+          p_segundos?: number
+          p_turno_id: number
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

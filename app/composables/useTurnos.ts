@@ -19,8 +19,9 @@ export type FichaTurno = {
   disponible: boolean
   requisitos: string[]
   profesional: string
-  especialidad: { nombre: string; nombreSimple: string; descripcion: string }
+  especialidad: { id: number; nombre: string; nombreSimple: string; descripcion: string }
   centro: {
+    id: number
     nombre: string
     tipo: string
     direccion: string
@@ -116,8 +117,8 @@ export function useTurnos() {
       .select(
         `id, inicio, duracion_min, estado, requisitos,
          profesionales (nombre),
-         especialidades (nombre, nombre_simple, descripcion),
-         centros (nombre, tipo, direccion, localidad, telefono, horario, accesibilidad, lat, lng)`,
+         especialidades (id, nombre, nombre_simple, descripcion),
+         centros (id, nombre, tipo, direccion, localidad, telefono, horario, accesibilidad, lat, lng)`,
       )
       .eq('id', id)
       .maybeSingle()
@@ -137,6 +138,7 @@ export function useTurnos() {
         requisitos: listaRequisitos(data.requisitos),
         profesional: data.profesionales.nombre,
         especialidad: {
+          id: data.especialidades.id,
           nombre: data.especialidades.nombre,
           nombreSimple: data.especialidades.nombre_simple,
           descripcion: data.especialidades.descripcion,

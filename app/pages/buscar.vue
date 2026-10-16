@@ -78,34 +78,8 @@ watch(filtrosActuales, async (filtros) => {
   avisarResultado()
 })
 
+// Las sugerencias y la lista de especialidades están en components/ElegirEspecialidad.vue.
 const elegida = computed(() => especialidadPorId(formulario.especialidadId))
-
-// Si cambia lo escrito, la especialidad elegida deja de valer.
-watch(textoNecesidad, (texto) => {
-  if (elegida.value && texto !== elegida.value.nombreSimple) {
-    formulario.especialidadId = null
-  }
-})
-// Al elegir una de la lista, el cuadro muestra su nombre.
-watch(
-  () => formulario.especialidadId,
-  () => {
-    if (elegida.value) {
-      textoNecesidad.value = elegida.value.nombreSimple
-    }
-  },
-)
-
-const sugerencias = computed(() =>
-  elegida.value ? [] : buscarEspecialidades(textoNecesidad.value, especialidades.value, 4),
-)
-
-function elegirSugerencia(especialidad: Especialidad) {
-  formulario.especialidadId = especialidad.id
-  anunciar(`Elegiste ${nombreCompleto(especialidad)}.`)
-  // El foco vuelve al cuadro, que ahora muestra la especialidad elegida.
-  document.getElementById('buscar-que')?.focus()
-}
 
 // La franja "me da igual" es null en los filtros.
 const franjaElegida = computed({
@@ -115,19 +89,6 @@ const franjaElegida = computed({
   },
 })
 
-const FRANJAS = [
-  { valor: 'manana', titulo: 'A la mañana', descripcion: 'De 8 a 13 h.', icono: '🌅' },
-  { valor: 'tarde', titulo: 'A la tarde', descripcion: 'De 13 a 17 h.', icono: '🌇' },
-  { valor: 'cualquiera', titulo: 'Me da igual', descripcion: 'A cualquier hora.', icono: '🕒' },
-]
-
-// En "Ver todas", el radio no acepta null: sin elegir es undefined.
-const especialidadDeLaLista = computed({
-  get: () => formulario.especialidadId ?? undefined,
-  set: (valor: string | number | undefined) => {
-    formulario.especialidadId = typeof valor === 'number' ? valor : null
-  },
-})
 
 // --- ¿Dónde? Ubicación del navegador o localidad ---
 const mensajeUbicacion = ref('')
@@ -340,6 +301,10 @@ async function avisame() {
     <p class="pagina__bajada">
       Respondé tres preguntas. Solo la primera es obligatoria. No hace falta que tengas una cuenta.
     </p>
+    <p>
+      ¿Preferís que te guiemos de a una pregunta por pantalla?
+      <NuxtLink to="/asistente">Pedí tu turno con el asistente</NuxtLink>.
+    </p>
 
     <Aviso v-if="catalogo?.error" tipo="error">
       <p>{{ catalogo.error }}</p>
@@ -354,54 +319,13 @@ async function avisame() {
           <span class="paso-busqueda__numero" aria-hidden="true">1</span>
           ¿Qué necesitás?
         </h2>
-        <Campo
+        <ElegirEspecialidad
           id="buscar-que"
-          v-model="textoNecesidad"
-          etiqueta="Escribí qué te pasa o qué médico buscás"
-          ayuda='Por ejemplo: "oculista", "me duele la rodilla" o "corazón".'
-          autocomplete="off"
+          v-model:texto="textoNecesidad"
+          v-model:especialidad-id="formulario.especialidadId"
+          :especialidades="especialidades"
           :error="errores.que"
-          requerido
         />
-
-        <p class="sr-only" role="status">
-          <template v-if="sugerencias.length > 0">
-            {{ sugerencias.length === 1 ? 'Hay 1 opción' : `Hay ${sugerencias.length} opciones` }} debajo del cuadro.
-          </template>
-        </p>
-
-        <div v-if="sugerencias.length > 0" class="sugerencias">
-          <p id="titulo-sugerencias" class="sugerencias__titulo">¿Es alguna de estas?</p>
-          <ul aria-labelledby="titulo-sugerencias">
-            <li v-for="especialidad in sugerencias" :key="especialidad.id">
-              <button type="button" class="sugerencia" @click="elegirSugerencia(especialidad)">
-                <span class="sugerencia__nombre">{{ nombreCompleto(especialidad) }}</span>
-                <span class="sugerencia__descripcion">{{ especialidad.descripcion }}</span>
-              </button>
-            </li>
-          </ul>
-        </div>
-
-        <p v-if="elegida" class="elegida">
-          <span aria-hidden="true">✓</span>
-          Elegiste: <strong>{{ nombreCompleto(elegida) }}</strong>. {{ elegida.descripcion }}
-        </p>
-
-        <details class="todas">
-          <summary>Ver todas las especialidades</summary>
-          <fieldset class="todas__lista">
-            <legend class="sr-only">Todas las especialidades</legend>
-            <OpcionTarjeta
-              v-for="especialidad in especialidades"
-              :key="especialidad.id"
-              v-model="especialidadDeLaLista"
-              nombre="buscar-especialidad"
-              :valor="especialidad.id"
-              :titulo="nombreCompleto(especialidad)"
-              :descripcion="especialidad.descripcion"
-            />
-          </fieldset>
-        </details>
       </section>
 
       <!-- 2. ¿Dónde? -->
@@ -477,7 +401,7 @@ async function avisame() {
           <legend>¿A qué hora te queda mejor?</legend>
           <div class="franjas">
             <OpcionTarjeta
-              v-for="franja in FRANJAS"
+              v-for="franja in OPCIONES_FRANJA"
               :key="franja.valor"
               v-model="franjaElegida"
               nombre="buscar-franja"
@@ -642,78 +566,14 @@ async function avisame() {
   color: var(--texto-suave);
 }
 
-/* Sugerencias y especialidades parecidas: botones grandes, uno debajo del otro. */
-.sugerencias__titulo {
-  font-family: var(--fuente-titulos);
-  font-weight: 600;
-}
-
-.sugerencias ul,
+/* Especialidades parecidas: botones grandes (.sugerencia, en base.css). */
 .parecidas {
   display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
   gap: var(--espacio-2);
   margin-top: var(--espacio-2);
   padding: 0;
   list-style: none;
-}
-
-.parecidas {
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
-}
-
-.sugerencia {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-  min-height: var(--alto-tactil);
-  padding: var(--espacio-2) var(--espacio-3);
-  background: var(--superficie);
-  color: var(--texto);
-  border: var(--grosor-borde) solid var(--primario);
-  border-radius: var(--radio-tarjeta);
-  text-align: left;
-  cursor: pointer;
-}
-
-.sugerencia:hover {
-  background: var(--fondo-info);
-}
-
-.sugerencia__nombre {
-  font-family: var(--fuente-titulos);
-  font-weight: 600;
-  color: var(--primario);
-}
-
-.sugerencia__descripcion {
-  color: var(--texto-suave);
-}
-
-.elegida {
-  padding: var(--espacio-2) var(--espacio-3);
-  background: var(--fondo-exito);
-  border: var(--grosor-borde) solid var(--exito);
-  border-radius: var(--radio-chico);
-}
-
-.todas summary {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--alto-tactil);
-  font-family: var(--fuente-titulos);
-  font-weight: 600;
-  color: var(--primario);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-
-.todas__lista {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
-  gap: var(--espacio-2);
-  margin-top: var(--espacio-2);
 }
 
 .campo-lista {

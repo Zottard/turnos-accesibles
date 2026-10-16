@@ -72,6 +72,39 @@ export function diaEnPalabras(inicio: string | Date, ahora = new Date()): string
   return texto
 }
 
+/** true si es un día que existe, escrito "AAAA-MM-DD" (como lo dan los campos de fecha). */
+export function esFechaValida(clave: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(clave)) {
+    return false
+  }
+  const fecha = new Date(`${clave}T12:00:00-03:00`)
+  // Si el día no existe (30 de febrero), la fecha no se entiende o "se corre" y no coincide.
+  return !Number.isNaN(fecha.getTime()) && fechaClave(fecha) === clave
+}
+
+/** Día de la semana de una fecha "AAAA-MM-DD": 0 = domingo, 1 = lunes... 6 = sábado. */
+export function diaDeLaSemana(clave: string): number {
+  return new Date(`${clave}T12:00:00-03:00`).getUTCDay()
+}
+
+/** El próximo día de la semana pedido, desde `hoy` inclusive: proximoDia('2026-10-14', 5) → viernes 16. */
+export function proximoDia(hoy: string, dia: number): string {
+  const faltan = (dia - diaDeLaSemana(hoy) + 7) % 7
+  return sumarDias(hoy, faltan)
+}
+
+/** "La semana que viene": el lunes siguiente (si hoy es lunes, el de la otra semana). */
+export function lunesQueViene(hoy: string): string {
+  // Días que pasaron desde el lunes de esta semana: lunes 0, martes 1... domingo 6.
+  const desdeElLunes = (diaDeLaSemana(hoy) + 6) % 7
+  return sumarDias(hoy, 7 - desdeElLunes)
+}
+
+/** Horas enteras que faltan hasta `inicio` (negativas si ya pasó). */
+export function horasHasta(inicio: string | Date, ahora = new Date()): number {
+  return Math.floor((new Date(inicio).getTime() - ahora.getTime()) / (60 * 60 * 1000))
+}
+
 /** Un día "AAAA-MM-DD" de un campo de fecha, en palabras: "martes 20 de octubre". */
 export function diaDeCampoEnPalabras(clave: string, ahora = new Date()): string {
   return diaEnPalabras(new Date(`${clave}T12:00:00-03:00`), ahora)

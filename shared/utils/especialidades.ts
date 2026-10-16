@@ -3,6 +3,7 @@
 // especialidades. Comparamos sin mayúsculas ni tildes, contra el nombre simple ("Oculista"),
 // el nombre técnico ("Oftalmología") y las palabras clave ({ojos, vista, anteojos}).
 // Son funciones puras: las prueba tests/especialidades.test.ts.
+// Está en shared/ porque también la usa el servidor (las reglas del asistente).
 
 export type Especialidad = {
   id: number
@@ -119,6 +120,33 @@ export function elegirEspecialidad(texto: string, lista: Especialidad[]): Especi
   }
   if (resultados.length === 1 || puntajeEspecialidad(texto, primera) === PUNTAJE.nombreExacto) {
     return primera
+  }
+  return null
+}
+
+/**
+ * Para el asistente, que recibe frases largas ("algo para la presión a la tarde").
+ * Como elegirEspecialidad, pero si coinciden varias suma lo que da cada palabra de la frase:
+ * en "control con el médico clínico" gana Clínica médica, que coincide en tres palabras.
+ * Si empatan, devuelve null y la persona elige.
+ */
+export function especialidadDeLaFrase(texto: string, lista: Especialidad[]): Especialidad | null {
+  const elegida = elegirEspecialidad(texto, lista)
+  if (elegida) {
+    return elegida
+  }
+  const palabras = normalizar(texto)
+    .split(' ')
+    .filter((palabra) => palabra.length >= 3 && !PALABRAS_VACIAS.includes(palabra))
+  const [primera, segunda] = lista
+    .map((especialidad) => ({
+      especialidad,
+      puntaje: palabras.reduce((suma, palabra) => suma + puntajeEspecialidad(palabra, especialidad), 0),
+    }))
+    .filter((item) => item.puntaje > 0)
+    .sort((a, b) => b.puntaje - a.puntaje)
+  if (primera && (!segunda || primera.puntaje > segunda.puntaje)) {
+    return primera.especialidad
   }
   return null
 }

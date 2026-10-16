@@ -40,6 +40,11 @@ la base. Nunca pongas acá la clave secreta (`service_role`).
 Para correr la compilación (`node .output/server/index.mjs`) pasá las mismas variables como
 `NUXT_PUBLIC_SUPABASE_URL` y `NUXT_PUBLIC_SUPABASE_KEY`.
 
+**Opcional (desde la v0.4):** `NUXT_ANTHROPIC_API_KEY=sk-ant-...` para que el asistente entienda
+los pedidos en lenguaje natural con Claude. Solo la usa el servidor (`server/api/interpretar.post.ts`):
+nunca llega al navegador. **Sin esta clave todo funciona igual**: el pedido se interpreta con
+reglas simples (ver "Qué trae la v0.4").
+
 ## Base de datos (Supabase)
 
 - Proyecto `rmvhepjmdxofksdlfvpo` (región São Paulo).
@@ -48,6 +53,9 @@ Para correr la compilación (`node .output/server/index.mjs`) pasá las mismas v
 - `supabase/migrations/0301_turnos.sql`: catálogo (`localidades`, `centros`, `especialidades`,
   `profesionales`, `turnos`), `avisos_disponibilidad`, la búsqueda `buscar_turnos` y
   `privado.generar_turnos(dias)`.
+- `supabase/migrations/0401_reservas.sql`: `reservas` (número correlativo, estado, quién la hizo,
+  cuánto tardó) y las funciones atómicas `reservar_turno`, `cancelar_reserva`,
+  `reprogramar_reserva` y `mis_reservas`. La app nunca escribe `reservas` directo.
 - `supabase/seed.sql`: usuarios de prueba (ya confirmados) y, en la sección v0.3, el catálogo
   de prueba con la agenda de los próximos 30 días. Se puede correr varias veces.
 - `app/types/database.types.ts`: tipos de la base. Si cambia una migración, hay que regenerarlos.
@@ -86,8 +94,8 @@ Seis versiones, una feature completa por versión. El detalle está en
 |---|---|---|
 | v0.1 | Base, marca y accesibilidad | Lista |
 | v0.2 | Cuentas y preferencias | Lista |
-| v0.3 | Búsqueda de turnos | Esta rama |
-| v0.4 | Asistente de reserva y mis turnos | Pendiente |
+| v0.3 | Búsqueda de turnos | Lista |
+| v0.4 | Asistente de reserva y mis turnos | Esta rama |
 | v0.5 | Avisos y modo acompañante | Pendiente |
 | v0.6 | Panel administrativo, métricas y PWA | Pendiente |
 
@@ -137,7 +145,6 @@ Auth. Quien llame a la API de Auth directamente se lo saltea. En producción se 
   escribió no es una especialidad: "¿Quisiste decir…?".
 - Ficha del turno (`/turnos/:id`): especialidad, día y hora, profesional, dirección, teléfono,
   horario, cómo es el edificio, qué llevar (para ir tildando) y cómo llegar (Google Maps).
-  "Reservar" llega en la v0.4.
 
 ### Datos de prueba
 
@@ -154,6 +161,56 @@ más o menos 1 de cada 4.
 
 Una búsqueda típica tarda unos 7 ms en la base y se ve en pantalla en unos 250 ms
 (el requisito es menos de 3 segundos).
+
+## Qué trae la v0.4
+
+- **Asistente para pedir un turno** (`/asistente`), una pregunta por pantalla, con "Paso 2 de 5",
+  "Volver" que no pierde nada y lectura en voz alta de cada paso:
+  1. **Contanos qué necesitás** (se puede saltar): se escribe o se dice con la voz ("Decilo con tu
+     voz", dictado del navegador en español de Argentina). El servidor lo interpreta y pregunta
+     "¿Es así?": *"Entendimos que buscás un turno de Oculista (Oftalmología), cerca de tu casa."*
+  2. **¿Qué médico necesitás?** (con las sugerencias de la búsqueda).
+  3. **¿Dónde te queda cómodo?** (localidad del perfil, tu ubicación o un centro).
+  4. **¿Qué día y hora?** Los turnos más próximos, de a 5 ("Ver más opciones").
+  5. **Revisá y confirmá**: todo junto y "Confirmar turno". Recién ahí se reserva.
+- Se puede empezar sin cuenta; para confirmar hay que ingresar y se vuelve al mismo paso.
+  Lo elegido queda como borrador en el navegador (`sessionStorage`), sin datos personales.
+- Desde la ficha de un turno, "Reservar este turno" abre el asistente directo en el paso 5.
+- **Reserva atómica**: si otra persona toma el turno mientras confirmás, te lo decimos y te
+  mostramos los más cercanos sin perder lo demás. Si ya tenés otro turno ese día (misma
+  especialidad) o a menos de 2 horas, te avisa y podés confirmar igual.
+- **Comprobante** (`/mis-turnos/123`): número correlativo, especialidad, día y hora en palabras,
+  dirección, qué llevar y cómo llegar. "Imprimir o guardar como PDF" (sin menú ni pie). La copia
+  por correo llega con la v0.5.
+- **Mis turnos** (`/mis-turnos`): próximos y anteriores (cumplidos, cancelados, cambiados de
+  fecha), con el estado en texto e ícono. En `/inicio` aparece el próximo turno.
+  - **Cancelar**: explica que el turno se libera y no se deshace. Con menos de 24 horas avisa y
+    pide confirmar otra vez (queda registrado). Un turno que ya pasó no se cancela.
+  - **Cambiar de fecha**: turnos de la misma especialidad cerca del mismo centro. Si el nuevo lo
+    toma otra persona, el de antes queda igual.
+
+### Cómo entiende el asistente (y qué pasa sin IA)
+
+`POST /api/interpretar` siempre calcula primero un resultado con **reglas simples**
+(`shared/utils/reglasAsistente.ts`): busca la especialidad con las mismas palabras clave que la
+búsqueda, "cerca de casa", "a la mañana / a la tarde" y "hoy, mañana, pasado mañana, el lunes,
+la semana que viene" (en hora argentina). Si hay clave de Anthropic, además le pregunta a
+**Claude** (`claude-opus-5-5`, esfuerzo bajo, respuesta con formato JSON fijo) con un límite de
+4 segundos. Si Claude no responde a tiempo, falla o responde algo que no es válido (una
+especialidad que no existe, una fecha que ya pasó), se usan las reglas. Si nada entiende, el
+asistente sigue por menús: **la IA nunca frena una reserva**. El texto de la persona no se guarda
+ni se registra. Hay un límite de 10 pedidos por minuto por persona.
+
+### Tiempos medidos
+
+Desde "Confirmar turno" hasta ver el comprobante: unos 220 ms (el requisito es menos de 5 s).
+Cambiar de fecha: unos 300 ms.
+
+### Por qué "cumplido" no está en la base
+
+Un turno confirmado cuyo horario ya pasó se muestra como **cumplido**: se calcula al leerlo
+(`estadoVisible()` en `app/utils/reservas.ts`), sin tareas programadas. El estado `completada`
+queda en la tabla para el panel de la v0.6.
 
 ## Documentación
 
