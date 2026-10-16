@@ -29,7 +29,7 @@ app/
   layouts/           default.vue (header, menú de accesibilidad, footer)
   middleware/        auth.ts (pide sesión), invitado.ts (solo sin sesión), admin.ts (pide rol admin)
   pages/             una página por pantalla
-  utils/             funciones puras: validar.ts, fechas.ts, textos.ts
+  utils/             funciones puras: validar.ts, fechas.ts, especialidades.ts, turnos.ts
 server/
   api/               endpoints propios (interpretar)
   utils/             reglas del asistente
@@ -79,7 +79,9 @@ centros           id, nombre, tipo, direccion, localidad, telefono, horario, lat
                   accesibilidad, activo
 especialidades    id, nombre, nombre_simple, descripcion, palabras_clave[], activa
 profesionales     id, nombre, especialidad_id, centro_id
-turnos            id, profesional_id, centro_id, especialidad_id, inicio, estado, requisitos
+turnos            id, profesional_id, centro_id, especialidad_id, inicio, duracion_min,
+                  estado (disponible | reservado), requisitos
+avisos_disponibilidad  id, usuario_id, especialidad_id, localidad, creado_en
 reservas          numero (correlativo), turno_id, solicitante_id, creada_por, estado,
                   asistida, segundos, reserva_origen, creada_en
 notificaciones    id, usuario_id, reserva_id, tipo, titulo, mensaje, enviar_desde, leida_en
