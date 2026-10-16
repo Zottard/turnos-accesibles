@@ -47,7 +47,10 @@ const CORREO_CONTACTO = 'contacto@turnos-accesibles.example'
       <h3>Lo que todavía no está bien</h3>
       <ul>
         <li>La lectura en voz alta depende de tu navegador. Algunos no tienen voces en español.</li>
-        <li>Tus preferencias quedan guardadas solo en este navegador. Pronto vas a poder guardarlas en tu cuenta.</li>
+        <li>
+          Si no ingresás con tu cuenta, tus preferencias quedan guardadas solo en este navegador. Con
+          tu cuenta, se usan en cualquier dispositivo.
+        </li>
         <li>Es un prototipo: todavía no lo probamos con todas las personas y lectores de pantalla.</li>
       </ul>
 
@@ -64,12 +67,6 @@ const CORREO_CONTACTO = 'contacto@turnos-accesibles.example'
 <style scoped>
 .tarjeta {
   max-width: 44rem;
-  padding: var(--relleno-tarjeta);
-  background: var(--superficie);
-  border: var(--grosor-borde) solid var(--borde);
-  border-top: 8px solid var(--primario);
-  border-radius: var(--radio-tarjeta);
-  box-shadow: var(--sombra);
 }
 
 .tarjeta > h2 {

@@ -6,6 +6,7 @@
 const abierto = ref(false)
 const boton = ref<HTMLButtonElement | null>(null)
 const route = useRoute()
+const { conSesion } = useSesion()
 
 function cerrar() {
   abierto.value = false
@@ -63,7 +64,10 @@ watch(
           Cerrar <span aria-hidden="true">✕</span>
         </button>
       </div>
-      <p class="texto-suave menu__ayuda">Los cambios se ven enseguida y quedan guardados en este navegador.</p>
+      <p class="texto-suave menu__ayuda">
+        Los cambios se ven enseguida y quedan guardados en este navegador<template v-if="conSesion">
+          y en tu cuenta</template>.
+      </p>
       <PreferenciasFormulario prefijo="menu" />
       <p class="menu__mas">
         <NuxtLink to="/accesibilidad">Más sobre la accesibilidad de este sitio</NuxtLink>
