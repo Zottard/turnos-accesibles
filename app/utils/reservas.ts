@@ -11,6 +11,9 @@ export type Reserva = {
   numero: number
   estado: 'confirmada' | 'cancelada' | 'reprogramada' | 'completada'
   canceladaTarde: boolean
+  // v0.5: la sacó un acompañante (y su nombre).
+  asistida: boolean
+  creadaPorNombre: string | null
   // El turno que esta reemplazó, y el turno por el que se cambió esta.
   origenNumero: number | null
   nuevaNumero: number | null
@@ -72,12 +75,38 @@ export function esCancelacionTardia(inicio: string, ahora = new Date()): boolean
   return new Date(inicio).getTime() - ahora.getTime() < 24 * 60 * 60 * 1000
 }
 
+// Cuando un acompañante opera los turnos de otra persona (v0.5): su nombre y qué quiso hacer.
+export type ContextoAyuda = { nombre: string; accion: 'ver' | 'reservar' | 'cancelar' }
+
+const QUE_QUISO: Record<ContextoAyuda['accion'], string> = {
+  ver: 'ver sus turnos',
+  reservar: 'sacarle turnos',
+  cancelar: 'cancelar ni cambiar de fecha sus turnos',
+}
+
 /**
  * El mensaje en lenguaje simple para cada `motivo` que devuelven reservar_turno,
  * cancelar_reserva y reprogramar_reserva. Cualquier otro caso es un problema de conexión.
+ * Con `ayuda` (modo acompañante), los mensajes hablan de la otra persona.
  */
-export function mensajeReserva(motivo: string): string {
+export function mensajeReserva(motivo: string, ayuda?: ContextoAyuda): string {
+  if (ayuda) {
+    switch (motivo) {
+      case 'sin_permiso':
+        return `${ayuda.nombre} no te dio permiso para ${QUE_QUISO[ayuda.accion]}. Pedile que lo cambie desde su cuenta.`
+      case 'sin_vinculo':
+        return `${ayuda.nombre} ya no comparte sus turnos con vos.`
+      case 'superpuesto':
+        return `${ayuda.nombre} ya tiene otro turno ese mismo día o muy cerca de esa hora.`
+      case 'no_vigente':
+        return 'Este turno ya estaba cancelado o se cambió por otro.'
+    }
+  }
   switch (motivo) {
+    case 'sin_permiso':
+      return 'No tenés permiso para hacer esto con los turnos de esta persona. Pedile que lo cambie desde su cuenta.'
+    case 'sin_vinculo':
+      return 'Esta persona ya no comparte sus turnos con vos.'
     case 'sin_sesion':
       return 'Para confirmar el turno, primero ingresá con tu cuenta.'
     case 'no_existe':

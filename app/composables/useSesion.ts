@@ -49,6 +49,8 @@ function mensajeDeError(codigo: string | undefined): string {
       return 'La contraseña nueva tiene que ser distinta de la anterior.'
     case 'email_address_invalid':
       return 'No podemos usar ese correo. Revisalo o probá con otro.'
+    case 'email_exists':
+      return 'Ya hay una cuenta con ese correo. Probá con otro.'
     case 'session_not_found':
     case 'session_expired':
       return 'Pasó mucho tiempo y se cerró la sesión. Pedí un enlace nuevo y probá otra vez.'
@@ -61,6 +63,8 @@ export function useSesion() {
   const supabase = useSupabaseClient()
   const usuario = useSupabaseUser()
   const cuenta = usePreferenciasCuenta()
+  const avisos = useAvisos()
+  const ayuda = useAyuda()
   const origen = useRequestURL().origin
 
   const conSesion = computed(() => usuario.value !== null)
@@ -156,6 +160,9 @@ export function useSesion() {
     await supabase.auth.signOut()
     usuario.value = null
     cuenta.olvidar()
+    // v0.5: los avisos y el modo "Estás ayudando a..." son de esta cuenta.
+    avisos.olvidar()
+    ayuda.dejar()
   }
 
   // Siempre responde lo mismo: no contamos si el correo tiene cuenta o no.
@@ -163,6 +170,21 @@ export function useSesion() {
     await supabase.auth.resetPasswordForEmail(correo.trim().toLowerCase(), {
       redirectTo: `${origen}/nueva-clave`,
     })
+    return { ok: true }
+  }
+
+  /**
+   * Cambiar el correo (v0.5: por ejemplo, si un aviso por correo rebotó). Supabase manda un enlace
+   * para confirmar; hasta que se confirme, sigue el correo de antes.
+   */
+  async function cambiarCorreo(nuevo: string): Promise<Resultado> {
+    const { error } = await supabase.auth.updateUser(
+      { email: nuevo.trim().toLowerCase() },
+      { emailRedirectTo: `${origen}/perfil` },
+    )
+    if (error) {
+      return { ok: false, mensaje: mensajeDeError(error.code) }
+    }
     return { ok: true }
   }
 
@@ -196,6 +218,7 @@ export function useSesion() {
     registrarse,
     salir,
     pedirRecuperacion,
+    cambiarCorreo,
     cambiarClave,
     sesionDesdeEnlace,
   }

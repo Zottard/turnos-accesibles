@@ -9,9 +9,14 @@ definePageMeta({ middleware: 'auth' })
 const route = useRoute()
 const { cargarReserva, cancelarReserva } = useReservas()
 const { anunciar } = useAnuncio()
+// Modo acompañante: solo con el permiso 'cancelar' (cancelar o cambiar de fecha). Si no lo tiene, se
+// explica acá y no se muestra el botón; la base igual lo rechazaría (sin_permiso).
+const { ayudando, puedoHacer } = useAyuda()
+const sinPermiso = computed(() => ayudando.value !== null && !puedoHacer('cancelar'))
+const volverA = computed(() => (ayudando.value ? `Volver a los turnos de ${ayudando.value.nombre}` : 'Volver a mis turnos'))
 
 const numero = Number(route.params.numero)
-const { data: cargado, refresh } = await useAsyncData(`reserva-cancelar-${route.params.numero}`, async () => {
+const { data: cargado, refresh } = await useAsyncData(`reserva-cancelar-${route.params.numero}-${ayudando.value?.id ?? 'propia'}`, async () => {
   if (!Number.isInteger(numero) || numero <= 0) {
     return { datos: null, error: null }
   }
@@ -24,6 +29,7 @@ const estado = computed(() => (reserva.value ? estadoVisible(reserva.value) : nu
 const titulo = computed(() => {
   if (cargado.value?.error) return 'No pudimos traer el turno'
   if (!reserva.value) return 'No encontramos este turno'
+  if (sinPermiso.value) return 'No podés cancelar este turno'
   if (estado.value !== 'proximo') return 'Este turno no se puede cancelar'
   return '¿Querés cancelar este turno?'
 })
@@ -69,13 +75,23 @@ async function cancelar() {
       </Aviso>
       <div class="acciones">
         <Boton @click="refresh()">Probar de nuevo</Boton>
-        <Boton to="/mis-turnos" variante="secundario">Volver a mis turnos</Boton>
+        <Boton to="/mis-turnos" variante="secundario">{{ volverA }}</Boton>
       </div>
     </template>
 
     <template v-else-if="!reserva">
       <div>
-        <Boton to="/mis-turnos">Volver a mis turnos</Boton>
+        <Boton to="/mis-turnos">{{ volverA }}</Boton>
+      </div>
+    </template>
+
+    <!-- Acompañante sin permiso para cancelar o cambiar -->
+    <template v-else-if="sinPermiso && ayudando">
+      <Aviso tipo="atencion">
+        <p>{{ mensajeReserva('sin_permiso', { nombre: ayudando.nombre, accion: 'cancelar' }) }}</p>
+      </Aviso>
+      <div>
+        <Boton :to="`/mis-turnos/${reserva.numero}`">Volver al turno</Boton>
       </div>
     </template>
 

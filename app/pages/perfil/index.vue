@@ -1,10 +1,13 @@
-<!-- Perfil: ver y editar los datos personales. El correo y el tipo de cuenta no se cambian desde acá. -->
+<!--
+  Perfil: ver y editar los datos personales. El tipo de cuenta no se cambia desde acá.
+  v0.5: también se puede cambiar el correo (Supabase pide confirmarlo con un enlace).
+-->
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' })
 useSeoMeta({ title: 'Mi perfil' })
 
 const { cargarPerfil, guardarPerfil } = usePerfil()
-const { usuario } = useSesion()
+const { usuario, cambiarCorreo } = useSesion()
 const { anunciar } = useAnuncio()
 
 const { data: cargado } = await useAsyncData('perfil', () => cargarPerfil())
@@ -61,6 +64,36 @@ const listaErrores = computed(() =>
   })),
 )
 
+// --- Cambiar el correo (v0.5) ---
+const correoNuevo = ref('')
+const errorCorreo = ref<string | undefined>()
+const resultadoCorreo = ref<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null)
+const cambiandoCorreo = ref(false)
+
+async function cambiarMiCorreo() {
+  if (cambiandoCorreo.value) return
+  resultadoCorreo.value = null
+  errorCorreo.value = validarCorreo(correoNuevo.value)
+  if (!errorCorreo.value && correoNuevo.value.trim().toLowerCase() === usuario.value?.email) {
+    errorCorreo.value = 'Ese ya es tu correo.'
+  }
+  if (errorCorreo.value) {
+    document.getElementById('perfil-correo-nuevo')?.focus()
+    return
+  }
+  cambiandoCorreo.value = true
+  const respuesta = await cambiarCorreo(correoNuevo.value)
+  cambiandoCorreo.value = false
+  resultadoCorreo.value = respuesta.ok
+    ? {
+        tipo: 'exito',
+        mensaje:
+          'Te mandamos un correo a la dirección nueva (y puede que también a la de antes). Tocá el enlace para confirmar el cambio. Hasta entonces, seguís usando la de antes.',
+      }
+    : { tipo: 'error', mensaje: respuesta.mensaje }
+  anunciar(resultadoCorreo.value.mensaje, !respuesta.ok)
+}
+
 async function guardar() {
   if (guardando.value) {
     return
@@ -109,6 +142,28 @@ async function guardar() {
         </div>
       </dl>
 
+      <!-- v0.5: si un correo de aviso rebotó, acá se puede cambiar la dirección. -->
+      <section class="pila" aria-labelledby="titulo-correo">
+        <h2 id="titulo-correo" tabindex="-1">Tu correo</h2>
+        <p>Lo usás para ingresar y te mandamos ahí los avisos. Si está mal escrito o ya no lo usás, cambialo.</p>
+        <Aviso v-if="resultadoCorreo" :tipo="resultadoCorreo.tipo">
+          <p>{{ resultadoCorreo.mensaje }}</p>
+        </Aviso>
+        <form class="tarjeta pila" novalidate @submit.prevent="cambiarMiCorreo">
+          <Campo
+            id="perfil-correo-nuevo"
+            v-model="correoNuevo"
+            etiqueta="Correo nuevo"
+            type="email"
+            autocomplete="email"
+            inputmode="email"
+            :error="errorCorreo"
+            requerido
+          />
+          <Boton type="submit" variante="secundario">{{ cambiandoCorreo ? 'Guardando…' : 'Cambiar mi correo' }}</Boton>
+        </form>
+      </section>
+
       <section class="pila" aria-labelledby="titulo-datos">
         <h2 id="titulo-datos">Tus datos</h2>
         <ResumenErrores :errores="listaErrores" />
@@ -138,6 +193,14 @@ async function guardar() {
         <p>Tamaño de letra, contraste, voz y avisos.</p>
         <div>
           <Boton to="/perfil/accesibilidad" variante="secundario">Cambiar mis preferencias</Boton>
+        </div>
+      </section>
+
+      <section class="pila" aria-labelledby="titulo-acompanantes">
+        <h2 id="titulo-acompanantes">Personas que te ayudan</h2>
+        <p>Quién puede ver tus turnos o sacarte turnos, y la constancia de cada permiso.</p>
+        <div>
+          <Boton to="/acompanantes" variante="secundario">Ver o invitar</Boton>
         </div>
       </section>
     </template>

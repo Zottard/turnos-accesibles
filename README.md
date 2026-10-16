@@ -45,6 +45,20 @@ los pedidos en lenguaje natural con Claude. Solo la usa el servidor (`server/api
 nunca llega al navegador. **Sin esta clave todo funciona igual**: el pedido se interpreta con
 reglas simples (ver "Qué trae la v0.4").
 
+**Opcional (desde la v0.5): avisos por correo.** Sin estas variables los avisos funcionan igual
+dentro de la app (bandeja, banda y sonido); solo no salen por correo.
+
+| Variable | Para qué |
+|---|---|
+| `NUXT_RESEND_API_KEY` | Clave de [Resend](https://resend.com) para mandar los correos. |
+| `NUXT_CORREO_REMITENTE` | Quién manda: `Turnos Accesibles <avisos@tu-dominio.com>` (dominio verificado en Resend). |
+| `NUXT_SUPABASE_SECRET_KEY` | Clave **secreta** de Supabase. Solo la usa `/api/avisos/enviar` en el servidor, para leer los avisos pendientes de todas las personas. |
+| `NUXT_CRON_SECRET` | Protege `/api/avisos/enviar`. En Vercel poné **el mismo valor** en `CRON_SECRET` (es la que manda el cron). |
+
+Con las dos primeras ya se manda la invitación a un acompañante por correo. Las cuatro hacen falta
+para la copia de los avisos (comprobante, cancelación, cambio de fecha y recordatorio).
+`NUXT_RESEND_BASE_URL` sirve solo para probar con un servidor falso.
+
 ## Base de datos (Supabase)
 
 - Proyecto `rmvhepjmdxofksdlfvpo` (región São Paulo).
@@ -56,6 +70,9 @@ reglas simples (ver "Qué trae la v0.4").
 - `supabase/migrations/0401_reservas.sql`: `reservas` (número correlativo, estado, quién la hizo,
   cuánto tardó) y las funciones atómicas `reservar_turno`, `cancelar_reserva`,
   `reprogramar_reserva` y `mis_reservas`. La app nunca escribe `reservas` directo.
+- `supabase/migrations/0501_avisos_acompanantes.sql`: `notificaciones` (avisos, con los triggers que
+  los crean), `acompanamientos` (vínculos y constancia del consentimiento), las funciones para
+  invitar, aceptar, rechazar y revocar, y las reservas con `p_para` (reemplaza las de la v0.4).
 - `supabase/seed.sql`: usuarios de prueba (ya confirmados) y, en la sección v0.3, el catálogo
   de prueba con la agenda de los próximos 30 días. Se puede correr varias veces.
 - `app/types/database.types.ts`: tipos de la base. Si cambia una migración, hay que regenerarlos.
@@ -71,6 +88,8 @@ Contraseña de todos: `Demo1234!`
 | `admin@demo.ar` | Admin Karma | admin |
 
 Rosa no tiene preferencias guardadas: al ingresar va a la bienvenida (primer ingreso).
+Desde la v0.5, **Lucía acompaña a Rosa** con permiso para ver sus turnos y sacarle turnos, pero
+no para cancelarlos ni cambiarlos (así se ve el límite en la demo).
 
 ### Correos (verificación y recuperación)
 
@@ -95,8 +114,8 @@ Seis versiones, una feature completa por versión. El detalle está en
 | v0.1 | Base, marca y accesibilidad | Lista |
 | v0.2 | Cuentas y preferencias | Lista |
 | v0.3 | Búsqueda de turnos | Lista |
-| v0.4 | Asistente de reserva y mis turnos | Esta rama |
-| v0.5 | Avisos y modo acompañante | Pendiente |
+| v0.4 | Asistente de reserva y mis turnos | Lista |
+| v0.5 | Avisos y modo acompañante | Esta rama |
 | v0.6 | Panel administrativo, métricas y PWA | Pendiente |
 
 ## Qué trae la v0.1
@@ -180,8 +199,8 @@ Una búsqueda típica tarda unos 7 ms en la base y se ve en pantalla en unos 250
   mostramos los más cercanos sin perder lo demás. Si ya tenés otro turno ese día (misma
   especialidad) o a menos de 2 horas, te avisa y podés confirmar igual.
 - **Comprobante** (`/mis-turnos/123`): número correlativo, especialidad, día y hora en palabras,
-  dirección, qué llevar y cómo llegar. "Imprimir o guardar como PDF" (sin menú ni pie). La copia
-  por correo llega con la v0.5.
+  dirección, qué llevar y cómo llegar. "Imprimir o guardar como PDF" (sin menú ni pie). Desde la
+  v0.5 también llega como aviso (y por correo, si está configurado).
 - **Mis turnos** (`/mis-turnos`): próximos y anteriores (cumplidos, cancelados, cambiados de
   fecha), con el estado en texto e ícono. En `/inicio` aparece el próximo turno.
   - **Cancelar**: explica que el turno se libera y no se deshace. Con menos de 24 horas avisa y
@@ -211,6 +230,70 @@ Cambiar de fecha: unos 300 ms.
 Un turno confirmado cuyo horario ya pasó se muestra como **cumplido**: se calcula al leerlo
 (`estadoVisible()` en `app/utils/reservas.ts`), sin tareas programadas. El estado `completada`
 queda en la tabla para el panel de la v0.6.
+
+## Qué trae la v0.5
+
+### Avisos (RF-06)
+
+- La base crea los avisos sola (triggers): al reservar (es el **comprobante**, con número), al
+  cancelar y al cambiar de fecha, y un **recordatorio** con la antelación que eligió cada persona
+  (2, 24 o 48 horas antes; 24 si no eligió). Al cancelar o cambiar, los recordatorios que todavía
+  no salieron se borran (el turno nuevo trae el suyo). Si el momento del recordatorio ya pasó al
+  reservar (un turno para dentro de 3 horas), no se programa: el aviso de la reserva ya lo dice.
+- Si la persona cambia la antelación en "Mis preferencias", sus recordatorios pendientes se
+  mueven a la nueva hora (si esa hora ya pasó, salen enseguida).
+- **"Avisame cuando haya turno"** (v0.3): cuando aparece un turno libre de esa especialidad (nuevo o
+  liberado por una cancelación), llega un aviso y el pedido se borra.
+- **Banda de avisos** debajo del encabezado: tranquila, sin titilar ni irse sola, con "Ver aviso" y
+  "Cerrar". Según el canal elegido: *en la pantalla* (solo la banda), *con sonido* (dos notas
+  suaves hechas con Web Audio y la lectura del título) o *las dos cosas* (banda y sonido; la
+  lectura si activó la lectura en voz alta). La app revisa al cambiar de página y cada minuto.
+- **Avisos** (`/avisos`): primero los sin leer; día y hora, centro, dirección, qué llevar y "Cómo
+  llegar"; "Marcar como leído" y el estado de cada aviso: **enviado** (llegó su hora), **visto en
+  la app** (entregado) y **leído**. En el encabezado, "Avisos" con la cantidad sin leer.
+- **Correo (opcional)**: `/api/avisos/enviar` manda la copia de los avisos de turnos con Resend
+  (HTML con la marca y versión en texto). Reintenta hasta 3 veces; si el proveedor rechaza la
+  dirección, se marca error y aparece un aviso en la app para revisar el correo (se puede cambiar
+  en "Mi cuenta"). `vercel.json` la llama **una vez por día** (lo que permite el plan gratuito):
+  el correo del recordatorio puede llegar hasta un día tarde, pero **el recordatorio en la app no
+  depende del cron** (aparece apenas llega su hora).
+
+### Modo acompañante (RF-07)
+
+- **Personas que te ayudan** (`/acompanantes`): invitar a alguien en 4 pantallas (nombre, correo,
+  qué puede hacer y la autorización explícita: *"Autorizo a Lucía a ver mis turnos y sacar turnos
+  por mí. Puedo quitarle el permiso cuando quiera."*). Después: el enlace para copiar o mandar por
+  WhatsApp (y por correo, si está configurado). La invitación vence a los 7 días.
+- **Constancia** de cada permiso (quién, a quién, qué puede hacer, cuándo se autorizó, aceptó y
+  quitó), para imprimir. Las filas no se borran nunca. **Quitar el permiso** es inmediato y se le
+  avisa al acompañante.
+- **La invitación** (`/invitacion/…`) se abre sin cuenta. Para aceptar hay que ingresar con el
+  correo invitado; para decir que no alcanza con el enlace.
+- **El acompañante** ve en su inicio "Personas que acompañás" y elige a quién ayudar: aparece la
+  banda **"Estás ayudando a Rosa"** y "Mis turnos", el comprobante y el asistente pasan a ser los de
+  Rosa. Lo que no tiene permitido no aparece y se explica (*"Rosa no te dio permiso para cancelar ni
+  cambiar de fecha sus turnos. Pedile que lo cambie desde su cuenta."*); la base igual lo rechaza.
+  Recibe una copia de los avisos de Rosa.
+- El acompañante **nunca** ve el perfil de Rosa (DNI, teléfono, fecha de nacimiento ni
+  preferencias): solo su nombre y sus turnos.
+
+### La demo
+
+1. Rosa ingresa, va a "Personas que te ayudan" e invita a alguien (o usa a Lucía, que ya está).
+2. Lucía ingresa, toca "Ayudar a Rosa" y le saca un turno con el asistente.
+3. Rosa ve la banda "Tenés un aviso nuevo: Lucía te sacó un turno", el turno en "Mis turnos" (con
+   "Lo sacó Lucía") y el aviso en "Avisos".
+4. Lucía intenta cancelarlo: no tiene ese permiso y la app se lo dice.
+5. Rosa le quita el permiso: Lucía deja de ver sus turnos al instante y recibe el aviso.
+
+Para volver a la demo después de revocar: correr de nuevo la sección v0.5 de `seed.sql`.
+
+### Limitaciones conocidas
+
+- Resend avisa los rebotes "tardíos" (la casilla no existe) con un webhook, que no está hecho: hoy
+  se detecta cuando el proveedor rechaza la dirección al mandar.
+- El correo de los avisos sale una vez por día (cron del plan gratuito de Vercel).
+- Una invitación pendiente se puede rechazar con solo tener el enlace (sin cuenta), a propósito.
 
 ## Documentación
 

@@ -7,6 +7,9 @@
   en sessionStorage (ta_asistente): si la persona se va, recarga o ingresa, sigue donde estaba.
   Nada se reserva (ni se bloquea el cupo) hasta tocar "Confirmar turno".
   /asistente?turno=123 (desde la ficha de un turno) empieza directo en "Revisá y confirmá".
+  v0.5: en modo acompañante el turno es para la persona que se ayuda (p_para). El borrador guarda
+  para quién es: si cambió la persona, se empieza de cero. Sin el permiso 'reservar' no se
+  muestra "Confirmar turno" (y la base lo rechazaría).
 -->
 <script setup lang="ts">
 const route = useRoute()
@@ -16,6 +19,9 @@ const { reservarTurno } = useReservas()
 const { conSesion } = useSesion()
 const { cargarPerfil } = usePerfil()
 const { anunciar } = useAnuncio()
+const { ayudando, puedoHacer } = useAyuda()
+// Para quién es el turno: la persona que se ayuda, o null (para uno mismo).
+const paraId = ayudando.value?.id ?? null
 
 // --- Catálogo: especialidades, localidades y centros ---
 const { data: catalogo } = await useAsyncData('catalogo-turnos', () => cargarCatalogo())
@@ -24,7 +30,7 @@ const localidades = computed(() => catalogo.value?.datos?.localidades ?? [])
 const centros = computed(() => catalogo.value?.datos?.centros ?? [])
 
 // --- El borrador y el paso actual ---
-const borrador = reactive<BorradorAsistente>(borradorNuevo())
+const borrador = reactive<BorradorAsistente>(borradorNuevo(Date.now(), paraId))
 const TOTAL_PASOS = PASOS_ASISTENTE.length
 const pregunta = computed(() => PASOS_ASISTENTE[borrador.paso]!)
 useSeoMeta({ title: () => `Paso ${borrador.paso + 1} de ${TOTAL_PASOS}: ${pregunta.value}` })
@@ -72,7 +78,7 @@ async function empezarConTurno(turnoId: number) {
     avisoInicio.value = 'No encontramos ese turno. Puede que ya haya pasado. Elegí uno con estas preguntas.'
     return
   }
-  Object.assign(borrador, borradorNuevo(), {
+  Object.assign(borrador, borradorNuevo(Date.now(), paraId), {
     paso: ULTIMO_PASO,
     especialidadId: datos.especialidad.id,
     localidad: datos.centro.localidad,
@@ -86,7 +92,7 @@ onMounted(async () => {
     await empezarConTurno(turnoPedido)
   } else {
     try {
-      Object.assign(borrador, normalizarBorrador(JSON.parse(sessionStorage.getItem(CLAVE_BORRADOR_ASISTENTE) ?? 'null')))
+      Object.assign(borrador, normalizarBorrador(JSON.parse(sessionStorage.getItem(CLAVE_BORRADOR_ASISTENTE) ?? 'null'), Date.now(), paraId))
     } catch {
       // Si el borrador está roto, empezamos de cero.
     }
@@ -109,7 +115,7 @@ function conPunto(texto: string) {
 const resumenElegido = computed(() => {
   if (!ficha.value) return ''
   return (
-    `Vas a pedir un turno de ${nombreCompleto(ficha.value.especialidad)}, con ${ficha.value.profesional}. ` +
+    `Vas a pedir un turno${ayudando.value ? ` para ${ayudando.value.nombre}` : ''} de ${nombreCompleto(ficha.value.especialidad)}, con ${ficha.value.profesional}. ` +
     `${conMayuscula(turnoEnPalabras(ficha.value.inicio))}. ` +
     `En ${ficha.value.centro.nombre}, ${ficha.value.centro.direccion}, ${ficha.value.centro.localidad}.`
   )
@@ -243,8 +249,9 @@ const mensajeUbicacion = ref('')
 const localidadDelPerfil = ref('')
 
 // Con la sesión iniciada, proponemos la localidad del perfil (si no eligió otra cosa).
+// Ayudando a otra persona no: no vemos su perfil (y la del acompañante no sirve).
 async function proponerLocalidadDelPerfil() {
-  if (!conSesion.value || borrador.localidad || borrador.lat !== null) return
+  if (!conSesion.value || ayudando.value || borrador.localidad || borrador.lat !== null) return
   const { datos } = await cargarPerfil()
   const suya = localidades.value.find((item) => normalizar(item.nombre) === normalizar(datos?.localidad ?? ''))
   if (suya && !borrador.localidad && borrador.lat === null) {
@@ -698,6 +705,7 @@ async function confirmar(confirmarSuperposicion: boolean) {
     <div v-else class="pila">
       <Aviso tipo="info" titulo="Todavía no reservaste nada">
         <p>El turno queda reservado recién cuando tocás "Confirmar turno".</p>
+        <p v-if="ayudando">El turno es para <strong>{{ ayudando.nombre }}</strong>.</p>
       </Aviso>
 
       <p v-if="cargandoFicha">Cargando el turno…</p>
@@ -778,9 +786,13 @@ async function confirmar(confirmarSuperposicion: boolean) {
         </template>
 
         <!-- Ya tiene otro turno ese día o muy cerca -->
-        <Aviso v-else-if="resultado?.motivo === 'superpuesto'" tipo="atencion" titulo="Ya tenés un turno cerca de ese horario">
+        <Aviso
+          v-else-if="resultado?.motivo === 'superpuesto'"
+          tipo="atencion"
+          :titulo="ayudando ? `${ayudando.nombre} ya tiene un turno cerca de ese horario` : 'Ya tenés un turno cerca de ese horario'"
+        >
           <p v-if="resultado.conflicto">
-            Tenés el turno N.º {{ resultado.conflicto.numero }} de {{ resultado.conflicto.especialidad }},
+            {{ ayudando ? 'Tiene' : 'Tenés' }} el turno N.º {{ resultado.conflicto.numero }} de {{ resultado.conflicto.especialidad }},
             {{ turnoEnPalabras(resultado.conflicto.inicio) }}, en {{ resultado.conflicto.centro }}.
           </p>
           <p>¿Querés reservar este también?</p>
@@ -798,7 +810,11 @@ async function confirmar(confirmarSuperposicion: boolean) {
         </Aviso>
       </div>
 
-      <template v-if="!sinTurno && resultado?.motivo !== 'superpuesto'">
+      <!-- Acompañante sin permiso para sacar turnos: se explica y no se ofrece confirmar -->
+      <Aviso v-if="ayudando && !puedoHacer('reservar')" tipo="atencion">
+        <p>{{ mensajeReserva('sin_permiso', { nombre: ayudando.nombre, accion: 'reservar' }) }}</p>
+      </Aviso>
+      <template v-else-if="!sinTurno && resultado?.motivo !== 'superpuesto'">
         <Aviso v-if="!conSesion" tipo="info" titulo="Para confirmar, ingresá a tu cuenta">
           <p>Lo que elegiste queda guardado. Después de ingresar, volvés a esta pantalla.</p>
         </Aviso>

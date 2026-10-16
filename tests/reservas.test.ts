@@ -28,6 +28,8 @@ function reserva(numero: number, inicio: string, estado: Reserva['estado'] = 'co
     numero,
     estado,
     canceladaTarde: false,
+    asistida: false,
+    creadaPorNombre: null,
     origenNumero: null,
     nuevaNumero: null,
     turnoId: numero * 10,
@@ -157,6 +159,15 @@ describe('normalizarBorrador', () => {
     expect(roto).toEqual(borradorNuevo(ahora))
     expect(normalizarBorrador(null, ahora)).toEqual(borradorNuevo(ahora))
     expect(normalizarBorrador('basura', ahora)).toEqual(borradorNuevo(ahora))
+  })
+
+  it('modo acompañante: el borrador es de una persona; si cambió, se descarta', () => {
+    const paraRosa = { ...borradorNuevo(500, 'rosa'), paso: 4, especialidadId: 3, turnoId: 99 }
+    expect(normalizarBorrador(paraRosa, ahora, 'rosa')).toEqual(paraRosa)
+    expect(normalizarBorrador(paraRosa, ahora, null)).toEqual(borradorNuevo(ahora, null))
+    expect(normalizarBorrador(paraRosa, ahora, 'otra')).toEqual(borradorNuevo(ahora, 'otra'))
+    const propio = { ...borradorNuevo(500), paso: 2 }
+    expect(normalizarBorrador(propio, ahora, 'rosa').paso).toBe(0)
   })
 
   it('arma los filtros de la búsqueda', () => {

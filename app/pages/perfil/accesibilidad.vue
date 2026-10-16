@@ -57,6 +57,9 @@ async function guardar() {
         </fieldset>
         <fieldset>
           <legend>Cuándo querés el recordatorio del turno</legend>
+          <p class="texto-suave ayuda-antelacion">
+            Al guardar, también cambia la hora del recordatorio de los turnos que ya tenés.
+          </p>
           <PreferenciasAntelacion prefijo="cuenta" />
         </fieldset>
       </section>
@@ -76,7 +79,8 @@ async function guardar() {
   margin-bottom: var(--espacio-3);
 }
 
-legend {
+legend,
+.ayuda-antelacion {
   margin-bottom: var(--espacio-2);
 }
 </style>

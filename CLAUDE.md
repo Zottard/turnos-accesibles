@@ -122,5 +122,42 @@ pnpm build
   palabra), `DictarBoton` (dictado con `dictar()` de `utils/voz.ts`).
 - Impresión: `@media print` en `base.css` oculta encabezado, pie y todo lo que tenga
   `.no-imprimir`.
-- v0.5 engancha en: `p_para` en `reservar_turno` (acompañante), avisos y recordatorios en las tres
-  RPC (comentarios "v0.5" en la migración) y la copia del comprobante por correo.
+
+## Convenciones de la v0.5 (avisos y modo acompañante)
+
+- Base: `0501_avisos_acompanantes.sql`. Reemplaza las cuatro RPC de reservas (ahora con `p_para`;
+  `reservar_turno` ya no recibe `p_asistida`: la base la calcula). Motivos nuevos: `sin_permiso`
+  (acompaña pero esa acción no está en el alcance) y `sin_vinculo` (no acompaña o le quitaron el
+  permiso). `mis_reservas` sin permiso da error `42501`.
+- Permisos: siempre `privado.puede_actuar(actor, solicitante, accion)` (acción `ver`, `reservar` o
+  `cancelar`; `cancelar` también cubre cambiar de fecha). La política de `reservas` la usa. El
+  acompañante nunca lee `perfiles` de otra persona: solo `personas_que_acompano()` (nombre y apellido).
+- `acompanamientos` no se borran (son la constancia) y no tienen escritura desde la app: RPC
+  `invitar_acompanante` (pide `p_consiento = true`), `ver_invitacion` y `rechazar_invitacion`
+  (también sin cuenta), `aceptar_invitacion` (el correo de la sesión tiene que ser el invitado),
+  `revocar_acompanamiento`. `vence_en` es de la invitación pendiente; un vínculo activo no vence.
+  El rol de la cuenta no cambia al aceptar: lo que da acceso es el vínculo.
+- `notificaciones`: las crean solo triggers y RPC (nunca la app). Guardan `tipo` + `datos` (foto del
+  turno). El texto sale de `textoAviso()` (`shared/utils/avisos.ts`), el mismo en la app y en el
+  correo: no escribir textos de avisos en SQL. La app solo actualiza `entregada_en` y `leida_en`
+  (permiso por columna). RLS: cada persona ve las suyas con `enviar_desde <= now()`.
+- Copias para acompañantes: `solicitante_id` distinto de `usuario_id`. Al revocar se borran.
+- Recordatorio: `privado.momento_recordatorio` en SQL = `momentoRecordatorio()` en `utils/avisos.ts`.
+  Si se cambia una, cambiar la otra.
+- App: `useAvisos()` (sin leer, bandeja, marcar), `plugins/avisos.client.ts` (revisa al navegar y
+  cada minuto; tono con `utils/sonido.ts`, voz con `hablar`), `BandaAvisos` (role="status", nunca se
+  va sola). `useAcompanantes()` (invitar, constancia, revocar, invitación).
+- Modo acompañante: `useAyuda()` (cookie de sesión `ta_ayudando`, no sessionStorage, para que el
+  servidor pinte lo mismo que el navegador). `useReservas()` agrega `p_para` solo; para lo propio
+  aunque esté ayudando: `cargarReservas(n, { propias: true })`. Las claves de `useAsyncData` de
+  "Mis turnos" llevan el id de la persona. `BandaAyuda` verifica el vínculo al montarse (no salir
+  del modo durante el SSR: rompe la hidratación). Lo que no está en el alcance se oculta y se
+  explica con `mensajeReserva(motivo, { nombre, accion })`.
+- El borrador del asistente guarda `para`: si cambió la persona, se descarta.
+- Correo: `server/utils/correo.ts` (Resend con `fetch`, `NUXT_RESEND_BASE_URL` para un servidor
+  falso). `/api/avisos/enviar` (GET o POST, bearer `NUXT_CRON_SECRET`, clave secreta de Supabase
+  solo ahí) responde 503 sin claves. `avisos_por_correo` solo la puede llamar `service_role`.
+- Los tests de la base se hacen con `execute_sql` dentro de un `do $$ ... $$` que termina en
+  `raise exception` con el resultado: así se deshace todo solo.
+- Ojo con el mismo nombre en `app/utils` y en componentes: el tipo de aviso de la app se llama
+  `Notificacion` (no `Aviso`, que es un componente).

@@ -123,6 +123,16 @@ export function turnoEnPalabras(inicio: string | Date, ahora = new Date()): stri
   return `${diaEnPalabras(inicio, ahora)}, ${articulo} ${hora}`
 }
 
+/**
+ * Un momento exacto, siempre con el año: "miércoles 14 de octubre de 2026, a las 15:42".
+ * Para constancias (el consentimiento) y registros, que se leen mucho después.
+ */
+export function momentoEnPalabras(fecha: string | Date): string {
+  const { diaSemana, dia, mes, anio } = partes(new Date(fecha))
+  const hora = horaEnPalabras(fecha)
+  return `${diaSemana} ${dia} de ${mes} de ${anio}, ${hora.startsWith('1:') ? 'a la' : 'a las'} ${hora}`
+}
+
 /** A la mañana (antes de las 13) o a la tarde. Es el mismo corte que usa la búsqueda en la base. */
 export function franjaDe(inicio: string | Date): Franja {
   return partes(new Date(inicio)).hora < 13 ? 'manana' : 'tarde'
