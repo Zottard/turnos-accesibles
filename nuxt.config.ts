@@ -76,6 +76,12 @@ export default defineNuxtConfig({
     },
   },
 
+  // En Linux (Vercel) rolldown reescribe los imports relativos a shared/ con un "../" de más y
+  // Nitro no los encuentra. Dejándolos absolutos funciona igual que en Windows.
+  vite: {
+    $server: { build: { rolldownOptions: { makeAbsoluteExternalsRelative: false } } },
+  },
+
   css: ['~/assets/css/tokens.css', '~/assets/css/base.css'],
 
   app: {
