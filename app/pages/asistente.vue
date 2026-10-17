@@ -20,6 +20,7 @@ const { conSesion } = useSesion()
 const { cargarPerfil } = usePerfil()
 const { anunciar } = useAnuncio()
 const { ayudando, puedoHacer } = useAyuda()
+const { registrar } = useEventos()
 // Para quién es el turno: la persona que se ayuda, o null (para uno mismo).
 const paraId = ayudando.value?.id ?? null
 
@@ -99,6 +100,8 @@ onMounted(async () => {
   }
   cargado.value = true
   guardarBorrador()
+  // Métricas (v0.6): alguien empezó el asistente desde el principio.
+  if (borrador.paso === 0) registrar('asistente_inicio')
   await alEntrarAlPaso()
   if (borrador.paso > 0) {
     await nextTick()
@@ -136,7 +139,14 @@ const textoDelPaso = computed(() => {
 // Lo que hace falta al llegar a cada paso.
 async function alEntrarAlPaso() {
   if (borrador.paso === 2) await proponerLocalidadDelPerfil()
-  if (borrador.paso === 3) await buscarOpciones()
+  if (borrador.paso === 3) {
+    await buscarOpciones()
+    registrar('busqueda', {
+      especialidad_id: borrador.especialidadId ?? undefined,
+      centro_id: borrador.centroId ?? undefined,
+      localidad: borrador.localidad || undefined,
+    })
+  }
   if (borrador.paso === ULTIMO_PASO) await cargarFicha()
 }
 
@@ -214,6 +224,8 @@ async function interpretar() {
     pedidoFallo.value = estado === 429 ? 'Hiciste muchos pedidos seguidos.' : 'No pudimos leer tu pedido.'
   }
   interpretando.value = false
+  // Métricas (v0.6): un pedido en lenguaje natural que entendimos (nunca el texto).
+  if (pedido.value?.entendido) registrar('asistente_ia', { especialidad_id: pedido.value.especialidadId ?? undefined })
   await nextTick()
   document.getElementById('resultado-pedido')?.focus()
   anunciar(textoResultadoPedido.value)

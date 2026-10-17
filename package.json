@@ -20,6 +20,7 @@
     "vue-router": "~5.3.1"
   },
   "devDependencies": {
+    "@vite-pwa/nuxt": "^1.1.1",
     "typescript": "~5.9.3",
     "vitest": "^4.1.9",
     "vue-tsc": "^3.0.0"

@@ -65,6 +65,44 @@ export type Database = {
         }
         Relationships: []
       }
+      auditoria: {
+        Row: {
+          accion: string
+          creado_en: string
+          detalle: Json
+          id: number
+          registro_id: string | null
+          tabla: string
+          usuario_id: string | null
+        }
+        Insert: {
+          accion: string
+          creado_en?: string
+          detalle?: Json
+          id?: never
+          registro_id?: string | null
+          tabla: string
+          usuario_id?: string | null
+        }
+        Update: {
+          accion?: string
+          creado_en?: string
+          detalle?: Json
+          id?: never
+          registro_id?: string | null
+          tabla?: string
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auditoria_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       avisos_disponibilidad: {
         Row: {
           creado_en: string
@@ -178,6 +216,27 @@ export type Database = {
           nombre?: string
           nombre_simple?: string
           palabras_clave?: string[]
+        }
+        Relationships: []
+      }
+      eventos_uso: {
+        Row: {
+          creado_en: string
+          datos: Json
+          id: number
+          tipo: string
+        }
+        Insert: {
+          creado_en?: string
+          datos?: Json
+          id?: never
+          tipo: string
+        }
+        Update: {
+          creado_en?: string
+          datos?: Json
+          id?: never
+          tipo?: string
         }
         Relationships: []
       }
@@ -519,6 +578,7 @@ export type Database = {
           usuario_id: string
         }[]
       }
+      borrar_profesional: { Args: { p_profesional_id: number }; Returns: Json }
       buscar_turnos: {
         Args: {
           p_centro_id?: number
@@ -548,12 +608,33 @@ export type Database = {
         Args: { p_confirmar_tarde?: boolean; p_para?: string; p_reserva_id: string }
         Returns: Json
       }
+      dar_de_baja_agenda: {
+        Args: { p_desde: string; p_hasta: string; p_profesional_id: number }
+        Returns: Json
+      }
       estado_bloqueo: { Args: { p_correo: string }; Returns: string | null }
+      generar_agenda: {
+        Args: {
+          p_desde: string
+          p_dias: number[]
+          p_duracion: number
+          p_hasta: string
+          p_hora_desde: string
+          p_hora_hasta: string
+          p_profesional_id: number
+          p_requisitos?: string
+        }
+        Returns: Json
+      }
       invitar_acompanante: {
         Args: { p_alcance: string[]; p_consiento?: boolean; p_correo: string; p_nombre: string }
         Returns: Json
       }
       limpiar_intentos: { Args: never; Returns: undefined }
+      metricas: {
+        Args: { p_agrupar?: string; p_desde: string; p_hasta: string }
+        Returns: Json
+      }
       mis_reservas: {
         Args: { p_numero?: number; p_para?: string }
         Returns: {
@@ -599,6 +680,7 @@ export type Database = {
         }[]
       }
       rechazar_invitacion: { Args: { p_token: string }; Returns: Json }
+      registrar_acceso_denegado: { Args: { p_ruta: string }; Returns: undefined }
       registrar_fallo: { Args: { p_correo: string }; Returns: string | null }
       reprogramar_reserva: {
         Args: { p_nuevo_turno_id: number; p_para?: string; p_reserva_id: string }

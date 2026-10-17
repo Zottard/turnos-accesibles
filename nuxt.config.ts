@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-08-01',
   devtools: { enabled: false },
 
-  modules: ['@nuxtjs/supabase'],
+  modules: ['@nuxtjs/supabase', '@vite-pwa/nuxt'],
 
   // Cuentas con Supabase. La URL y la clave pública salen de SUPABASE_URL y SUPABASE_KEY (.env).
   supabase: {
@@ -29,6 +29,51 @@ export default defineNuxtConfig({
     resendBaseUrl: 'https://api.resend.com',
     correoRemitente: '',
     supabase: { secretKey: '' },
+  },
+
+  // v0.6 — App instalable (PWA). El service worker:
+  // - guarda de antemano solo los archivos de la app (JS, CSS, íconos) y la página sin conexión;
+  // - NUNCA guarda las páginas (HTML): pueden tener datos personales y tienen que estar al día.
+  //   Cada página se pide siempre a internet; si no hay conexión, se muestra /offline/index.html.
+  // Los íconos PNG se generan con `node scripts/iconos.mjs` desde public/icono.svg.
+  pwa: {
+    registerType: 'autoUpdate',
+    manifest: {
+      name: 'Turnos Accesibles',
+      short_name: 'Turnos',
+      description: 'Sacá turnos de salud pública paso a paso, con texto grande, alto contraste y lectura en voz alta.',
+      lang: 'es-AR',
+      dir: 'ltr',
+      start_url: '/',
+      scope: '/',
+      display: 'standalone',
+      theme_color: '#5B2BD9',
+      background_color: '#FFF9F0',
+      icons: [
+        { src: '/icono-192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/icono-512.png', sizes: '512x512', type: 'image/png' },
+        { src: '/icono-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        { src: '/icono.svg', sizes: 'any', type: 'image/svg+xml' },
+      ],
+    },
+    workbox: {
+      // Sin "página de reemplazo" para las navegaciones: no queremos servir HTML guardado.
+      navigateFallback: null,
+      globPatterns: ['**/*.{js,css,svg,png,woff2}', 'offline/index.html'],
+      cleanupOutdatedCaches: true,
+      runtimeCaching: [
+        {
+          // Páginas: siempre de internet (nada se guarda). Sin conexión, la página sin conexión.
+          urlPattern: ({ request }) => request.mode === 'navigate',
+          handler: 'NetworkOnly',
+          options: { precacheFallback: { fallbackURL: '/offline/index.html' } },
+        },
+      ],
+    },
+    client: {
+      // Guardamos el aviso del navegador para mostrar nuestro botón "Instalar la app".
+      installPrompt: 'ta_ocultar_instalar',
+    },
   },
 
   css: ['~/assets/css/tokens.css', '~/assets/css/base.css'],

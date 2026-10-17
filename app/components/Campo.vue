@@ -8,7 +8,7 @@ const props = withDefaults(
   defineProps<{
     id: string
     etiqueta: string
-    type?: 'text' | 'email' | 'tel' | 'password' | 'number' | 'date' | 'search'
+    type?: 'text' | 'email' | 'tel' | 'password' | 'number' | 'date' | 'search' | 'time'
     autocomplete?: string
     inputmode?: 'text' | 'numeric' | 'decimal' | 'tel' | 'email' | 'search' | 'url'
     ayuda?: string

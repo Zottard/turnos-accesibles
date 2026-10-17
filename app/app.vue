@@ -5,6 +5,8 @@ aplicarAlDocumento()
 </script>
 
 <template>
+  <!-- v0.6: el enlace al manifiesto de la app instalable (PWA). -->
+  <NuxtPwaManifest />
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>

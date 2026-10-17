@@ -13,6 +13,7 @@ definePageMeta({ middleware: 'auth' })
 const { invitar, mandarPorCorreo } = useAcompanantes()
 const { cargarPerfil } = usePerfil()
 const { anunciar } = useAnuncio()
+const { registrar } = useEventos()
 
 const PREGUNTAS = ['¿Cómo se llama la persona?', '¿Cuál es su correo?', '¿Qué puede hacer?', 'Confirmá el permiso'] as const
 const paso = ref(0)
@@ -86,6 +87,7 @@ async function confirmar() {
     anunciar(respuesta.mensaje, true)
     return
   }
+  registrar('acompanante_invitar')
   const porCorreo = await mandarPorCorreo(respuesta.token)
   enviando.value = false
   listo.value = { token: respuesta.token, venceEn: respuesta.venceEn, porCorreo }
