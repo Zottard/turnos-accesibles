@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Karma Tech · Guía de marca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Lexend:wght@400;600;700;800&display=block" rel="stylesheet">
+<style>
+:root{
+  --violeta:#5B2BD9; --violeta-oscuro:#3F1A9E; --turquesa:#0B7A75; --coral:#C2410C;
+  --sol:#FFC233; --rosa:#C0266D; --tinta:#1E1633; --tinta-suave:#4A4160;
+  --crema:#FFF9F0; --blanco:#FFFFFF;
+  --s-violeta:color-mix(in srgb,var(--violeta) 10%,var(--crema));
+  --s-turquesa:color-mix(in srgb,var(--turquesa) 10%,var(--crema));
+  --s-coral:color-mix(in srgb,var(--coral) 10%,var(--crema));
+  --s-sol:color-mix(in srgb,var(--sol) 22%,var(--crema));
+  --s-rosa:color-mix(in srgb,var(--rosa) 10%,var(--crema));
+  --linea:color-mix(in srgb,var(--tinta) 14%,var(--crema));
+  --display:'Lexend','Segoe UI',Arial,sans-serif;
+  --texto:'Atkinson Hyperlegible','Segoe UI',Arial,sans-serif;
+}
+@page{size:A4 landscape;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--crema);color:var(--tinta);font-family:var(--texto);font-size:11pt;line-height:1.5;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:297mm;height:210mm;position:relative;overflow:hidden;padding:15mm 18mm 20mm;break-after:page;background:var(--crema)}
+.page:last-child{break-after:auto}
+h1,h2,h3,h4{font-family:var(--display);line-height:1.15;color:var(--tinta)}
+h2{font-size:26pt;font-weight:800;letter-spacing:-.01em;margin:3mm 0 3mm}
+h3{font-size:13pt;font-weight:700;margin-bottom:1.5mm}
+p{max-width:150mm}
+.lead{font-size:12.5pt;color:var(--tinta-suave);max-width:165mm}
+.eyebrow{display:inline-flex;align-items:center;gap:2mm;font-family:var(--display);font-weight:600;font-size:8.5pt;
+  letter-spacing:.08em;text-transform:uppercase;padding:1.2mm 3.5mm;border-radius:999px;background:var(--s-violeta);color:var(--violeta-oscuro)}
+.eyebrow.t{background:var(--s-turquesa);color:#08524F}
+.eyebrow.c{background:var(--s-coral);color:#8A2E08}
+.eyebrow.r{background:var(--s-rosa);color:#8C1B4F}
+.eyebrow.s{background:var(--s-sol);color:var(--tinta)}
+.foot{position:absolute;left:18mm;right:18mm;bottom:8mm;display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--display);font-size:8pt;color:var(--tinta-suave);border-top:1px solid var(--linea);padding-top:2.5mm}
+.foot .mk{display:flex;align-items:center;gap:2mm}
+.foot svg{height:5mm;width:auto}
+.num{font-weight:700;color:var(--violeta)}
+svg.brand{display:block;overflow:visible}
+.card{background:var(--blanco);border-radius:14px;box-shadow:0 1px 2px rgba(30,22,51,.06),0 4px 14px rgba(30,22,51,.06)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8mm}
+.small{font-size:9pt;color:var(--tinta-suave)}
+.mono{font-family:var(--display);font-size:8.5pt;letter-spacing:.03em}
+/* dark-surface logo variants */
+.on-dark text{fill:#FFFFFF}
+.on-dark text:last-of-type{fill:var(--sol)}
+.on-dark tspan{fill:var(--sol)}
+.kt-dark text{fill:#FFFFFF}
+.icons svg.kt-dark{width:62mm;height:auto}
+.kt-dark tspan{fill:var(--sol)}
+
+/* ---------- portada ---------- */
+.cover{padding:0}
+.cover .shapes{position:absolute;inset:0}
+.cover .content{position:absolute;left:22mm;top:30mm;width:150mm}
+.cover .content svg.brand{width:135mm;height:auto}
+.cover h1{font-size:40pt;font-weight:800;margin-top:14mm;letter-spacing:-.02em}
+.cover .sub{font-size:14pt;color:var(--tinta-suave);margin-top:3mm;max-width:120mm}
+.cover .bottom{position:absolute;left:22mm;bottom:16mm;display:flex;align-items:center;gap:6mm}
+.cover .bottom svg{height:12mm;width:auto}
+.cover .ver{font-family:var(--display);font-size:9pt;color:var(--tinta-suave);border-left:1px solid var(--linea);padding-left:6mm}
+
+/* ---------- sobre + indice ---------- */
+.about{display:grid;grid-template-columns:1.05fr 1fr;gap:16mm;margin-top:6mm}
+.about blockquote{font-family:var(--display);font-size:21pt;font-weight:600;line-height:1.3;margin:4mm 0 6mm}
+.about blockquote em{font-style:normal;color:var(--violeta)}
+.toc{list-style:none;counter-reset:t}
+.toc li{display:flex;align-items:center;gap:5mm;padding:3.1mm 0;border-bottom:1px solid var(--linea);font-family:var(--display);font-size:13pt;font-weight:600}
+.toc li .dot{width:9mm;height:9mm;border-radius:50%;display:grid;place-items:center;font-size:9pt;font-weight:700;color:#fff;flex:none}
+.toc li .pg{margin-left:auto;font-size:10pt;color:var(--tinta-suave);font-weight:400}
+.howto{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm;margin-top:6mm}
+.howto .card{padding:4mm 5mm}
+.howto b{font-family:var(--display);display:block;margin-bottom:1mm}
+
+/* ---------- equipo ---------- */
+.team{display:grid;grid-template-columns:1fr 1.15fr;gap:14mm;margin-top:4mm;align-items:start}
+.ring-hero{background:var(--blanco);border-radius:24px;height:118mm;display:grid;place-items:center;position:relative}
+.ring-hero svg{width:150mm;height:auto}
+.ring-hero .tag{position:absolute;bottom:8mm;left:0;right:0;text-align:center;font-family:var(--display);font-size:13pt;font-weight:600;color:var(--tinta-suave)}
+.people{display:grid;gap:4mm;margin-top:6mm}
+.person{display:flex;gap:5mm;align-items:center;padding:4mm 5mm}
+.av{width:15mm;height:15mm;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:13pt;color:#fff;flex:none}
+.person b{font-family:var(--display);font-size:12pt}
+.vals{display:flex;gap:3mm;margin-top:5mm;flex-wrap:wrap}
+.vals span{font-family:var(--display);font-weight:600;font-size:10pt;padding:2mm 4.5mm;border-radius:999px}
+
+/* ---------- logotipo ---------- */
+.stage{border-radius:20px;display:grid;place-items:center;position:relative}
+.logo-main{display:grid;grid-template-columns:1fr;gap:5mm;margin-top:4mm}
+.logo-main .stage{height:84mm;background:var(--blanco)}
+.parts{display:grid;grid-template-columns:repeat(5,1fr);gap:4mm}
+.parts .card{padding:3.5mm 4mm;display:flex;gap:3mm;align-items:flex-start}
+.parts .k{width:8mm;height:8mm;border-radius:50%;flex:none;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:9pt}
+
+.versions{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:6mm;margin-top:5mm}
+.versions .stage{height:58mm}
+.versions .lbl{margin-top:2mm;font-family:var(--display);font-size:9pt;color:var(--tinta-suave)}
+.versions .lbl b{color:var(--tinta)}
+.rules2{display:grid;grid-template-columns:1.25fr 2fr;gap:6mm;margin-top:6mm}
+.minsizes{display:flex;gap:10mm;align-items:center;justify-content:center;padding:6mm 7mm}
+.minsizes .it{display:flex;flex-direction:column;align-items:center;gap:2mm}
+.minsizes .rule{height:0;border-top:1.5px solid var(--coral);width:100%}
+.minsizes .mono{color:#8A2E08}
+
+/* ---------- icono / karma ---------- */
+.icons{display:grid;grid-template-columns:1fr 1fr;gap:10mm;margin-top:4mm}
+.icons .stage{height:72mm;background:var(--blanco)}
+.icons .row{display:flex;gap:6mm;align-items:flex-end;margin-top:4mm}
+.icons .row .tile{display:grid;place-items:center;border-radius:12px;background:var(--blanco)}
+
+/* ---------- usos incorrectos ---------- */
+.wrong{display:grid;grid-template-columns:repeat(4,1fr);gap:5mm;margin-top:6mm}
+.wrong .stage{height:62mm;background:var(--blanco);overflow:hidden}
+.wrong .stage svg.brand{width:46mm;height:auto}
+.wrong .x{position:absolute;top:3mm;right:3mm;width:9mm;height:9mm;border-radius:50%;background:var(--rosa);display:grid;place-items:center}
+.wrong .ok{background:var(--turquesa)}
+.wrong h3{margin-top:3mm;font-size:11pt}
+.wrong p{font-size:9.5pt;color:var(--tinta-suave)}
+
+/* ---------- color ---------- */
+.swatches{display:grid;grid-template-columns:repeat(5,1fr);gap:4mm;margin-top:4mm}
+.sw{border-radius:14px;overflow:hidden;background:var(--blanco);box-shadow:0 1px 2px rgba(30,22,51,.06),0 4px 14px rgba(30,22,51,.06)}
+.sw .chip{height:30mm;padding:3mm 4mm;display:flex;flex-direction:column;justify-content:space-between;font-family:var(--display);font-weight:700;font-size:10.5pt}
+.sw .chip .aa{align-self:flex-end;font-size:15pt;font-weight:800}
+.sw .meta{padding:2.5mm 4mm 3mm;font-size:8.6pt;line-height:1.35}
+.sw .meta .hex{font-family:var(--display);font-weight:700;font-size:9.5pt}
+.sw .meta .rol{color:var(--tinta-suave);min-height:7mm}
+.sw .meta .ct{margin-top:1mm;display:inline-block;font-family:var(--display);font-size:8pt;padding:.6mm 2.5mm;border-radius:999px;background:var(--s-turquesa);color:#08524F}
+
+/* ---------- alto contraste ---------- */
+.screens{display:grid;grid-template-columns:1fr 1fr;gap:10mm;margin-top:5mm}
+.screen{border-radius:16px;overflow:hidden;height:112mm;display:flex;flex-direction:column}
+.screen .bar{display:flex;align-items:center;justify-content:space-between;padding:3.5mm 5mm}
+.screen .bar svg{height:8mm;width:auto}
+.screen .body{padding:4mm 6mm;flex:1}
+.screen .q{font-family:var(--display);font-weight:700;font-size:15pt;margin-bottom:3mm}
+.screen .opt{display:flex;align-items:center;gap:3mm;border-radius:12px;padding:0 4mm;height:12mm;margin-bottom:2.5mm;font-family:var(--display);font-weight:600;font-size:11pt}
+.screen .radio{width:5mm;height:5mm;border-radius:50%;flex:none}
+.screen .btn{display:inline-flex;align-items:center;justify-content:center;height:12mm;padding:0 9mm;border-radius:999px;font-family:var(--display);font-weight:700;font-size:11pt;margin-top:1.5mm}
+.normal{background:var(--crema);border:1px solid var(--linea)}
+.normal .bar{background:var(--blanco);border-bottom:1px solid var(--linea)}
+.normal .opt{background:var(--blanco);border:2px solid var(--linea)}
+.normal .opt.sel{border-color:var(--violeta);background:var(--s-violeta)}
+.normal .radio{border:2px solid var(--tinta-suave)}
+.normal .sel .radio{border:5px solid var(--violeta)}
+.normal .btn{background:var(--violeta);color:#fff}
+.hc{background:#000;color:#fff}
+.hc .bar{border-bottom:3px solid #fff}
+.hc .q{color:#fff}
+.hc .opt{background:#000;color:#fff;border:3px solid #fff}
+.hc .opt.sel{border-color:#FFE14D;color:#FFE14D}
+.hc .radio{border:3px solid #fff}
+.hc .sel .radio{border:5px solid #FFE14D}
+.hc .btn{background:#FFE14D;color:#000}
+.hc-specs{display:flex;gap:4mm;margin-top:4mm}
+.hc-specs span{display:flex;align-items:center;gap:2mm;font-family:var(--display);font-size:9pt}
+.hc-specs i{width:6mm;height:6mm;border-radius:50%;display:inline-block;border:1px solid var(--tinta)}
+
+/* ---------- tipografia ---------- */
+.types{display:grid;grid-template-columns:1fr 1fr;gap:8mm;margin-top:4mm}
+.type{padding:6mm 7mm;height:128mm;display:flex;flex-direction:column}
+.type .aa{font-size:58pt;line-height:1;font-weight:700}
+.type .name{display:flex;justify-content:space-between;align-items:baseline;margin:3mm 0 2mm}
+.type .name b{font-family:var(--display);font-size:15pt}
+.type .abc{font-size:12.5pt;letter-spacing:.02em;word-break:break-all}
+.type .why{margin-top:auto;padding-top:3mm;border-top:1px solid var(--linea);font-size:10pt}
+.weights{display:flex;gap:4mm;margin:2mm 0;font-family:var(--display);font-size:13pt}
+.disamb{display:flex;gap:3mm;margin:3mm 0}
+.disamb span{font-family:var(--texto);font-size:20pt;font-weight:700;background:var(--s-sol);border-radius:10px;padding:1mm 4mm}
+.scale{display:flex;gap:4mm;margin-top:4mm;align-items:baseline}
+.scale div{background:var(--blanco);border-radius:10px;padding:2mm 4mm}
+
+/* ---------- componentes ---------- */
+.comps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6mm;margin-top:5mm}
+.comp{padding:5mm 6mm}
+.comp h3{display:flex;align-items:center;gap:2mm}
+.comp .spec{font-size:8.6pt;color:var(--tinta-suave);margin-top:3mm;line-height:1.45}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:2.5mm;height:56px;padding:0 28px;border-radius:999px;font-family:var(--display);font-weight:700;font-size:18px;border:0}
+.b.pri{background:var(--violeta);color:#fff}
+.b.sec{background:var(--blanco);color:var(--violeta-oscuro);border:2px solid var(--violeta)}
+.b.focus{outline:4px solid var(--sol);outline-offset:3px;box-shadow:0 0 0 2px var(--tinta)}
+.field label{display:block;font-family:var(--display);font-weight:600;font-size:16px;margin-bottom:1.5mm}
+.field .hint{font-size:13px;color:var(--tinta-suave);margin-bottom:1.5mm}
+.field .in{height:56px;border-radius:12px;border:2px solid var(--rosa);background:#fff;display:flex;align-items:center;padding:0 14px;font-size:17px}
+.field .err{display:flex;gap:2mm;align-items:flex-start;color:#9E1F59;font-size:14px;font-weight:700;margin-top:1.5mm}
+.optc{display:flex;gap:3.5mm;align-items:center;min-height:64px;border-radius:14px;border:2px solid var(--violeta);background:var(--s-violeta);padding:3mm 4mm;margin-bottom:2.5mm}
+.optc.off{border-color:var(--linea);background:#fff}
+.optc .rd{width:22px;height:22px;border-radius:50%;border:7px solid var(--violeta);flex:none;background:#fff}
+.optc.off .rd{border:2px solid var(--tinta-suave)}
+.optc b{font-family:var(--display);font-size:15px;display:block}
+.optc small{font-size:12.5px;color:var(--tinta-suave)}
+.alert{display:flex;gap:3mm;border-radius:14px;padding:3.5mm 4mm;border-left:6px solid var(--turquesa);background:var(--s-turquesa);margin-bottom:2.5mm}
+.alert.w{border-left-color:var(--coral);background:var(--s-coral)}
+.alert b{font-family:var(--display);font-size:14px;display:block}
+.alert span{font-size:13px}
+.ico{width:22px;height:22px;flex:none}
+.rules{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;margin-top:5mm}
+.rules div{border-radius:12px;padding:3mm 4mm;font-size:9.2pt;background:var(--blanco)}
+.rules b{font-family:var(--display);font-size:15pt;display:block;color:var(--violeta)}
+
+/* ---------- tono ---------- */
+.voice{display:grid;grid-template-columns:.8fr 1.6fr;gap:9mm;margin-top:4mm}
+.princ{display:grid;gap:3.5mm}
+.princ .card{padding:3.5mm 5mm}
+.princ b{font-family:var(--display);font-size:11.5pt}
+.princ p{font-size:9.6pt;color:var(--tinta-suave)}
+table.dd{width:100%;border-collapse:separate;border-spacing:0;background:var(--blanco);border-radius:14px;overflow:hidden;font-size:10pt}
+table.dd th{font-family:var(--display);font-size:10pt;text-align:left;padding:3mm 4.5mm;color:#fff}
+table.dd th.no{background:var(--rosa)} table.dd th.si{background:var(--turquesa)} table.dd th.why{background:var(--tinta)}
+table.dd td{padding:2.9mm 4.5mm;border-top:1px solid var(--linea);vertical-align:top}
+table.dd td.no{color:#8C1B4F;text-decoration:line-through;text-decoration-color:rgba(192,38,109,.5)}
+table.dd td.why{color:var(--tinta-suave);font-size:9pt}
+
+/* ---------- contratapa ---------- */
+.back{background:var(--violeta-oscuro);color:#fff;padding:0}
+.back .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.back .c svg.brand{width:120mm;height:auto}
+.back .c p{color:#fff;max-width:none}
+.back .motto{font-family:var(--display);font-size:22pt;font-weight:700;margin-top:9mm}
+.back .meta{font-size:10.5pt;margin-top:4mm;opacity:1;color:#E7E0FA}
+.back .prod{position:absolute;bottom:14mm;left:0;right:0;display:flex;justify-content:center}
+.back .prod .pill{background:var(--crema);border-radius:999px;padding:3mm 8mm}
+.back .prod svg{height:11mm;width:auto}
+.versions .stage svg.brand{width:62mm;height:auto}
+.cover .content svg.brand{width:135mm}
+</style>
+</head>
+<body>
+
+<!-- ============ 1. PORTADA ============ -->
+<section class="page cover">
+  <svg class="shapes" viewBox="0 0 297 210" preserveAspectRatio="none" aria-hidden="true">
+    <circle cx="246" cy="58" r="52" fill="#FFC233"/>
+    <rect x="178" y="112" width="86" height="86" rx="22" fill="#0B7A75"/>
+    <path d="M297 118 A62 62 0 0 0 235 180 L235 210 L297 210Z" fill="#C2410C"/>
+    <rect x="160" y="18" width="46" height="18" rx="9" fill="#C0266D"/>
+    <circle cx="282" cy="16" r="8" fill="#5B2BD9"/>
+    <circle cx="214" cy="100" r="6" fill="#5B2BD9"/>
+    <path d="M196 156 l9 9 17 -18" fill="none" stroke="#FFFFFF" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div class="content">
+    <span class="eyebrow">Manual de marca</span>
+    <div style="height:9mm"></div>
+    <!--SVG:logo-->
+    <h1>Guía de marca</h1>
+    <p class="sub">Identidad visual, color, tipografía y voz de Turnos Accesibles: una capa amable para sacar turnos de salud pública.</p>
+  </div>
+  <div class="bottom">
+    <!--SVG:karma-tech-->
+    <span class="ver">Versión 1.0 · 2026<br>UTN FRGP · Metodología de Sistemas I · Grupo 28</span>
+  </div>
+</section>
+
+<!-- ============ 2. SOBRE ESTE MANUAL + ÍNDICE ============ -->
+<section class="page">
+  <span class="eyebrow">Sobre este manual</span>
+  <div class="about">
+    <div>
+      <blockquote>Una marca para que <em>nadie quede afuera</em> de un trámite esencial.</blockquote>
+      <p>Este manual reúne las reglas para usar la identidad de <b>Turnos Accesibles</b> y de su equipo, <b>Karma Tech</b>, de la misma manera en la aplicación, en los documentos y en las presentaciones.</p>
+      <p style="margin-top:3mm">Cada decisión visual responde a una necesidad de accesibilidad: el color tiene un trabajo, la tipografía se eligió por su legibilidad y los componentes se pensaron para manos y ojos que necesitan más espacio.</p>
+      <div class="howto">
+        <div class="card"><b>Calidez</b><span class="small">Colores vivos, formas redondeadas, tono cercano.</span></div>
+        <div class="card"><b>Claridad</b><span class="small">Un dato por vez. Nada de jerga sin explicar.</span></div>
+        <div class="card"><b>Confianza</b><span class="small">Contraste AA en todo. Sin sorpresas.</span></div>
+      </div>
+    </div>
+    <div>
+      <h3 style="font-size:11pt;color:var(--tinta-suave);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2mm">Índice</h3>
+      <ol class="toc">
+        <li><span class="dot" style="background:var(--violeta)">01</span>El equipo Karma Tech<span class="pg">3</span></li>
+        <li><span class="dot" style="background:var(--turquesa)">02</span>Logotipo y versiones<span class="pg">4–5</span></li>
+        <li><span class="dot" style="background:var(--coral)">03</span>Ícono y logo del equipo<span class="pg">6</span></li>
+        <li><span class="dot" style="background:var(--rosa)">04</span>Usos incorrectos<span class="pg">7</span></li>
+        <li><span class="dot" style="background:var(--violeta-oscuro)">05</span>Universo cromático<span class="pg">8–9</span></li>
+        <li><span class="dot" style="background:var(--turquesa)">06</span>Tipografía<span class="pg">10</span></li>
+        <li><span class="dot" style="background:var(--coral)">07</span>Forma y componentes<span class="pg">11</span></li>
+        <li><span class="dot" style="background:var(--rosa)">08</span>Tono y voz<span class="pg">12</span></li>
+      </ol>
+    </div>
+  </div>
+  <div class="foot"><span class="mk"><!--SVG:karma-tech-icono-->Turnos Accesibles · Guía de marca</span><span class="num">02</span></div>
+</section>
+
+<!-- ============ 3. EQUIPO ============ -->
+<section class="page">
+  <span class="eyebrow">01 · El equipo</span>
+  <h2>Karma Tech: lo que das, vuelve</h2>
+  <div class="team">
+    <div class="ring-hero">
+      <!--SVG:karma-tech-->
+      <span class="tag">El anillo gira y la flecha vuelve al inicio.</span>
+    </div>
+    <div>
+      <p class="lead">Somos el equipo detrás de Turnos Accesibles. Creemos que la ayuda circula: lo que se construye para quien más lo necesita termina mejorando el servicio para todas las personas.</p>
+      <p style="margin-top:3mm">El anillo se divide en cuatro colores (turquesa, sol, coral y violeta) que son los mismos del producto. La flecha violeta cierra el círculo: lo que das, vuelve.</p>
+      <div class="people">
+        <div class="card person"><span class="av" style="background:var(--violeta)">MD</span><div><b>Marco D'Antino</b><br><span class="small">Base, marca y accesibilidad · Asistente de reserva</span></div></div>
+        <div class="card person"><span class="av" style="background:var(--turquesa)">MT</span><div><b>Miguel Tello</b><br><span class="small">Cuentas y preferencias · Avisos y modo acompañante</span></div></div>
+        <div class="card person"><span class="av" style="background:var(--coral)">NR</span><div><b>Nicolas Rosso</b><br><span class="small">Búsqueda de turnos · Panel administrativo y PWA</span></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="mk"><!--SVG:karma-tech-icono-->Turnos Accesibles · Guía de marca</span><span class="num">03</span></div>
+</section>
+
+<!-- ============ 4. LOGOTIPO ============ -->
+<section class="page">
+  <span class="eyebrow t">02 · Logotipo</span>
+  <h2>El turno que se ve y se escucha</h2>
+  <div class="logo-main">
+    <div class="stage">
+      <svg viewBox="-24 -26 348 116" style="width:180mm;height:auto" aria-hidden="true">
+        <g stroke="#C0266D" stroke-width=".6" stroke-dasharray="2 2" fill="none">
+          <line x1="-24" y1="4" x2="324" y2="4"/><line x1="-24" y1="58" x2="324" y2="58"/>
+          <line x1="3" y1="-26" x2="3" y2="90"/><line x1="52" y1="-26" x2="52" y2="90"/><line x1="76" y1="-26" x2="76" y2="90"/>
+        </g>
+        <!--SVGINNER:logo-->
+        <g font-family="Lexend" font-size="6.5" fill="#8C1B4F" font-weight="600">
+          <text x="3" y="-15">ícono 49 × 48 · radio 13</text>
+          <text x="80" y="-5">nombre en Lexend Bold, dos líneas</text>
+          <text x="-22" y="80">línea base del ícono y del nombre</text>
+        </g>
+      </svg>
+    </div>
+    <div class="parts">
+      <div class="card"><span class="k" style="background:var(--violeta);color:#fff">1</span><div><h3>Calendario</h3><span class="small">Rectángulo violeta de esquinas redondeadas: el turno, sin ángulos agresivos.</span></div></div>
+      <div class="card"><span class="k" style="background:var(--sol);color:var(--tinta)">2</span><div><h3>Argollas sol</h3><span class="small">Dos argollas amarillas que sostienen la hoja y suman calidez.</span></div></div>
+      <div class="card"><span class="k" style="background:var(--tinta);color:#fff">3</span><div><h3>Tilde blanco</h3><span class="small">El trámite resuelto. Su altura (<b>x</b>) es la unidad de medida del logo.</span></div></div>
+      <div class="card"><span class="k" style="background:var(--coral);color:#fff">4</span><div><h3>Ondas de sonido</h3><span class="small">Dos ondas coral: el turno también <i>se escucha</i>.</span></div></div>
+      <div class="card"><span class="k" style="background:var(--s-violeta);color:var(--violeta-oscuro)">Aa</span><div><h3>Nombre</h3><span class="small">"Turnos" en tinta y "Accesibles" en violeta, en dos líneas alineadas a la izquierda.</span></div></div>
+    </div>
+  </div>
+  <div class="foot"><span class="mk"><!--SVG:karma-tech-icono-->Turnos Accesibles · Guía de marca</span><span class="num">04</span></div>
+</section>
+
+<!-- ============ 5. AREA, TAMAÑOS, VERSIONES ============ -->
+<section class="page">
+  <span class="eyebrow t">02 · Logotipo</span>
+  <h2>Aire, tamaño y fondos</h2>
+  <div class="versions">
+    <div>
+      <div class="stage" style="background:var(--blanco)">
+        <svg viewBox="-24 -22 348 108" style="width:92mm;height:auto" aria-hidden="true">
+          <rect x="-18" y="-14" width="336" height="90" fill="#C0266D" fill-opacity=".07" stroke="#C0266D" stroke-width="1" stroke-dasharray="3 2.5"/>
+          <rect x="0" y="4" width="300" height="54" fill="none" stroke="#C0266D" stroke-width=".5" stroke-opacity=".5"/>
+          <!--SVGINNER:logo-->
+          <g font-family="Lexend" font-size="9" font-weight="700" fill="#8C1B4F">
+            <text x="146" y="-3">x</text><text x="146" y="72">x</text><text x="-14" y="36">x</text><text x="306" y="36">x</text>
+          </g>
+        </svg>
+      </div>
+      <p class="lbl"><b>Área de respeto.</b> Libre de otros elementos: la altura del tilde (x) en los cuatro lados.</p>
+    </div>
+    <div>
+      <div class="stage" style="background:var(--crema);border:1px solid var(--linea)"><!--SVG:logo--></div>
+      <p class="lbl"><b>Fondo claro.</b> Versión principal sobre crema o blanco.</p>
+    </div>
+    <div>
+      <div class="stage" style="background:var(--tinta)"><!--SVG:logo:on-dark--></div>
+      <p class="lbl"><b>Fondo oscuro.</b> Sobre tinta: "Turnos" en blanco y "Accesibles" en sol.</p>
+    </div>
+  </div>
+  <div class="rules2">
+    <div class="card minsizes">
+      <div class="it"><svg viewBox="0 0 300 64" style="width:37mm;height:auto"><!--SVGINNER:logo--></svg><span class="rule"></span><span class="mono">35 mm · impresión</span></div>
+      <div class="it"><svg viewBox="0 0 300 64" style="width:140px;height:auto"><!--SVGINNER:logo--></svg><span class="rule"></span><span class="mono">140 px · pantalla</span></div>
+      <div class="it"><svg viewBox="0 0 68 64" style="width:24px;height:auto"><!--SVGINNER:icono--></svg><span class="rule" style="width:12mm"></span><span class="mono">ícono 24 px</span></div>
+    </div>
+    <div class="card" style="padding:6mm 7mm">
+      <h3>Tamaños mínimos</h3>
+      <p class="small" style="max-width:none;font-size:10pt">Por debajo de 140 px de ancho el nombre pierde legibilidad: en ese caso se usa solo el ícono, que nunca baja de 24 px (favicon, avatar, ícono de la PWA). En impresión, el logo completo no baja de 35 mm de ancho.</p>
+      <h3 style="margin-top:4mm">Fondos permitidos</h3>
+      <p class="small" style="max-width:none;font-size:10pt">Crema, blanco o tinta, siempre planos. Nunca sobre fotografías, degradados ni colores de la paleta que compitan con el ícono.</p>
+    </div>
+  </div>
+  <div class="foot"><span class="mk"><!--SVG:karma-tech-icono-->Turnos Accesibles · Guía de marca</span><span class="num">05</span></div>
+</section>
+
+<!-- ============ 6. ICONO + KARMA ============ -->
+<section class="page">
+  <span class="eyebrow c">03 · Ícono y logo del equipo</span>
+  <h2>Dos símbolos, una familia</h2>
+  <div class="icons">
+    <div>
+      <div class="stage"><svg viewBox="0 0 68 64" style="width:52mm;height:auto"><!--SVGINNER:icono--></svg></div>
+      <h3 style="margin-top:4mm">Ícono del producto</h3>
+      <p class="small" style="font-size:10pt">El calendario con tilde y ondas funciona solo cuando no hay espacio para el nombre: favicon, ícono de la PWA, avatar en redes.</p>
+      <div class="row">
+        <div class="tile" style="width:22mm;height:22mm"><svg viewBox="0 0 68 64" style="width:14mm"><!--SVGINNER:icono--></svg></div>
+        <div class="tile" style="width:16mm;height:16mm;border-radius:50%"><svg viewBox="0 0 68 64" style="width:10mm"><!--SVGINNER:icono--></svg></div>
+        <div class="tile" style="width:11mm;height:11mm;border-radius:8px"><svg viewBox="0 0 68 64" style="width:24px"><!--SVGINNER:icono--></svg></div>
+        <span class="small">App, avatar y favicon (24 px)</span>
+      </div>
+    </div>
+    <div>
+      <div class="stage" style="display:flex;justify-content:space-around;align-items:center">
+        <svg viewBox="0 0 64 64" style="width:40mm;height:auto"><!--SVGINNER:karma-tech-icono--></svg>
+        <div style="background:var(--tinta);border-radius:16px;padding:7mm 8mm"><!--SVG:karma-tech:kt-dark--></div>
+      </div>
+      <h3 style="margin-top:4mm">Logo Karma Tech</h3>
+      <p class="small" style="font-size:10pt">Firma del equipo: va en el pie de la app y en portadas y contratapas de los documentos. Nunca compite con el logo del producto: se usa más chico y en una posición secundaria. Sobre tinta, "Karma" en blanco y "Tech" en sol.</p>
+      <div class="row" style="gap:3mm">
+        <span class="small"><b>No</b> cambiar el orden ni los colores del anillo · <b>No</b> quitar la flecha · Mínimo 24 px para el ícono del anillo.</span>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="mk"><!--SVG:karma-tech-icono-->Turnos Accesibles · Guía de marca</span><span class="num">06</span></div>
+</section>
+
+<!-- ============ 7. USOS INCORRECTOS ============ -->
+<section class="page">
+  <span class="eyebrow r">04 · Usos incorrectos</span>
+  <h2>Lo que nunca hacemos con el logo</h2>
+  <p class="lead">El logo se usa tal como se entrega, en los archivos SVG oficiales. Estos son los errores más comunes.</p>
+  <div class="wrong">
+    <div>
+      <div class="stage"><div style="transform:scaleX(1.3) scaleY(.72)"><!--SVG:logo--></div>
+        <span class="x"><svg viewBox="0 0 20 20" width="14" height="14"><path d="M5 5l10 10M15 5L5 15" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+      <h3>No deformar</h3><p>Escalar siempre en proporción. Estirarlo lo vuelve irreconocible.</p>
+    </div>
+    <div>
+      <div class="stage"><div style="filter:hue-rotate(150deg) saturate(1.6)"><!--SVG:logo--></div>
+        <span class="x"><svg viewBox="0 0 20 20" width="14" height="14"><path d="M5 5l10 10M15 5L5 15" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+      <h3>No cambiar los colores</h3><p>Cada color tiene un significado. Solo existen las versiones de la página 5.</p>
+    </div>
+    <div>
+      <div class="stage" style="background:repeating-linear-gradient(45deg,#0B7A75 0 7mm,#FFC233 7mm 12mm,#C0266D 12mm 17mm,#5B2BD9 17mm 24mm)"><!--SVG:logo-->
+        <span class="x"><svg viewBox="0 0 20 20" width="14" height="14"><path d="M5 5l10 10M15 5L5 15" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+      <h3>No usar fondos cargados</h3><p>Ni fotos, ni tramas, ni degradados detrás. Solo fondos planos.</p>
+    </div>
+    <div>
+      <div class="stage"><div style="transform:rotate(-14deg)"><!--SVG:logo--></div>
+        <span class="x"><svg viewBox="0 0 20 20" width="14" height="14"><path d="M5 5l10 10M15 5L5 15" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+      <h3>No rotar ni inclinar</h3><p>El logo siempre va horizontal, sobre la línea base.</p>
+    </div>
+  </div>
+  <div class="card" style="margin-top:7mm;padding:5mm 6mm;display:flex;gap:5mm;align-items:center;border-left:6px solid var(--turquesa)"><svg width="28" height="28" viewBox="0 0 24 24" style="flex:none"><circle cx="12" cy="12" r="11" fill="#0B7A75"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><p style="max-width:none"><b>Ante la duda:</b> usar el archivo SVG oficial, en proporción, horizontal y sobre crema, blanco o tinta. Si el espacio no alcanza, usar solo el ícono.</p></div>
+  <div class="foot"><span class="mk"><!--SVG:karma-tech-icono-->Turnos Accesibles · Guía de marca</span><span class="num">07</span></div>
+</section>
+
+<!-- ============ 8. COLOR ============ -->
+<section class="page">
+  <span class="eyebrow">05 · Universo cromático</span>
+  <h2>Cada color tiene un trabajo</h2>
+  <p class="lead">Colorida, pero nunca ruidosa. Todos los pares de texto pasan el nivel AA de WCAG. Cada color tiene una versión suave (10 % sobre crema) para fondos de tarjetas y avisos.</p>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#5B2BD9;color:#fff">Violeta<span class="aa">Aa</span></div><div class="meta"><div class="hex">#5B2BD9</div><div class="rol">Primario: botones, enlaces, foco</div><span class="ct">7,2:1 sobre crema</span></div></div>
+    <div class="sw"><div class="chip" style="background:#3F1A9E;color:#fff">Violeta oscuro<span class="aa">Aa</span></div><div class="meta"><div class="hex">#3F1A9E</div><div class="rol">Hover, texto sobre fondos suaves</div><span class="ct">10,8:1</span></div></div>
+    <div class="sw"><div class="chip" style="background:#0B7A75;color:#fff">Turquesa<span class="aa">Aa</span></div><div class="meta"><div class="hex">#0B7A75</div><div class="rol">Éxito, confirmaciones, "disponible"</div><span class="ct">4,9:1</span></div></div>
+    <div class="sw"><div class="chip" style="background:#C2410C;color:#fff">Coral<span class="aa">Aa</span></div><div class="meta"><div class="hex">#C2410C</div><div class="rol">Avisos, recordatorios, voz</div><span class="ct">4,9:1</span></div></div>
+    <div class="sw"><div class="chip" style="background:#FFC233;color:#1E1633">Sol<span class="aa">Aa</span></div><div class="meta"><div class="hex">#FFC233</div><div class="rol">Acento y resaltados. Solo con texto tinta</div><span class="ct">10,7:1 con tinta</span></div></div>
+    <div class="sw"><div class="chip" style="background:#C0266D;color:#fff">Rosa<span class="aa">Aa</span></div><div class="meta"><div class="hex">#C0266D</div><div class="rol">Errores y cancelaciones</div><span class="ct">5,4:1</span></div></div>
+    <div class="sw"><div class="chip" style="background:#1E1633;color:#fff">Tinta<span class="aa">Aa</span></div><div class="meta"><div class="hex">#1E1633</div><div class="rol">Texto principal</div><span class="ct">16,5:1</span></div></div>
+    <div class="sw"><div class="chip" style="background:#4A4160;color:#fff">Tinta suave<span class="aa">Aa</span></div><div class="meta"><div class="hex">#4A4160</div><div class="rol">Texto secundario</div><span class="ct">9,0:1</span></div></div>
+    <div class="sw"><div class="chip" style="background:#FFF9F0;color:#1E1633;border-bottom:1px solid var(--linea)">Crema<span class="aa">Aa</span></div><div class="meta"><div class="hex">#FFF9F0</div><div class="rol">Fondo de la app</div><span class="ct" style="background:var(--s-violeta);color:var(--violeta-oscuro)">Fondo</span></div></div>
+    <div class="sw"><div class="chip" style="background:#FFFFFF;color:#1E1633;border-bottom:1px solid var(--linea)">Blanco<span class="aa">Aa</span></div><div class="meta"><div class="hex">#FFFFFF</div><div class="rol">Tarjetas</div><span class="ct" style="background:var(--s-violeta);color:var(--violeta-oscuro)">Superficie</span></div></div>
+  </div>
+  <div class="foot"><span class="mk"><!--SVG:karma-tech-icono-->Turnos Accesibles · Guía de marca</span><span class="num">08</span></div>
+</section>
+
+<!-- ============ 9. ALTO CONTRASTE ============ -->
+<section class="page">
+  <span class="eyebrow">05 · Universo cromático</span>
+  <h2>Tema de alto contraste</h2>
+  <p class="lead">Se activa desde el menú de accesibilidad y se ofrece en el primer ingreso. Cambia los colores, no el diseño: la persona encuentra todo en el mismo lugar.</p>
+  <div class="screens">
+    <div>
+      <div class="screen normal">
+        <div class="bar"><!--SVG:logo--><span class="small">Accesibilidad</span></div>
+        <div class="body">
+          <div class="q">¿Qué tipo de atención necesitás?</div>
+          <div class="opt sel"><span class="radio"></span>Oculista (oftalmología)</div>
+          <div class="opt"><span class="radio"></span>Médico de cabecera (clínica)</div>
+          <div class="opt"><span class="radio"></span>Corazón (cardiología)</div>
+          <span class="btn">Seguir</span>
+        </div>
+      </div>
+      <p class="small" style="margin-top:2mm"><b>Tema de la marca.</b> Crema, tarjetas blancas, primario violeta.</p>
+    </div>
+    <div>
+      <div class="screen hc">
+        <div class="bar"><!--SVG:logo:on-dark--><span style="color:#fff;font-size:9pt">Accesibilidad</span></div>
+        <div class="body">
+          <div class="q">¿Qué tipo de atención necesitás?</div>
+          <div class="opt sel"><span class="radio"></span>Oculista (oftalmología)</div>
+          <div class="opt"><span class="radio"></span>Médico de cabecera (clínica)</div>
+          <div class="opt"><span class="radio"></span>Corazón (cardiología)</div>
+          <span class="btn">Seguir</span>
+        </div>
+      </div>
+      <div class="hc-specs">
+        <span><i style="background:#000"></i>Fondo #000</span>
+        <span><i style="background:#fff"></i>Texto #FFF (21:1)</span>
+        <span><i style="background:#FFE14D"></i>Primario #FFE14D</span>
+        <span><i style="background:#fff;border:3px solid #000"></i>Bordes blancos de 3 px</span>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="mk"><!--SVG:karma-tech-icono-->Turnos Accesibles · Guía de marca</span><span class="num">09</span></div>
+</section>
+
+<!-- ============ 10. TIPOGRAFIA ============ -->
+<section class="page">
+  <span class="eyebrow t">06 · Tipografía</span>
+  <h2>Dos letras pensadas para leer sin esfuerzo</h2>
+  <div class="types">
+    <div class="card type">
+      <div class="aa" style="font-family:var(--display);color:var(--violeta)">Aa</div>
+      <div class="name"><b>Lexend</b><span class="mono">Títulos y botones</span></div>
+      <div class="weights"><span style="font-weight:400">Regular</span><span style="font-weight:600">SemiBold</span><span style="font-weight:700">Bold</span><span style="font-weight:800">ExtraBold</span></div>
+      <div class="abc" style="font-family:var(--display)">ABCDEFGHIJKLMNÑOPQRSTUVWXYZ<br>abcdefghijklmnñopqrstuvwxyz<br>0123456789 ¿?¡! áéíóú</div>
+      <div class="why"><b>Por qué:</b> fue diseñada para reducir el esfuerzo visual y mejorar la fluidez de lectura. Sus letras amplias y espaciadas hacen que los títulos y los botones se lean de un vistazo.</div>
+    </div>
+    <div class="card type">
+      <div class="aa" style="font-family:var(--texto);color:var(--turquesa)">Aa</div>
+      <div class="name"><b style="font-family:var(--texto)">Atkinson Hyperlegible</b><span class="mono">Texto</span></div>
+      <div class="disamb"><span>I l 1</span><span>O 0</span><span>rn m</span><span>b d</span></div>
+      <div class="abc" style="font-family:var(--texto)">ABCDEFGHIJKLMNÑOPQRSTUVWXYZ<br>abcdefghijklmnñopqrstuvwxyz<br>0123456789 ¿?¡! áéíóú</div>
+      <div class="why"><b>Por qué:</b> la creó el Braille Institute para personas con baja visión. Cada letra se distingue de las que se le parecen, así un número de turno o un DNI no se confunden.</div>
+    </div>
+  </div>
+  <div class="scale">
+    <div><span style="font-family:var(--display);font-weight:800;font-size:20pt">Título 32 px</span></div>
+    <div><span style="font-family:var(--display);font-weight:700;font-size:15pt">Subtítulo 24 px</span></div>
+    <div><span style="font-size:12.5pt">Texto 18 px · interlineado 1,6</span></div>
+    <span class="small" style="max-width:85mm">Nada por debajo de 18 px en la app. Líneas de 70 caracteres como máximo.</span>
+  </div>
+  <div class="foot"><span class="mk"><!--SVG:karma-tech-icono-->Turnos Accesibles · Guía de marca</span><span class="num">10</span></div>
+</section>
+
+<!-- ============ 11. FORMA Y COMPONENTES ============ -->
+<section class="page">
+  <span class="eyebrow c">07 · Forma y componentes</span>
+  <h2>Formas amables, objetivos grandes</h2>
+  <div class="comps">
+    <div class="card comp">
+      <h3>Botones</h3>
+      <div style="display:flex;flex-direction:column;gap:4mm;align-items:flex-start;margin-top:3mm">
+        <span class="b pri">Confirmar turno</span>
+        <span class="b sec">Volver</span>
+        <span class="b pri focus">Con foco</span>
+      </div>
+      <p class="spec">Píldora (radio 999 px), 56 px de alto. Foco: anillo de 4 px en sol con borde tinta, siempre visible.</p>
+    </div>
+    <div class="card comp">
+      <h3>Campo con error</h3>
+      <div class="field" style="margin-top:3mm">
+        <label>Correo electrónico</label>
+        <div class="hint">Lo usamos para mandarte el comprobante.</div>
+        <div class="in">rosa.gomez@</div>
+        <div class="err"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#C0266D"/><path d="M12 6.5v7" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.5" fill="#fff"/></svg>Falta una parte del correo. Escribilo así: nombre@correo.com</div>
+      </div>
+      <p class="spec">El error va junto al campo, con ícono y texto (nunca solo color), y dice qué hacer.</p>
+    </div>
+    <div class="card comp">
+      <h3>Tarjeta de opción y avisos</h3>
+      <div style="margin-top:3mm">
+        <div class="optc"><span class="rd"></span><div><b>Hospital Austral</b><small>Pilar · a 2 km de tu casa</small></div></div>
+        <div class="optc off"><span class="rd"></span><div><b>CAPS Pacheco Centro</b><small>Tigre · a 4 km</small></div></div>
+        <div class="alert"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#0B7A75"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>Turno confirmado</b><span>Te mandamos el comprobante por correo.</span></div></div>
+        <div class="alert w"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#C2410C"/><path d="M12 6.5v7" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.5" fill="#fff"/></svg><div><b>Mañana a las 9:30</b><span>Llevá el DNI y la orden médica.</span></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="rules">
+    <div><b>14 px</b>Radio de tarjetas. Botones en píldora.</div>
+    <div><b>56 px</b>Alto mínimo de todo objetivo táctil.</div>
+    <div><b>4 px</b>Anillo de foco sol con borde tinta.</div>
+    <div><b>0</b>Degradados detrás del texto. Animaciones solo cortas, y ninguna con movimiento reducido.</div>
+  </div>
+  <div class="foot"><span class="mk"><!--SVG:karma-tech-icono-->Turnos Accesibles · Guía de marca</span><span class="num">11</span></div>
+</section>
+
+<!-- ============ 12. TONO Y VOZ ============ -->
+<section class="page">
+  <span class="eyebrow r">08 · Tono y voz</span>
+  <h2>Hablamos como una persona que ayuda</h2>
+  <div class="voice">
+    <div class="princ">
+      <div class="card"><b>De vos, con frases cortas</b><p>Un dato por oración. Sin rodeos.</p></div>
+      <div class="card"><b>Qué pasó y qué hacer</b><p>Cada mensaje explica la situación y ofrece el paso siguiente.</p></div>
+      <div class="card"><b>Palabras de todos los días</b><p>"Prestador" se dice "centro de salud". Si hace falta un término técnico, se explica.</p></div>
+      <div class="card"><b>Nunca culpamos</b><p>El problema es del sistema, no de la persona.</p></div>
+    </div>
+    <table class="dd">
+      <thead><tr><th class="no">No decimos</th><th class="si">Decimos</th><th class="why">Por qué</th></tr></thead>
+      <tbody>
+        <tr><td class="no">Correo inválido.</td><td>No encontramos ese correo. Revisá si está bien escrito.</td><td class="why">No culpa y dice qué hacer.</td></tr>
+        <tr><td class="no">Error 409: recurso no disponible.</td><td>Ese turno ya lo tomó otra persona. Te mostramos otros cerca.</td><td class="why">Explica qué pasó y ofrece una salida.</td></tr>
+        <tr><td class="no">Seleccione prestador.</td><td>¿A qué centro de salud querés ir?</td><td class="why">Vocabulario cotidiano, pregunta directa.</td></tr>
+        <tr><td class="no">Sesión expirada por inactividad.</td><td>Guardamos lo que cargaste. Podés seguir cuando quieras.</td><td class="why">Sin apuro ni pérdida de datos.</td></tr>
+        <tr><td class="no">Operación exitosa.</td><td>¡Listo! Tu turno es el lunes 3 a las 9:30.</td><td class="why">Confirma con el dato que importa.</td></tr>
+        <tr><td class="no">Complete los campos obligatorios.</td><td>Falta tu número de documento.</td><td class="why">Señala exactamente qué falta.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot"><span class="mk"><!--SVG:karma-tech-icono-->Turnos Accesibles · Guía de marca</span><span class="num">12</span></div>
+</section>
+
+<!-- ============ 13. CONTRATAPA ============ -->
+<section class="page back">
+  <svg style="position:absolute;inset:0" viewBox="0 0 297 210" preserveAspectRatio="none" aria-hidden="true">
+    <circle cx="20" cy="22" r="34" fill="#5B2BD9"/>
+    <circle cx="282" cy="196" r="44" fill="#5B2BD9"/>
+    <rect x="250" y="16" width="30" height="12" rx="6" fill="#FFC233"/>
+    <circle cx="30" cy="190" r="5" fill="#FFC233"/>
+  </svg>
+  <div class="c">
+    <!--SVG:karma-tech:kt-dark-->
+    <p class="motto">Lo que das, vuelve.</p>
+    <p class="meta">Tecnología para que nadie quede afuera de un trámite esencial.<br>UTN FRGP · Técnico Universitario en Programación · Metodología de Sistemas I · Grupo 28</p>
+  </div>
+  <div class="prod"><span class="pill"><!--SVG:logo--></span></div>
+</section>
+
+</body>
+</html>

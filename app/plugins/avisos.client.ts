@@ -1,55 +1,61 @@
-const CADA = 60_000
+// Avisos nuevos (v0.5): con la sesión iniciada, revisa si hay avisos al cambiar de página y cada
+// minuto (una consulta liviana: solo los sin leer). Si llegó algo nuevo, la banda lo muestra
+// (components/BandaAvisos.vue) y, según el canal que eligió la persona, suena un tono suave y se
+// lee el título en voz alta. Nada se repite: el sonido es solo para los que la app no había mostrado.
 
-function sonar() {
-  const Contexto = window.AudioContext ?? (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
-  if (!Contexto) return
-  const ctx = new Contexto()
-  for (const [i, frecuencia] of [660, 880].entries()) {
-    const osc = ctx.createOscillator()
-    const volumen = ctx.createGain()
-    osc.frequency.value = frecuencia
-    volumen.gain.value = 0.15
-    osc.connect(volumen).connect(ctx.destination)
-    osc.start(ctx.currentTime + i * 0.25)
-    osc.stop(ctx.currentTime + i * 0.25 + 0.2)
-  }
-}
+const CADA_MINUTO_MS = 60 * 1000
+// Esperamos un poco para no pisar el anuncio del título de la página (foco-al-navegar).
+const ESPERA_ANTES_DE_LEER_MS = 1500
 
-export default defineNuxtPlugin({
-  name: 'avisos',
-  dependsOn: ['preferencias'],
-  setup(nuxtApp) {
-    const user = useSupabaseUser()
-    const avisoNuevo = useState<{ titulo: string, cuerpo: string } | null>('aviso-nuevo', () => null)
-    const { prefs } = useAccesibilidad()
-    const { announce } = useAnuncio()
-    const { noLeidas, contar, listar } = useNotificaciones()
-    let anterior: number | null = null
+export default defineNuxtPlugin((nuxtApp) => {
+  const router = useRouter()
+  const usuario = useSupabaseUser()
+  const avisos = useAvisos()
+  const cuenta = usePreferenciasCuenta()
+  const { preferencias } = useAccesibilidad()
+  const ayuda = useAyuda()
+  let revisando = false
 
-    async function revisar() {
-      if (!user.value) {
-        anterior = null
-        noLeidas.value = 0
-        return
-      }
-      const actual = await contar()
-      if (anterior !== null && actual > anterior) {
-        const [ultima] = await listar()
-        if (ultima) {
-          const canal = prefs.value.notificationChannel
-          if (canal !== 'sonoro') avisoNuevo.value = { titulo: ultima.titulo, cuerpo: ultima.cuerpo }
-          if (canal !== 'visual') sonar()
-          announce(`Tenés un aviso nuevo: ${ultima.titulo}.`)
-        }
-      }
-      anterior = actual
+  async function revisar() {
+    if (revisando) return
+    if (!usuario.value) {
+      avisos.olvidar()
+      return
     }
+    revisando = true
+    try {
+      const nuevos = await avisos.revisar()
+      if (nuevos.length === 0) return
+      const como = comoAvisar(cuenta.aviso.value.canalAviso, preferencias.value.lecturaVoz)
+      if (como.tono) tocarTonoAviso()
+      if (como.voz) {
+        const primero = nuevos[0]!
+        const texto =
+          nuevos.length === 1
+            ? `Aviso nuevo. ${tituloConPunto(textoAviso(primero).titulo)}`
+            : `Tenés ${nuevos.length} avisos nuevos.`
+        setTimeout(() => hablar(texto, preferencias.value.velocidadVoz), ESPERA_ANTES_DE_LEER_MS)
+      }
+      // Si cambió un permiso (por ejemplo, le quitaron el acceso), revisamos el modo ayuda.
+      if (nuevos.some((aviso) => aviso.tipo === 'acompanamiento')) {
+        await ayuda.verificar()
+      }
+    } finally {
+      revisando = false
+    }
+  }
 
-    watch(() => user.value?.sub, () => {
-      anterior = null
+  nuxtApp.hook('app:mounted', () => {
+    revisar()
+    setInterval(revisar, CADA_MINUTO_MS)
+  })
+  router.afterEach(() => {
+    revisar()
+  })
+  watch(
+    () => usuario.value?.sub,
+    () => {
       revisar()
-    }, { immediate: true })
-    nuxtApp.hook('page:finish', revisar)
-    useIntervalFn(revisar, CADA)
-  },
+    },
+  )
 })

@@ -1,78 +1,125 @@
-<template>
-  <div class="max-w-xl flex flex-col gap-8">
-    <h1 class="text-2xl font-bold">Ingresá a tu cuenta</h1>
-
-    <UForm method="post" :validate-on="['input']" :schema="SCHEMA_INGRESO" :state="form" class="flex flex-col gap-6" @submit="enviar" @error="alFallar">
-      <UFormField label="Tu correo" name="email">
-        <UInput id="ingresar-email" v-model="form.email" type="email" autocomplete="email" class="w-full" />
-      </UFormField>
-
-      <UFormField label="Tu contraseña" name="clave">
-        <CampoClave id="ingresar-clave" v-model="form.clave" autocomplete="current-password" />
-      </UFormField>
-
-      <UAlert v-if="aviso" color="error" icon="i-lucide-circle-x" :title="aviso.titulo" :description="aviso.ayuda" />
-
-      <div v-if="motivo === 'sin-confirmar'" class="flex flex-col gap-3">
-        <UButton label="Mandarme el correo de nuevo" icon="i-lucide-mail" class="self-start" :loading="reenviando" @click="reenviar" />
-        <p v-if="reenviado" class="text-lg">Listo. Te mandamos el correo de nuevo a {{ form.email }}.</p>
-      </div>
-
-      <UButton type="submit" color="primary" variant="solid" label="Ingresar" icon="i-lucide-log-in" block class="sm:w-auto sm:self-start" :loading="enviando" />
-    </UForm>
-
-    <nav aria-label="Otras opciones" class="flex flex-col gap-2">
-      <NuxtLink to="/recuperar-clave" class="inline-flex items-center min-h-12 text-lg underline">Me olvidé la contraseña</NuxtLink>
-      <NuxtLink to="/registrarme" class="inline-flex items-center min-h-12 text-lg underline">Todavía no tengo cuenta. Quiero crear una.</NuxtLink>
-    </nav>
-  </div>
-</template>
-
 <script setup lang="ts">
-import type { Aviso } from '~/composables/useSesion'
-
 definePageMeta({ middleware: 'invitado' })
-useHead({ title: 'Ingresar' })
+useSeoMeta({ title: 'Ingresar' })
 
 const route = useRoute()
 const { ingresar, reenviarConfirmacion } = useSesion()
-const { alFallar } = useFormulario()
-const { alert, announce } = useAnuncio()
+const { anunciar } = useAnuncio()
 
-const form = reactive({ email: '', clave: '' })
-const enviando = ref(false)
-const aviso = ref<Aviso>()
-const motivo = ref<string>()
-const reenviando = ref(false)
+const correo = ref(typeof route.query.correo === 'string' ? route.query.correo : '')
+const clave = ref('')
+const errores = ref<{ correo?: string; clave?: string }>({})
+const resultado = ref<{ mensaje: string; ofrecerRecuperar?: boolean; ofrecerReenvio?: boolean } | null>(null)
 const reenviado = ref(false)
+const enviando = ref(false)
+
+const listaErrores = computed(() => {
+  const lista: { id: string; mensaje: string }[] = []
+  if (errores.value.correo) lista.push({ id: 'ingreso-correo', mensaje: errores.value.correo })
+  if (errores.value.clave) lista.push({ id: 'ingreso-clave', mensaje: errores.value.clave })
+  return lista
+})
 
 async function enviar() {
-  enviando.value = true
-  aviso.value = undefined
+  if (enviando.value) {
+    return
+  }
+  resultado.value = null
   reenviado.value = false
-  const resultado = await ingresar(form.email.trim(), form.clave)
-  enviando.value = false
-
-  if (resultado.ok) {
-    announce('Ingresaste a tu cuenta.')
-    return navigateTo(rutaSegura(route.query.volver))
+  errores.value = {
+    correo: validarCorreo(correo.value),
+    clave: clave.value === '' ? 'Escribí tu contraseña.' : undefined,
+  }
+  const primero = listaErrores.value[0]
+  if (primero) {
+    document.getElementById(primero.id)?.focus()
+    return
   }
 
-  aviso.value = resultado.aviso
-  motivo.value = resultado.motivo
-  alert(`${resultado.aviso.titulo} ${resultado.aviso.ayuda}`)
+  enviando.value = true
+  anunciar('Revisando tus datos…')
+  const respuesta = await ingresar(correo.value, clave.value)
+  enviando.value = false
+
+  if (respuesta.ok) {
+    anunciar('Ingresaste a tu cuenta.')
+    await navigateTo(rutaSegura(route.query.volver))
+    return
+  }
+  resultado.value = respuesta
+  clave.value = ''
 }
 
 async function reenviar() {
-  reenviando.value = true
-  const resultado = await reenviarConfirmacion(form.email.trim())
-  reenviando.value = false
-  if (resultado.ok) {
+  const respuesta = await reenviarConfirmacion(correo.value)
+  if (respuesta.ok) {
     reenviado.value = true
-    announce(`Listo. Te mandamos el correo de nuevo a ${form.email}.`)
+    anunciar('Te mandamos el correo de nuevo.')
   } else {
-    aviso.value = resultado.aviso
-    alert(`${resultado.aviso.titulo} ${resultado.aviso.ayuda}`)
+    resultado.value = respuesta
   }
 }
 </script>
+
+<template>
+  <div class="contenedor pagina formulario-angosto">
+    <h1>Ingresar</h1>
+    <p class="pagina__bajada">Escribí el correo y la contraseña de tu cuenta.</p>
+
+    <ResumenErrores :errores="listaErrores" />
+
+    <Aviso v-if="resultado" tipo="error">
+      <p>{{ resultado.mensaje }}</p>
+      <p v-if="resultado.ofrecerRecuperar">
+        <NuxtLink :to="{ path: '/recuperar', query: { correo } }">Crear una contraseña nueva</NuxtLink>
+      </p>
+      <p v-if="resultado.ofrecerReenvio && !reenviado">
+        <button type="button" class="boton boton--texto enlace-boton" @click="reenviar">
+          Mandarme el correo de nuevo
+        </button>
+      </p>
+    </Aviso>
+    <Aviso v-if="reenviado" tipo="exito">
+      <p>Te mandamos el correo de nuevo. Buscalo también en "Correo no deseado".</p>
+    </Aviso>
+
+    <form class="tarjeta pila" novalidate @submit.prevent="enviar">
+      <Campo
+        id="ingreso-correo"
+        v-model="correo"
+        etiqueta="Correo electrónico"
+        type="email"
+        autocomplete="email"
+        inputmode="email"
+        :error="errores.correo"
+        requerido
+      />
+      <CampoClave
+        id="ingreso-clave"
+        v-model="clave"
+        autocomplete="current-password"
+        :error="errores.clave"
+      />
+      <Boton type="submit" bloque>{{ enviando ? 'Ingresando…' : 'Ingresar' }}</Boton>
+    </form>
+
+    <ul class="enlaces">
+      <li><NuxtLink :to="{ path: '/recuperar', query: { correo } }">Me olvidé la contraseña</NuxtLink></li>
+      <li>¿No tenés cuenta? <NuxtLink to="/registrarme">Creá una cuenta</NuxtLink></li>
+    </ul>
+  </div>
+</template>
+
+<style scoped>
+.enlaces {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  padding: 0;
+  list-style: none;
+}
+
+.enlace-boton {
+  padding-inline: 0;
+}
+</style>

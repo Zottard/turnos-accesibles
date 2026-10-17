@@ -1,111 +1,227 @@
+<!--
+  Perfil: ver y editar los datos personales. El tipo de cuenta no se cambia desde acá.
+  v0.5: también se puede cambiar el correo (Supabase pide confirmarlo con un enlace).
+-->
+<script setup lang="ts">
+definePageMeta({ middleware: 'auth' })
+useSeoMeta({ title: 'Mi perfil' })
+
+const { cargarPerfil, guardarPerfil } = usePerfil()
+const { usuario, cambiarCorreo } = useSesion()
+const { anunciar } = useAnuncio()
+
+const { data: cargado } = await useAsyncData('perfil', () => cargarPerfil())
+
+const NOMBRES_ROL = { solicitante: 'Solicitante', acompanante: 'Acompañante', admin: 'Administración' }
+
+const datos = reactive<DatosPerfil>({
+  nombre: '',
+  apellido: '',
+  dni: '',
+  fechaNacimiento: '',
+  telefono: '',
+  localidad: '',
+})
+
+// Copia los datos traídos de la base al formulario.
+watch(
+  () => cargado.value?.datos,
+  (perfil) => {
+    if (perfil) {
+      const { rol: _rol, ...editables } = perfil
+      Object.assign(datos, editables)
+    }
+  },
+  { immediate: true },
+)
+
+type ClaveCampo = keyof DatosPerfil
+
+const CAMPOS: {
+  clave: ClaveCampo
+  etiqueta: string
+  type?: 'text' | 'tel' | 'date'
+  autocomplete: string
+  inputmode?: 'numeric' | 'tel'
+  validar: (valor: string) => string | undefined
+}[] = [
+  { clave: 'nombre', etiqueta: 'Nombre', autocomplete: 'given-name', validar: (v) => validarRequerido(v, 'Escribí tu nombre.') },
+  { clave: 'apellido', etiqueta: 'Apellido', autocomplete: 'family-name', validar: (v) => validarRequerido(v, 'Escribí tu apellido.') },
+  { clave: 'dni', etiqueta: 'Número de DNI', autocomplete: 'off', inputmode: 'numeric', validar: validarDni },
+  { clave: 'fechaNacimiento', etiqueta: 'Fecha de nacimiento', type: 'date', autocomplete: 'bday', validar: (v) => validarFechaNacimiento(v) },
+  { clave: 'telefono', etiqueta: 'Teléfono', type: 'tel', autocomplete: 'tel', inputmode: 'tel', validar: validarTelefono },
+  { clave: 'localidad', etiqueta: 'Localidad', autocomplete: 'address-level2', validar: (v) => validarRequerido(v, 'Escribí tu localidad.') },
+]
+
+const errores = ref<Partial<Record<ClaveCampo, string>>>({})
+const resultado = ref<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null)
+const guardando = ref(false)
+
+const listaErrores = computed(() =>
+  CAMPOS.filter((campo) => errores.value[campo.clave]).map((campo) => ({
+    id: `perfil-${campo.clave}`,
+    mensaje: errores.value[campo.clave]!,
+  })),
+)
+
+// --- Cambiar el correo (v0.5) ---
+const correoNuevo = ref('')
+const errorCorreo = ref<string | undefined>()
+const resultadoCorreo = ref<{ tipo: 'exito' | 'error'; mensaje: string } | null>(null)
+const cambiandoCorreo = ref(false)
+
+async function cambiarMiCorreo() {
+  if (cambiandoCorreo.value) return
+  resultadoCorreo.value = null
+  errorCorreo.value = validarCorreo(correoNuevo.value)
+  if (!errorCorreo.value && correoNuevo.value.trim().toLowerCase() === usuario.value?.email) {
+    errorCorreo.value = 'Ese ya es tu correo.'
+  }
+  if (errorCorreo.value) {
+    document.getElementById('perfil-correo-nuevo')?.focus()
+    return
+  }
+  cambiandoCorreo.value = true
+  const respuesta = await cambiarCorreo(correoNuevo.value)
+  cambiandoCorreo.value = false
+  resultadoCorreo.value = respuesta.ok
+    ? {
+        tipo: 'exito',
+        mensaje:
+          'Te mandamos un correo a la dirección nueva (y puede que también a la de antes). Tocá el enlace para confirmar el cambio. Hasta entonces, seguís usando la de antes.',
+      }
+    : { tipo: 'error', mensaje: respuesta.mensaje }
+  anunciar(resultadoCorreo.value.mensaje, !respuesta.ok)
+}
+
+async function guardar() {
+  if (guardando.value) {
+    return
+  }
+  resultado.value = null
+  errores.value = {}
+  for (const campo of CAMPOS) {
+    const error = campo.validar(datos[campo.clave])
+    if (error) {
+      errores.value[campo.clave] = error
+    }
+  }
+  const primero = listaErrores.value[0]
+  if (primero) {
+    document.getElementById(primero.id)?.focus()
+    return
+  }
+
+  guardando.value = true
+  const respuesta = await guardarPerfil(datos)
+  guardando.value = false
+  resultado.value = respuesta.ok
+    ? { tipo: 'exito', mensaje: 'Guardamos tus datos.' }
+    : { tipo: 'error', mensaje: respuesta.mensaje }
+  anunciar(resultado.value.mensaje, !respuesta.ok)
+}
+</script>
+
 <template>
-  <div class="max-w-2xl flex flex-col gap-10">
-    <h1 class="text-2xl font-bold">Mi perfil</h1>
+  <div class="contenedor pagina formulario-angosto">
+    <h1>Mi perfil</h1>
 
-    <section aria-labelledby="titulo-datos" class="flex flex-col gap-6">
-      <h2 id="titulo-datos" class="text-xl font-bold">Mis datos</h2>
+    <Aviso v-if="cargado?.error" tipo="error">
+      <p>{{ cargado.error }}</p>
+    </Aviso>
 
-      <VistaEstados :estado="listo ? 'contenido' : 'cargando'" texto-cargando="Estamos trayendo tus datos. Esperá un momento.">
-        <dl class="flex flex-col gap-2">
-          <div class="flex flex-wrap gap-x-4">
-            <dt class="font-bold">Documento:</dt>
-            <dd>{{ perfil?.documento }}</dd>
-          </div>
-          <div v-if="perfil?.fecha_nacimiento" class="flex flex-wrap gap-x-4">
-            <dt class="font-bold">Fecha de nacimiento:</dt>
-            <dd>{{ nacimiento }}</dd>
-          </div>
-        </dl>
+    <template v-else-if="cargado?.datos">
+      <dl class="tarjeta cuenta">
+        <div>
+          <dt>Correo electrónico</dt>
+          <dd>{{ usuario?.email }}</dd>
+        </div>
+        <div>
+          <dt>Tipo de cuenta</dt>
+          <dd>{{ NOMBRES_ROL[cargado.datos.rol] }}</dd>
+        </div>
+      </dl>
 
-        <UForm method="post" :validate-on="['input']" :schema="SCHEMA_PERFIL" :state="form" class="flex flex-col gap-6" @submit="guardar" @error="alFallar">
-          <UFormField label="Tu nombre" name="nombre">
-            <UInput id="perfil-nombre" v-model="form.nombre" autocomplete="given-name" class="w-full" />
-          </UFormField>
-          <UFormField label="Tu apellido" name="apellido">
-            <UInput id="perfil-apellido" v-model="form.apellido" autocomplete="family-name" class="w-full" />
-          </UFormField>
-          <UFormField label="Tu teléfono" name="telefono" description="No es obligatorio. Lo usamos solo si hay que avisarte algo urgente.">
-            <UInput id="perfil-telefono" v-model="form.telefono" type="tel" autocomplete="tel" class="w-full" />
-          </UFormField>
-          <UFormField label="Tu localidad" name="localidad" description="La usamos para mostrarte los hospitales más cerca.">
-            <USelectMenu id="perfil-localidad" v-model="form.localidad" :items="itemsLocalidades" value-key="value" placeholder="Elegí tu localidad" class="w-full" />
-          </UFormField>
+      <!-- v0.5: si un correo de aviso rebotó, acá se puede cambiar la dirección. -->
+      <section class="pila" aria-labelledby="titulo-correo">
+        <h2 id="titulo-correo" tabindex="-1">Tu correo</h2>
+        <p>Lo usás para ingresar y te mandamos ahí los avisos. Si está mal escrito o ya no lo usás, cambialo.</p>
+        <Aviso v-if="resultadoCorreo" :tipo="resultadoCorreo.tipo">
+          <p>{{ resultadoCorreo.mensaje }}</p>
+        </Aviso>
+        <form class="tarjeta pila" novalidate @submit.prevent="cambiarMiCorreo">
+          <Campo
+            id="perfil-correo-nuevo"
+            v-model="correoNuevo"
+            etiqueta="Correo nuevo"
+            type="email"
+            autocomplete="email"
+            inputmode="email"
+            :error="errorCorreo"
+            requerido
+          />
+          <Boton type="submit" variante="secundario">{{ cambiandoCorreo ? 'Guardando…' : 'Cambiar mi correo' }}</Boton>
+        </form>
+      </section>
 
-          <UAlert v-if="aviso" color="error" icon="i-lucide-circle-x" :title="aviso" description="Revisá tu conexión a internet y probá de nuevo." />
+      <section class="pila" aria-labelledby="titulo-datos">
+        <h2 id="titulo-datos">Tus datos</h2>
+        <ResumenErrores :errores="listaErrores" />
+        <Aviso v-if="resultado" :tipo="resultado.tipo">
+          <p>{{ resultado.mensaje }}</p>
+        </Aviso>
 
-          <UButton type="submit" color="primary" variant="solid" icon="i-lucide-save" label="Guardar mis datos" block class="sm:w-auto sm:self-start" :loading="guardando" />
-        </UForm>
-      </VistaEstados>
-    </section>
+        <form class="tarjeta pila" novalidate @submit.prevent="guardar">
+          <Campo
+            v-for="campo in CAMPOS"
+            :id="`perfil-${campo.clave}`"
+            :key="campo.clave"
+            v-model="datos[campo.clave]"
+            :etiqueta="campo.etiqueta"
+            :type="campo.type"
+            :autocomplete="campo.autocomplete"
+            :inputmode="campo.inputmode"
+            :error="errores[campo.clave]"
+            requerido
+          />
+          <Boton type="submit">{{ guardando ? 'Guardando…' : 'Guardar los cambios' }}</Boton>
+        </form>
+      </section>
 
-    <section aria-labelledby="titulo-mas" class="flex flex-col gap-4">
-      <h2 id="titulo-mas" class="text-xl font-bold">Más opciones</h2>
-      <UButton to="/perfil/accesibilidad" icon="i-lucide-accessibility" label="Cómo quiero usar la app" class="self-start" />
-    </section>
+      <section class="pila" aria-labelledby="titulo-accesibilidad">
+        <h2 id="titulo-accesibilidad">Cómo ves la página</h2>
+        <p>Tamaño de letra, contraste, voz y avisos.</p>
+        <div>
+          <Boton to="/perfil/accesibilidad" variante="secundario">Cambiar mis preferencias</Boton>
+        </div>
+      </section>
+
+      <section class="pila" aria-labelledby="titulo-acompanantes">
+        <h2 id="titulo-acompanantes">Personas que te ayudan</h2>
+        <p>Quién puede ver tus turnos o sacarte turnos, y la constancia de cada permiso.</p>
+        <div>
+          <Boton to="/acompanantes" variante="secundario">Ver o invitar</Boton>
+        </div>
+      </section>
+    </template>
   </div>
 </template>
 
-<script setup lang="ts">
-definePageMeta({ middleware: 'auth' })
-useHead({ title: 'Mi perfil' })
-
-const supabase = useSupabaseClient()
-const { perfil, cargarPerfil } = useSesion()
-const { localidades, localidadPorNombre } = useTurnos()
-const { alFallar } = useFormulario()
-const { announce, alert } = useAnuncio()
-
-const form = reactive({
-  nombre: '',
-  apellido: '',
-  telefono: '',
-  localidad: undefined as number | undefined,
-})
-const guardando = ref(false)
-const listo = ref(false)
-const aviso = ref<string>()
-
-const itemsLocalidades = computed(() => localidades.value.map((l) => ({ label: l.nombre, description: l.partido, value: l.id })))
-const nacimiento = computed(() => (perfil.value?.fecha_nacimiento ? diaEnPalabras(`${perfil.value.fecha_nacimiento}T12:00:00-03:00`).replace(/^\w+ /, '') : ''))
-
-async function guardar() {
-  const loc = localidades.value.find((l) => l.id === form.localidad)
-  if (!perfil.value || !loc) return
-  guardando.value = true
-  aviso.value = undefined
-  const { error } = await supabase
-    .from('profiles')
-    .update({
-      nombre: form.nombre.trim(),
-      apellido: form.apellido.trim(),
-      telefono: form.telefono.trim() || null,
-      localidad: loc.nombre,
-      lat: loc.lat,
-      lng: loc.lng,
-    })
-    .eq('id', perfil.value.id)
-  guardando.value = false
-  if (error) {
-    aviso.value = 'No pudimos guardar tus datos.'
-    alert(`${aviso.value} Revisá tu conexión a internet y probá de nuevo.`)
-    return
-  }
-  await cargarPerfil(true)
-  announce('Listo. Guardamos tus datos.')
+<style scoped>
+.cuenta {
+  display: grid;
+  gap: var(--espacio-3);
+  margin: 0;
 }
 
-watch(localidades, () => {
-  form.localidad ??= localidadPorNombre(perfil.value?.localidad)?.id
-})
+.cuenta dt {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  color: var(--texto-suave);
+}
 
-onMounted(async () => {
-  const p = await cargarPerfil()
-  if (p) {
-    form.nombre = p.nombre
-    form.apellido = p.apellido
-    form.telefono = p.telefono ?? ''
-    form.localidad = localidadPorNombre(p.localidad)?.id
-  }
-  listo.value = true
-})
-</script>
+.cuenta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+</style>

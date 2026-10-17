@@ -1,28 +1,111 @@
 <!doctype html>
 <html lang="es-AR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sin conexión · Turnos Accesibles</title>
-  <link rel="icon" href="/icono.svg" type="image/svg+xml">
-  <style>
-    :root { color-scheme: light dark; --bg: #fff; --text: #10161c; --primary: #0b4f9e; --primary-text: #fff; --focus: #b45309; }
-    @media (prefers-color-scheme: dark) { :root { --bg: #000; --text: #fff; --primary: #ffdd00; --primary-text: #000; --focus: #ffdd00; } }
-    body { margin: 0; background: var(--bg); color: var(--text); font: 1.25rem/1.6 system-ui, sans-serif; overflow-wrap: anywhere; }
-    main { max-width: 40rem; margin: 0 auto; padding: 2rem 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
-    h1 { font-size: 2rem; line-height: 1.25; margin: 0; }
-    p { margin: 0; }
-    button { align-self: flex-start; min-height: 48px; padding: .75rem 1.5rem; font: inherit; font-weight: 700; color: var(--primary-text); background: var(--primary); border: 2px solid var(--primary); border-radius: .5rem; cursor: pointer; }
-    button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
-  </style>
-</head>
-<body>
-  <main>
-    <h1>No hay internet</h1>
-    <p>Para buscar o sacar un turno, la app necesita conexión. Revisá que el wifi o los datos del celular estén prendidos.</p>
-    <p>Tus turnos no se perdieron: cuando vuelva la conexión, los vas a ver igual.</p>
-    <button type="button" onclick="location.reload()">Probar de nuevo</button>
-  </main>
-  <script>addEventListener('online', () => location.reload())</script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#5B2BD9" />
+    <title>Sin conexión · Turnos Accesibles</title>
+    <link rel="icon" type="image/svg+xml" href="/icono.svg" />
+    <!--
+      Página sin conexión (v0.6, PWA). La muestra el service worker cuando no hay internet y la
+      persona abre una página. Es estática a propósito: no guarda ni muestra datos personales.
+      Colores y medidas de docs/marca.md (texto de 18 px como mínimo, botones de 56 px de alto).
+    -->
+    <style>
+      :root {
+        --fondo: #fff9f0;
+        --superficie: #fff;
+        --texto: #1e1633;
+        --texto-suave: #4a4160;
+        --primario: #5b2bd9;
+        --primario-hover: #3f1a9e;
+        --borde: #d8cfe6;
+      }
+      @media (prefers-contrast: more) {
+        :root {
+          --fondo: #000;
+          --superficie: #000;
+          --texto: #fff;
+          --texto-suave: #fff;
+          --primario: #ffe14d;
+          --primario-hover: #fff;
+          --borde: #fff;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        font-size: 112.5%;
+        background: var(--fondo);
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 16px;
+        background: var(--fondo);
+        color: var(--texto);
+        font-family: 'Atkinson Hyperlegible', 'Segoe UI', Arial, sans-serif;
+        font-size: 1.25rem;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+      }
+      main {
+        width: 100%;
+        max-width: 34rem;
+        padding: 1.5rem;
+        background: var(--superficie);
+        border: 2px solid var(--borde);
+        border-top: 8px solid var(--primario);
+        border-radius: 14px;
+      }
+      img {
+        display: block;
+        width: 4rem;
+        height: auto;
+      }
+      h1 {
+        margin: 1rem 0 0.5rem;
+        font-family: 'Lexend', 'Segoe UI', Arial, sans-serif;
+        font-size: 1.8rem;
+        line-height: 1.25;
+      }
+      p {
+        margin: 0 0 1rem;
+      }
+      .suave {
+        color: var(--texto-suave);
+      }
+      button {
+        min-height: 56px;
+        padding: 0.5rem 1.4rem;
+        border: 2px solid var(--primario);
+        border-radius: 999px;
+        background: var(--primario);
+        color: var(--fondo);
+        font: 600 1.1rem 'Lexend', 'Segoe UI', Arial, sans-serif;
+        cursor: pointer;
+      }
+      button:hover {
+        background: var(--primario-hover);
+      }
+      button:focus-visible {
+        outline: 4px solid #ffc233;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 2px #1e1633, 0 0 0 8px #1e1633;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/icono.svg" alt="" width="68" height="64" />
+      <h1>No tenés conexión</h1>
+      <p>Cuando vuelva internet, podés seguir.</p>
+      <p>Tus turnos guardados están en Mis turnos y en tu correo.</p>
+      <p class="suave">Si tenés el comprobante impreso o guardado en PDF, también lo podés mostrar en el centro de salud.</p>
+      <button type="button" onclick="location.reload()">Probar de nuevo</button>
+    </main>
+  </body>
 </html>

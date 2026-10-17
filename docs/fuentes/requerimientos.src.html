@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Turnos Accesibles · Especificación de Requerimientos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Lexend:wght@400;600;700;800&display=block" rel="stylesheet">
+<style>
+:root{
+  --violeta:#5B2BD9; --violeta-oscuro:#3F1A9E; --turquesa:#0B7A75; --coral:#C2410C;
+  --sol:#FFC233; --rosa:#C0266D; --tinta:#1E1633; --tinta-suave:#4A4160;
+  --crema:#FFF9F0; --blanco:#FFFFFF;
+  --s-violeta:color-mix(in srgb,var(--violeta) 9%,#fff);
+  --s-turquesa:color-mix(in srgb,var(--turquesa) 10%,#fff);
+  --s-coral:color-mix(in srgb,var(--coral) 9%,#fff);
+  --s-sol:color-mix(in srgb,var(--sol) 25%,#fff);
+  --s-rosa:color-mix(in srgb,var(--rosa) 9%,#fff);
+  --linea:#E4DEEC;
+  --display:'Lexend','Segoe UI',Arial,sans-serif;
+  --texto:'Atkinson Hyperlegible','Segoe UI',Arial,sans-serif;
+}
+@page{
+  size:A4 portrait; margin:22mm 19mm 20mm 19mm;
+  @top-left{content:"Turnos Accesibles · Especificación de Requerimientos";font-family:'Lexend',sans-serif;font-size:7.5pt;color:#4A4160;vertical-align:bottom;padding-bottom:4mm;border-bottom:.6pt solid #E4DEEC}
+  @top-right{content:"Karma Tech";font-family:'Lexend',sans-serif;font-weight:700;font-size:7.5pt;color:#3F1A9E;vertical-align:bottom;padding-bottom:4mm;border-bottom:.6pt solid #E4DEEC;
+    background:url("__DATAURI:karma-tech-icono__") no-repeat right 16.6mm bottom 3.6mm / 4mm 4mm}
+  @bottom-left{content:"UTN FRGP · Metodología de Sistemas I · Grupo 28";font-family:'Lexend',sans-serif;font-size:7.5pt;color:#4A4160;vertical-align:top;padding-top:4mm}
+  @bottom-right{content:"Página " counter(page) " de " counter(pages);font-family:'Lexend',sans-serif;font-size:7.5pt;color:#3F1A9E;font-weight:600;vertical-align:top;padding-top:4mm}
+}
+@page cover{margin:0;@top-left{content:none;border:0}@top-right{content:none;border:0;background:none}@bottom-left{content:none}@bottom-right{content:none}}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#fff;color:var(--tinta);font-family:var(--texto);font-size:10.4pt;line-height:1.5;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;orphans:3;widows:3}
+h1,h2,h3,h4{font-family:var(--display);line-height:1.2;color:var(--tinta);break-after:avoid}
+p{margin:0 0 2.4mm}
+ul{margin:0 0 2.4mm 5mm}
+li{margin-bottom:1mm;padding-left:1mm}
+li::marker{color:var(--violeta)}
+b,strong{font-weight:700}
+svg.brand{display:block;overflow:visible}
+
+/* ---------- cover ---------- */
+.cover{page:cover;height:297mm;width:210mm;position:relative;overflow:hidden;background:var(--crema);padding:22mm 20mm 0}
+.cover .shapes{position:absolute;inset:0;width:210mm;height:297mm}
+.cover .inner{position:relative}
+.cover .logo{width:92mm;height:auto}
+.cover .kicker{margin-top:16mm;font-family:var(--display);font-weight:600;font-size:9pt;letter-spacing:.08em;text-transform:uppercase;color:var(--violeta-oscuro)}
+.cover h1{font-size:30pt;font-weight:800;letter-spacing:-.015em;margin-top:2mm;max-width:150mm;line-height:1.1}
+.cover .proj{font-family:var(--display);font-size:13pt;font-weight:600;color:var(--tinta-suave);margin-top:4mm;max-width:130mm}
+.cover .inst{margin-top:9mm;display:grid;grid-template-columns:1fr auto;gap:6mm;align-items:start}
+.cover .inst ul{list-style:none;margin:0;font-family:var(--display);font-size:10pt;line-height:1.6}
+.cover .inst li{padding:0;margin:0}
+.cover .inst li:first-child{font-weight:700}
+.cover .team{background:#fff;border-radius:14px;padding:4mm 5mm;text-align:center;box-shadow:0 2px 10px rgba(30,22,51,.07)}
+.cover .team svg{width:46mm;height:auto;margin-top:1.5mm}
+.cover .team span{font-family:var(--display);font-size:8pt;color:var(--tinta-suave);letter-spacing:.06em;text-transform:uppercase}
+.cover table{margin-top:7mm;width:132mm;border-collapse:separate;border-spacing:0;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(30,22,51,.07);font-size:9.6pt}
+.cover th{background:var(--violeta);color:#fff;font-family:var(--display);font-weight:600;text-align:left;padding:2.4mm 4mm;font-size:9pt}
+.cover td{padding:2.3mm 4mm;border-top:1px solid var(--linea)}
+.cover .fill{margin-top:6mm;display:flex;gap:6mm;font-family:var(--display);font-size:10pt;font-weight:600}
+.cover .fill div{background:#fff;border-radius:10px;padding:3mm 4mm;box-shadow:0 2px 10px rgba(30,22,51,.07);display:flex;align-items:flex-end;gap:2mm}
+.cover .fill span.line{display:inline-block;border-bottom:1.2px solid var(--tinta);width:38mm;height:5mm}
+.cover .fill span.line.s{width:18mm}
+
+/* ---------- sections ---------- */
+.part{break-before:page;padding-right:.8mm}
+.toc{padding-right:.8mm}
+.part-head{display:flex;align-items:center;gap:4mm;margin-bottom:6mm;padding-bottom:4mm;border-bottom:2px solid var(--linea)}
+.part-head .n{width:13mm;height:13mm;border-radius:12px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:15pt;color:#fff;flex:none}
+.part-head h2{font-size:21pt;font-weight:800;letter-spacing:-.01em}
+.part-head .sub{font-family:var(--display);font-size:9pt;color:var(--tinta-suave);margin-top:1mm}
+h3{font-size:13pt;font-weight:700;margin:6mm 0 2.5mm;display:flex;align-items:baseline;gap:2.5mm}
+h3 .k{font-size:9.5pt;color:var(--violeta);font-weight:700}
+h4{font-size:10.5pt;font-weight:700;margin:3.5mm 0 1.5mm}
+.lead{font-size:11.2pt;color:var(--tinta-suave)}
+.callout{border-radius:12px;padding:3.5mm 4.5mm;margin:3mm 0 3.5mm;background:var(--s-violeta);border-left:5px solid var(--violeta);break-inside:avoid}
+.callout.t{background:var(--s-turquesa);border-left-color:var(--turquesa)}
+.callout.c{background:var(--s-coral);border-left-color:var(--coral)}
+.callout.s{background:var(--s-sol);border-left-color:var(--sol)}
+.callout b.h{font-family:var(--display);display:block;margin-bottom:.8mm;font-size:9.8pt}
+.callout p:last-child{margin:0}
+
+table.t{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--linea);border-radius:12px;overflow:hidden;font-size:9.6pt;margin:2mm 0 4mm}
+table.t th{background:var(--tinta);color:#fff;font-family:var(--display);font-weight:600;text-align:left;padding:2.3mm 3mm;font-size:8.8pt;vertical-align:bottom}
+table.t td{padding:2.2mm 3mm;border-top:1px solid var(--linea);vertical-align:top}
+table.t tr{break-inside:avoid}
+table.t tr.grp{break-after:avoid}
+table.t.compact td{padding:1.3mm 3mm;font-size:9.3pt}
+table.t.compact th{padding:1.9mm 3mm}
+table.t td ul{margin:0 0 0 4mm}
+table.t td li{margin-bottom:.4mm}
+table.t td.k{font-family:var(--display);font-weight:600;white-space:nowrap}
+table.t tbody tr:nth-child(even) td{background:#FCFAFE}
+table.t code,code{font-family:Consolas,'Courier New',monospace;font-size:8.6pt;background:var(--s-violeta);color:var(--violeta-oscuro);padding:.2mm 1.2mm;border-radius:4px}
+.scope{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin:2mm 0 3mm}
+.scope .col{border-radius:12px;padding:3.5mm 4.5mm;break-inside:avoid}
+.scope .col h4{margin-top:0;display:flex;gap:2mm;align-items:center}
+.scope .in{background:var(--s-turquesa)} .scope .out{background:var(--s-rosa)}
+.scope ul{margin-bottom:0}
+.tag{display:inline-block;font-family:var(--display);font-size:8pt;font-weight:600;padding:.4mm 2.2mm;border-radius:999px;background:var(--s-violeta);color:var(--violeta-oscuro);white-space:nowrap}
+.tag.t{background:var(--s-turquesa);color:#08524F}
+.tag.c{background:var(--s-coral);color:#8A2E08}
+.tag.r{background:var(--s-rosa);color:#8C1B4F}
+.tag.s{background:var(--s-sol);color:var(--tinta)}
+
+/* ---------- requirement block ---------- */
+.req{border:1px solid var(--linea);border-radius:14px;margin:0 0 6mm;overflow:hidden;break-inside:avoid}
+.req-h{display:flex;align-items:center;gap:3.5mm;padding:3mm 4.5mm;background:var(--s-violeta);break-after:avoid}
+.req-h .id{font-family:var(--display);font-weight:800;font-size:10pt;color:#fff;background:var(--violeta);border-radius:8px;padding:1.2mm 2.6mm;white-space:nowrap}
+.req-h h3{margin:0;font-size:12.5pt}
+.req-h .mod{margin-left:auto}
+.req-r{display:grid;grid-template-columns:31mm 1fr;border-top:1px solid var(--linea);break-inside:avoid}
+.req-r .lb{padding:2.6mm 3mm 2.6mm 4.5mm;font-family:var(--display);font-weight:600;font-size:8.8pt;color:var(--tinta-suave);background:#FCFAFE;border-right:1px solid var(--linea)}
+.req-r .lb small{display:block;font-weight:400;font-size:7.8pt;color:var(--tinta-suave)}
+.req-r .bd{padding:2.4mm 4.5mm 1.2mm}
+.req-r .bd ul{margin:0 0 1.2mm 4mm}
+.req-r.err .lb{color:#8C1B4F}
+.req-r .bd .chg{background:var(--s-sol);border-radius:4px;padding:0 1mm}
+table.nfrt th{background:var(--turquesa)}
+table.nfrt td{font-size:10pt}
+table.nfrt td.k{white-space:normal;font-size:10.5pt}
+table.nfrt .id{display:inline-block;font-family:var(--display);font-weight:800;font-size:9pt;color:#fff;background:var(--turquesa);border-radius:7px;padding:.8mm 2.2mm;margin-bottom:1.2mm}
+table.nfrt td ul li{margin-bottom:.9mm}
+.nfr-unused{}
+.nfr .req-h{background:var(--s-turquesa);flex-direction:column;align-items:flex-start;gap:2mm;padding:3mm 4mm}
+.nfr .req-h .id{background:var(--turquesa)}
+.nfr .req-h h3{font-size:11pt}
+.nfr .req-r{display:block;border-top:0}
+.nfr .req-r .lb{display:none}
+.nfr .req-r .bd{padding:2.6mm 4.5mm 1.4mm}
+
+/* ---------- toc ---------- */
+.toc{break-before:page}
+.toc h2{font-size:21pt;font-weight:800;margin-bottom:5mm}
+.toc ol{list-style:none;margin:0}
+.toc li{display:flex;align-items:baseline;gap:3mm;padding:2.1mm 0;border-bottom:1px solid var(--linea);margin:0}
+.toc li.l1{font-family:var(--display);font-weight:700;font-size:11.5pt;padding-top:3.4mm}
+.toc li.l2{padding-left:12mm;font-size:10pt;color:var(--tinta-suave)}
+.toc li .n{width:9mm;font-family:var(--display);color:var(--violeta);font-weight:700}
+.toc li .pg{margin-left:auto;font-family:var(--display);font-weight:600;color:var(--tinta)}
+.docinfo{margin-top:8mm;display:grid;grid-template-columns:repeat(3,1fr);gap:4mm}
+.docinfo div{background:var(--crema);border-radius:12px;padding:3.5mm 4mm;font-size:9.2pt}
+.docinfo b{display:block;font-family:var(--display);font-size:9.5pt;margin-bottom:.6mm}
+
+/* ---------- diagram ---------- */
+figure{margin:3mm 0 4mm;break-inside:avoid}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:8.8pt;color:var(--tinta-suave);margin-top:1.5mm;text-align:center}
+
+/* ---------- identidad ---------- */
+.idv{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin-top:3mm}
+.idv .box{border-radius:14px;background:var(--crema);padding:4mm;display:grid;place-items:center;min-height:28mm}
+.idv .box.dark{background:var(--tinta)}
+.idv svg.brand{width:62mm;height:auto}
+.on-dark text{fill:#fff} .on-dark text:last-of-type{fill:var(--sol)}
+.pal{display:grid;grid-template-columns:repeat(5,1fr);gap:2.5mm;margin:3mm 0}
+.pal div{border-radius:10px;height:20mm;padding:2mm 2.5mm;display:flex;flex-direction:column;justify-content:flex-end;font-family:var(--display);font-size:7.8pt;font-weight:600;line-height:1.3}
+.fonts{display:grid;grid-template-columns:1fr 1fr;gap:4mm}
+.fonts > div{border:1px solid var(--linea);border-radius:12px;padding:3.5mm 4.5mm}
+.fonts .aa{font-size:26pt;font-weight:700;line-height:1}
+
+/* ---------- glossary ---------- */
+dl.gl{display:grid;grid-template-columns:44mm 1fr;border:1px solid var(--linea);border-radius:12px;overflow:hidden}
+dl.gl dt,dl.gl dd{padding:1.6mm 4mm;border-top:1px solid var(--linea);break-inside:avoid;font-size:9.8pt;line-height:1.45}
+dl.gl dt:first-of-type,dl.gl dd:first-of-type{border-top:0}
+dl.gl dt{font-family:var(--display);font-weight:700;background:#FCFAFE;font-size:9.8pt}
+dl.gl dt small{display:block;font-weight:400;color:var(--tinta-suave);font-size:7.8pt}
+.end{margin-top:4mm;padding:4mm !important;display:flex;align-items:center;justify-content:center;gap:6mm;padding:6mm;border-radius:14px;background:var(--crema);break-inside:avoid}
+.end svg{height:11mm;width:auto}
+.end p{margin:0;font-family:var(--display);font-weight:600;color:var(--tinta-suave)}
+</style>
+</head>
+<body>
+
+<!-- ======================= PORTADA ======================= -->
+<section class="cover">
+  <svg class="shapes" viewBox="0 0 210 297" aria-hidden="true">
+    <circle cx="196" cy="24" r="40" fill="#FFC233"/>
+    <rect x="150" y="6" width="26" height="10" rx="5" fill="#C0266D"/>
+    <circle cx="160" cy="66" r="5" fill="#5B2BD9"/>
+    <path d="M210 228 A58 58 0 0 0 152 286 L152 297 L210 297Z" fill="#0B7A75"/>
+    <rect x="118" y="262" width="26" height="26" rx="8" fill="#C2410C"/>
+    <circle cx="200" cy="208" r="5" fill="#5B2BD9"/>
+  </svg>
+  <div class="inner">
+    <!--SVG:logo:logo-->
+    <p class="kicker">Especificación de Requerimientos de Software</p>
+    <h1>Plataforma de accesibilidad para la gestión de turnos en salud pública</h1>
+    <p class="proj">Eje temático: salud pública y accesibilidad</p>
+    <div class="inst">
+      <ul>
+        <li>Universidad Tecnológica Nacional</li>
+        <li>Facultad Regional Gral. Pacheco</li>
+        <li>Técnico Universitario en Programación</li>
+        <li>Metodología de Sistemas I</li>
+        <li>Trabajo Final – Segunda Etapa</li>
+        <li><b>Grupo N°: 28</b></li>
+      </ul>
+      <div class="team"><span>Equipo Karma Tech</span><!--SVG:karma-tech--></div>
+    </div>
+    <table>
+      <thead><tr><th>Apellido y Nombre</th><th>Correo electrónico</th></tr></thead>
+      <tbody>
+        <tr><td>Marco Javier D' Antino</td><td>marco.d'@alumnos.frgp.utn.edu.ar</td></tr>
+        <tr><td>Nicolas Agustin Rosso Fortini</td><td>nicolas.rosso@alumnos.frgp.utn.edu.ar</td></tr>
+        <tr><td>Miguel Angel Tello Reyna</td><td>miguel.tello@alumnos.frgp.utn.edu.ar</td></tr>
+      </tbody>
+    </table>
+    <div class="fill">
+      <div>Fecha de entrega: <span class="line"></span></div>
+      <div>Entrega N°: <span class="line s"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= ÍNDICE ======================= -->
+<section class="toc">
+  <h2>Índice</h2>
+  <ol>
+    <li class="l1"><span class="n">1</span>Propuesta de proyecto final<span class="pg">3</span></li>
+    <li class="l2"><span class="n">1.1</span>Título y descripción<span class="pg">3</span></li>
+    <li class="l2"><span class="n">1.2</span>Alcance<span class="pg">3</span></li>
+    <li class="l2"><span class="n">1.3</span>Objetivos<span class="pg">4</span></li>
+    <li class="l2"><span class="n">1.4</span>Motivo y contribución<span class="pg">4</span></li>
+    <li class="l2"><span class="n">1.5</span>Módulos y funciones<span class="pg">5</span></li>
+    <li class="l2"><span class="n">1.6</span>Plataforma de desarrollo<span class="pg">6</span></li>
+    <li class="l1"><span class="n">2</span>Requerimientos funcionales (RF-01 a RF-09)<span class="pg">8</span></li>
+    <li class="l1"><span class="n">3</span>Requerimientos no funcionales (RNF-01 a RNF-07)<span class="pg">17</span></li>
+    <li class="l2"><span class="n">3.8</span>Restricciones<span class="pg">18</span></li>
+    <li class="l1"><span class="n">4</span>Modelo de datos<span class="pg">20</span></li>
+    <li class="l1"><span class="n">5</span>Plan de versiones<span class="pg">22</span></li>
+    <li class="l1"><span class="n">6</span>Matriz de trazabilidad<span class="pg">24</span></li>
+    <li class="l1"><span class="n">7</span>Identidad visual<span class="pg">25</span></li>
+    <li class="l1"><span class="n">8</span>Glosario<span class="pg">26</span></li>
+  </ol>
+  <div class="docinfo">
+    <div><b>Qué es</b>La propuesta del proyecto y la especificación de sus requerimientos, según la estructura de la cátedra.</div>
+    <div><b>Cómo leerlo</b>Cada requerimiento tiene un identificador (RF-01, RNF-01) que se usa en el plan de versiones y en la matriz de trazabilidad.</div>
+    <div><b>Términos</b>Las palabras técnicas se explican en el glosario (sección 8).</div>
+  </div>
+</section>
+
+<!-- ======================= 1. PROPUESTA ======================= -->
+<section class="part">
+  <div class="part-head"><span class="n" style="background:var(--violeta)">1</span><div><h2>Propuesta de proyecto final</h2><div class="sub">Plataforma de accesibilidad para la gestión de turnos en salud pública · Eje temático: salud pública y accesibilidad</div></div></div>
+
+  <h3><span class="k">1.1</span>Título y descripción</h3>
+  <p><b>Título:</b> Plataforma de accesibilidad para la gestión de turnos en salud pública (nombre del producto: <b>Turnos Accesibles</b>).</p>
+  <p>Se propone desarrollar una aplicación web que funcione como <b>capa de accesibilidad</b> sobre los sistemas de turnos de los centros de salud pública y de las obras sociales. No reemplaza a los sistemas oficiales (como los "Turnos Web" provinciales): simplifica la búsqueda y la reserva mediante un flujo guiado, en lenguaje claro y con asistencia por voz o por texto.</p>
+  <p>Está dirigida a personas mayores, personas con discapacidad y personas con baja alfabetización digital, que hoy encuentran barreras para sacar un turno médico por sus propios medios: pantallas de autenticación, vocabulario administrativo y menús poco claros.</p>
+
+  <h3><span class="k">1.2</span>Alcance</h3>
+  <div class="scope">
+    <div class="col in">
+      <h4><svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#0B7A75"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Comprendido en el alcance</h4>
+      <ul>
+        <li>Aplicación web responsive, accesible desde computadora y celular, instalable como PWA.</li>
+        <li>Registro y gestión de usuarios: solicitante y acompañante autorizado.</li>
+        <li>Búsqueda guiada de turnos por especialidad, centro de salud y cercanía, sobre un conjunto acotado de datos de prueba.</li>
+        <li>Asistente paso a paso en lenguaje simple para completar la reserva, con opción de lectura en voz alta.</li>
+        <li>Recordatorios de turnos mediante notificaciones accesibles (visuales y sonoras).</li>
+        <li>Modo de ayuda asistida para completar el trámite junto a un acompañante autorizado, con consentimiento explícito.</li>
+        <li>Panel administrativo con métricas de uso.</li>
+        <li>Prototipo funcional desplegado con datos de prueba.</li>
+      </ul>
+    </div>
+    <div class="col out">
+      <h4><svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#C0266D"/><path d="M8 8l8 8M16 8l-8 8" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>Fuera del alcance</h4>
+      <ul>
+        <li>Integración real con los sistemas oficiales de turnos de cada provincia u obra social (queda documentada como trabajo futuro).</li>
+        <li>Aplicación móvil nativa (Android/iOS): se cubre con la PWA instalable.</li>
+        <li>Emisión de recetas, historia clínica u otra información médica sensible.</li>
+        <li>Autenticación oficial contra ReNaPer, AFIP o ANSES (se simula en el entorno de prueba).</li>
+        <li>Puesta en producción con usuarios reales y soporte permanente.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout c"><b class="h">Aclaración de alcance</b><p>La plataforma no reemplaza al sistema oficial de salud ni garantiza la disponibilidad real de turnos fuera del entorno de prueba. Esta condición se explicita en los términos de uso.</p></div>
+
+  <h3><span class="k">1.3</span>Objetivos</h3>
+  <h4>Objetivo general</h4>
+  <p>Desarrollar una aplicación que reduzca la dificultad con la que una persona mayor, con discapacidad o con baja alfabetización digital consigue un turno en el sistema de salud pública, y que transforme un trámite que hoy depende de filas, llamados telefónicos o ayuda de terceros en un proceso guiado y accesible.</p>
+  <h4>Objetivos específicos</h4>
+  <ul>
+    <li>Centralizar la búsqueda de turnos disponibles por especialidad, centro de salud y cercanía.</li>
+    <li>Guiar la reserva con un flujo lineal en lenguaje claro y con opción de lectura en voz alta.</li>
+    <li>Garantizar que toda la plataforma pueda operarse con teclado y con lectores de pantalla.</li>
+    <li>Emitir recordatorios accesibles, visuales y sonoros, de los turnos reservados.</li>
+    <li>Habilitar un modo asistido para que un acompañante autorizado complete el trámite junto al solicitante.</li>
+    <li>Registrar métricas de uso que permitan medir la reducción de fricción respecto del circuito tradicional.</li>
+  </ul>
+
+  <h3><span class="k">1.4</span>Motivo y contribución</h3>
+  <h4>Motivo</h4>
+  <p>Los sistemas de turnos digitales avanzan. Por ejemplo, el sistema de Turnos Web de la Provincia de Buenos Aires ofreció más de 11.000 turnos en más de 70 hospitales de 40 distritos desde su lanzamiento en 2023. Sin embargo, exige autenticarse contra ReNaPer, AFIP o ANSES, un paso que puede convertirse en una barrera para quien no tiene experiencia digital.</p>
+  <p>El resultado es una paradoja: el trámite se digitalizó, pero para buena parte de la población (justamente la que más necesita el sistema de salud) sigue siendo casi tan difícil como antes.</p>
+  <div class="callout s"><b class="h">Una situación habitual</b><p>Una persona mayor que vive sola necesita un turno con un especialista y no tiene quien la acompañe a hacer la fila presencial. El sistema en línea existe, pero la pantalla de autenticación y el vocabulario del formulario son una barrera en sí mismos. El trámite queda sin completar o se delega por completo en un tercero.</p></div>
+  <h4>Contribución</h4>
+  <ul>
+    <li>Reduce la dependencia de terceros para completar un trámite esencial.</li>
+    <li>Traduce el vocabulario administrativo y sanitario a lenguaje simple, paso a paso.</li>
+    <li>Da soporte formal a la ayuda que ya ocurre entre personas (un familiar que completa el trámite), en lugar de ignorarla en el diseño.</li>
+    <li>Aporta una capa de accesibilidad que hoy no existe en los sistemas oficiales de turnos, en línea con la Ley 26.653 de accesibilidad de la información en las páginas web del Estado.</li>
+    <li>Genera métricas que permiten dimensionar el problema de accesibilidad en el acceso a la salud pública.</li>
+  </ul>
+
+  <h3><span class="k">1.5</span>Módulos y funciones</h3>
+  <table class="t">
+    <thead><tr><th style="width:44mm">Módulo</th><th>Funciones principales</th><th style="width:22mm">RF</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Gestión de usuarios</td><td><ul><li>Registro y autenticación.</li><li>Perfil de solicitante y de acompañante autorizado.</li><li>Recuperación de credenciales.</li><li>Preferencias de accesibilidad: tamaño de texto, lectura en voz alta.</li></ul></td><td><span class="tag">RF-01</span> <span class="tag">RF-02</span></td></tr>
+      <tr><td class="k">Búsqueda de turnos</td><td><ul><li>Listado de turnos disponibles por especialidad y centro de salud.</li><li>Filtro por cercanía.</li><li>Ficha de detalle con dirección, especialidad y requisitos.</li></ul></td><td><span class="tag">RF-03</span></td></tr>
+      <tr><td class="k">Asistente de reserva</td><td><ul><li>Flujo guiado paso a paso en lenguaje simple.</li><li>Interpretación de pedidos en lenguaje natural (texto o voz) mediante un servicio de IA.</li><li>Confirmación clara de cada paso antes de avanzar.</li></ul></td><td><span class="tag">RF-04</span> <span class="tag">RF-05</span></td></tr>
+      <tr><td class="k">Recordatorios y notificaciones</td><td><ul><li>Aviso del turno reservado mediante notificación visual y sonora.</li><li>Recordatorio con antelación configurable.</li><li>Información de cómo llegar al centro de salud.</li></ul></td><td><span class="tag">RF-06</span></td></tr>
+      <tr><td class="k">Modo asistido</td><td><ul><li>Invitación a un acompañante autorizado.</li><li>Visualización compartida del trámite.</li><li>Registro del consentimiento del solicitante.</li></ul></td><td><span class="tag">RF-07</span></td></tr>
+      <tr><td class="k">Panel administrativo</td><td><ul><li>Gestión de los centros de salud y las especialidades cargados en el entorno de prueba.</li><li>Métricas de turnos buscados, reservados y completados.</li><li>Reportes exportables.</li></ul></td><td><span class="tag">RF-08</span> <span class="tag">RF-09</span></td></tr>
+      <tr><td class="k">Accesibilidad transversal</td><td><ul><li>Alto contraste y tipografía escalable.</li><li>Navegación completa por teclado.</li><li>Compatibilidad verificada con lector de pantalla.</li></ul></td><td><span class="tag t">RNF-07</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="k">1.6</span>Plataforma de desarrollo</h3>
+  <p>La plataforma se actualizó respecto de la primera entrega: la lógica de servidor ya no corre en Edge Functions de Supabase sino en las <b>rutas de API de Nuxt</b>, dentro de la misma aplicación. La interpretación con IA sigue ejecutándose siempre del lado del servidor.</p>
+  <figure>
+    <svg viewBox="0 0 680 300" role="img" aria-label="Diagrama de arquitectura: el navegador se comunica con Nuxt en Vercel, que usa Supabase y el servicio de IA">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#4A4160"/></marker>
+      </defs>
+      <g font-family="Lexend, sans-serif">
+        <!-- navegador -->
+        <rect x="6" y="70" width="150" height="160" rx="16" fill="#FFF9F0" stroke="#5B2BD9" stroke-width="2"/>
+        <text x="81" y="100" text-anchor="middle" font-size="15" font-weight="700" fill="#1E1633">Navegador</text>
+        <text x="81" y="118" text-anchor="middle" font-size="11" fill="#4A4160">PWA instalable</text>
+        <rect x="20" y="134" width="122" height="34" rx="10" fill="#fff" stroke="#E4DEEC"/>
+        <text x="81" y="155" text-anchor="middle" font-size="10.5" fill="#1E1633">Web Speech API</text>
+        <rect x="20" y="176" width="122" height="38" rx="10" fill="#fff" stroke="#E4DEEC"/>
+        <text x="81" y="192" text-anchor="middle" font-size="10" fill="#1E1633">Lector de pantalla</text>
+        <text x="81" y="206" text-anchor="middle" font-size="10" fill="#1E1633">y teclado</text>
+        <!-- nuxt -->
+        <rect x="216" y="40" width="200" height="220" rx="16" fill="#FFF9F0" stroke="#0B7A75" stroke-width="2"/>
+        <text x="316" y="68" text-anchor="middle" font-size="15" font-weight="700" fill="#1E1633">Nuxt 4</text>
+        <text x="316" y="86" text-anchor="middle" font-size="11" fill="#4A4160">desplegado en Vercel</text>
+        <rect x="232" y="102" width="168" height="58" rx="12" fill="#fff" stroke="#E4DEEC"/>
+        <text x="316" y="126" text-anchor="middle" font-size="12" font-weight="700" fill="#1E1633">Páginas SSR</text>
+        <text x="316" y="144" text-anchor="middle" font-size="10" fill="#4A4160">HTML real para el lector</text>
+        <rect x="232" y="172" width="168" height="72" rx="12" fill="#fff" stroke="#E4DEEC"/>
+        <text x="316" y="196" text-anchor="middle" font-size="12" font-weight="700" fill="#1E1633">API del servidor</text>
+        <text x="316" y="214" text-anchor="middle" font-size="10" fill="#4A4160">/api/interpretar</text>
+        <text x="316" y="230" text-anchor="middle" font-size="10" fill="#4A4160">(guarda la clave de IA)</text>
+        <!-- supabase -->
+        <rect x="476" y="16" width="198" height="150" rx="16" fill="#FFF9F0" stroke="#3F1A9E" stroke-width="2"/>
+        <text x="575" y="44" text-anchor="middle" font-size="15" font-weight="700" fill="#1E1633">Supabase</text>
+        <rect x="490" y="58" width="170" height="30" rx="10" fill="#fff" stroke="#E4DEEC"/>
+        <text x="575" y="78" text-anchor="middle" font-size="10.5" fill="#1E1633">Auth (cuentas y roles)</text>
+        <rect x="490" y="94" width="170" height="30" rx="10" fill="#fff" stroke="#E4DEEC"/>
+        <text x="575" y="114" text-anchor="middle" font-size="10.5" fill="#1E1633">Postgres + RLS</text>
+        <rect x="490" y="130" width="170" height="28" rx="10" fill="#fff" stroke="#E4DEEC"/>
+        <text x="575" y="149" text-anchor="middle" font-size="10.5" fill="#1E1633">Funciones RPC atómicas</text>
+        <!-- IA -->
+        <rect x="476" y="190" width="198" height="70" rx="16" fill="#FFF9F0" stroke="#C2410C" stroke-width="2"/>
+        <text x="575" y="216" text-anchor="middle" font-size="14" font-weight="700" fill="#1E1633">Servicio de IA</text>
+        <text x="575" y="234" text-anchor="middle" font-size="10.5" fill="#4A4160">Claude (Anthropic)</text>
+        <text x="575" y="250" text-anchor="middle" font-size="9.5" fill="#4A4160">uso acotado, no crítico</text>
+        <!-- arrows -->
+        <g stroke="#4A4160" stroke-width="2" fill="none">
+          <path d="M158 150 H214" marker-end="url(#ar)" marker-start="url(#ar)"/>
+          <path d="M402 130 C440 130 440 90 474 90" marker-end="url(#ar)"/>
+          <path d="M402 205 H474" marker-end="url(#ar)"/>
+          <path d="M318 262 V286 H600 V262" stroke="#C2410C" stroke-dasharray="5 4"/>
+        </g>
+        <text x="186" y="142" text-anchor="middle" font-size="9.5" fill="#4A4160">HTTPS</text>
+        <text x="459" y="198" text-anchor="middle" font-size="9" fill="#4A4160">pedido</text>
+        <rect x="328" y="275" width="262" height="22" rx="11" fill="#fff"/>
+        <text x="459" y="290" text-anchor="middle" font-size="9.5" font-weight="600" fill="#8A2E08">Si falla o no hay clave: reglas simples y menús</text>
+      </g>
+    </svg>
+    <figcaption>Figura 1. Arquitectura general. Una sola aplicación Nuxt sirve las páginas y la API; Supabase resuelve cuentas, datos y permisos.</figcaption>
+  </figure>
+  <table class="t">
+    <thead><tr><th style="width:38mm">Componente</th><th>Tecnología prevista</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Interfaz de usuario</td><td><b>Nuxt 4</b> (Vue 3 y TypeScript) con renderizado del lado del servidor (SSR), estilos propios con variables de marca y empaquetado como PWA instalable. Cumple las pautas WCAG 2.1 nivel AA.</td></tr>
+      <tr><td class="k">Servidor y API</td><td>Rutas de servidor de Nuxt (<code>server/api</code>), desplegadas junto con la interfaz. La ruta <code>interpretar</code> resuelve la interpretación de pedidos en lenguaje natural. Las operaciones que deben ser atómicas (reservar, cancelar, reprogramar, invitar) son funciones SQL (RPC) de la base de datos que validan los permisos internamente.</td></tr>
+      <tr><td class="k">Base de datos</td><td><b>Supabase Postgres</b>, con control de acceso por fila (RLS) en todas las tablas: cada persona ve lo suyo, el administrador ve todo y el acompañante autorizado ve solo lo que se le autorizó.</td></tr>
+      <tr><td class="k">Autenticación</td><td><b>Supabase Auth</b>, con verificación por correo y control de acceso por rol: solicitante, acompañante autorizado y administrador.</td></tr>
+      <tr><td class="k">Voz</td><td><b>Web Speech API</b> del navegador, para la lectura en voz alta y el dictado. No requiere servidor ni tiene costo.</td></tr>
+      <tr><td class="k">Servicios de IA</td><td>Modelo de lenguaje <b>Claude</b> (Anthropic), invocado solo desde el servidor para interpretar pedidos en lenguaje natural y redactar explicaciones en lenguaje simple. La clave nunca llega al navegador. Si no hay clave o el servicio falla, se usan <b>reglas simples</b> y el trámite sigue por menús: el uso es acotado y no crítico para el funcionamiento base.</td></tr>
+      <tr><td class="k">Pruebas</td><td><b>Vitest</b> para las funciones puras: validaciones, reglas del asistente y fechas.</td></tr>
+      <tr><td class="k">Control de versiones</td><td>Git, con repositorio remoto en GitHub. Cada versión del plan se entrega en su propia rama y solicitud de cambios (PR).</td></tr>
+      <tr><td class="k">Despliegue</td><td><b>Vercel</b>, en su capa gratuita, para la instancia de prueba.</td></tr>
+      <tr><td class="k">Documentación y gestión</td><td>Diagramas de arquitectura, tablero de tareas y documentación técnica del proyecto (requerimientos, marca, arquitectura y plan de versiones).</td></tr>
+    </tbody>
+  </table>
+
+
+  <p>La adopción de Nuxt y Supabase permite que un equipo reducido priorice el tiempo de desarrollo por sobre la infraestructura, sin resignar robustez: Supabase figura entre los motores de base de datos sugeridos por la guía de la cátedra, y el renderizado del lado del servidor de Nuxt beneficia directamente la accesibilidad y el rendimiento en conexiones lentas.</p>
+  <div class="callout t"><b class="h">La accesibilidad es un requisito, no un agregado</b><p>La plataforma se dirige, en parte, a personas mayores y a personas con discapacidad. Por eso la accesibilidad de la interfaz es un requisito no funcional prioritario: debe garantizarse la navegación con lectores de pantalla, un contraste adecuado y la operación completa por teclado.</p></div>
+</section>
+
+<!-- ======================= 2. RF ======================= -->
+<section class="part">
+  <div class="part-head"><span class="n" style="background:var(--violeta)">2</span><div><h2>Requerimientos funcionales</h2><div class="sub">Especificación de Requerimientos de Software · estructura de la cátedra: Introducción, Inputs, Processing, Outputs y Error Handling</div></div></div>
+
+  <div class="req">
+    <div class="req-h"><span class="id">RF-01</span><h3>Registrar y autenticar usuario</h3><span class="mod tag s">Gestión de usuarios</span></div>
+    <div class="req-r"><div class="lb">1.1 Introducción</div><div class="bd"><ul><li>Una persona se registra en la plataforma como solicitante o como acompañante autorizado, y accede a ella en sesiones posteriores.</li></ul></div></div>
+    <div class="req-r"><div class="lb">1.2 Inputs<small>Entradas</small></div><div class="bd"><ul><li>Nombre y apellido, número de documento, fecha de nacimiento, correo electrónico, teléfono, localidad y contraseña.</li><li>Rol de la cuenta: solicitante o acompañante autorizado.</li><li>Correo electrónico y contraseña, para el ingreso de un usuario ya registrado.</li></ul></div></div>
+    <div class="req-r"><div class="lb">1.3 Processing<small>Proceso</small></div><div class="bd"><ul><li>El usuario completa el formulario de registro en lenguaje simple, con un campo por pantalla.</li><li>Se verifica que el correo electrónico no pertenezca a una cuenta existente.</li><li>Se valida el formato del documento y del correo, y la longitud mínima de la contraseña.</li><li>Se envía un correo de verificación; la cuenta se activa al confirmarlo.</li><li>En cada ingreso se validan las credenciales y se asigna el rol correspondiente (solicitante, acompañante autorizado o administrador).</li></ul></div></div>
+    <div class="req-r"><div class="lb">1.4 Outputs<small>Salidas</small></div><div class="bd"><ul><li>Cuenta de usuario creada y verificada, con su rol asignado.</li><li>Sesión iniciada, con acceso a las funciones habilitadas para ese rol.</li><li>Correo de confirmación del registro.</li></ul></div></div>
+    <div class="req-r err"><div class="lb">1.5 Error Handling<small>Manejo de errores</small></div><div class="bd"><ul><li>Si el correo electrónico ya está registrado, se informa la situación y se ofrece recuperar la contraseña.</li><li>Si falta un dato obligatorio o tiene un formato inválido, se señala el campo con un mensaje en lenguaje simple y no se avanza al paso siguiente.</li><li>Si las credenciales de ingreso son incorrectas, se informa el error sin indicar cuál de los dos datos falló. Después de cinco intentos fallidos, el acceso se bloquea temporalmente.</li><li>Si el usuario olvida su contraseña, se envía al correo registrado un enlace de recuperación de un solo uso y con vencimiento.</li></ul></div></div>
+  </div>
+
+  <div class="req">
+    <div class="req-h"><span class="id">RF-02</span><h3>Configurar preferencias de accesibilidad</h3><span class="mod tag s">Gestión de usuarios</span></div>
+    <div class="req-r"><div class="lb">2.1 Introducción</div><div class="bd"><ul><li>El usuario ajusta la forma en que la plataforma se presenta y se comunica con él, y esa configuración se conserva en todas sus sesiones.</li></ul></div></div>
+    <div class="req-r"><div class="lb">2.2 Inputs<small>Entradas</small></div><div class="bd"><ul><li>Tamaño de texto, nivel de contraste, activación y velocidad de la lectura en voz alta, reducción de animaciones y modo de lenguaje simple.</li><li>Canal preferido de notificación: visual, sonoro o ambos.</li></ul></div></div>
+    <div class="req-r"><div class="lb">2.3 Processing<small>Proceso</small></div><div class="bd"><ul><li>La configuración se ofrece en el primer ingreso y queda disponible de forma permanente en el perfil.</li><li>Cada opción se previsualiza en pantalla antes de guardarse.</li><li>Las preferencias se guardan asociadas a la cuenta del usuario.</li><li>Al iniciar sesión, las preferencias se aplican a todas las pantallas, en cualquier dispositivo.</li></ul></div></div>
+    <div class="req-r"><div class="lb">2.4 Outputs<small>Salidas</small></div><div class="bd"><ul><li>Preferencias de accesibilidad almacenadas en el perfil del usuario.</li><li>Interfaz presentada según la configuración elegida.</li></ul></div></div>
+    <div class="req-r err"><div class="lb">2.5 Error Handling<small>Manejo de errores</small></div><div class="bd"><ul><li>Si las preferencias no se pudieron guardar, se mantiene la configuración anterior y se informa al usuario que el cambio no se registró.</li><li>Si el dispositivo o el navegador no admite la lectura en voz alta, se informa la limitación y se ofrece el texto ampliado como alternativa.</li><li><span class="chg">Si el usuario no configura ninguna preferencia, se aplica un perfil predeterminado accesible: texto ampliado, animaciones reducidas y contraste AA de la marca. El alto contraste se ofrece en el primer ingreso.</span> <span class="tag s">Ajuste respecto de la primera etapa</span></li></ul></div></div>
+  </div>
+
+  <div class="req">
+    <div class="req-h"><span class="id">RF-03</span><h3>Buscar turnos disponibles</h3><span class="mod tag s">Búsqueda de turnos</span></div>
+    <div class="req-r"><div class="lb">3.1 Introducción</div><div class="bd"><ul><li>El solicitante consulta los turnos disponibles según la atención que necesita y la zona en la que puede atenderse.</li></ul></div></div>
+    <div class="req-r"><div class="lb">3.2 Inputs<small>Entradas</small></div><div class="bd"><ul><li>Especialidad médica, centro de salud, localidad o dirección de referencia, rango de fechas y franja horaria preferida.</li><li>Datos registrados de centros de salud, especialidades y agendas del entorno de prueba.</li></ul></div></div>
+    <div class="req-r"><div class="lb">3.3 Processing<small>Proceso</small></div><div class="bd"><ul><li>El solicitante indica la especialidad y, de manera opcional, el centro de salud o la cercanía deseada.</li><li>Se consultan las agendas cargadas y se filtran los turnos que cumplen los criterios ingresados.</li><li>Los resultados se ordenan por cercanía al domicilio declarado y por fecha más próxima.</li><li>En cada resultado, el vocabulario administrativo y sanitario se traduce a lenguaje simple.</li></ul></div></div>
+    <div class="req-r"><div class="lb">3.4 Outputs<small>Salidas</small></div><div class="bd"><ul><li>Listado de turnos disponibles con centro de salud, especialidad, profesional, fecha y hora.</li><li>Ficha de detalle de cada turno con dirección, requisitos previos y cómo llegar.</li><li>Lectura en voz alta de los resultados, cuando la preferencia está activada.</li></ul></div></div>
+    <div class="req-r err"><div class="lb">3.5 Error Handling<small>Manejo de errores</small></div><div class="bd"><ul><li>Si ningún turno cumple los criterios, se informa la situación y se sugieren alternativas: otra fecha, otro centro de salud cercano o el registro de un aviso de disponibilidad.</li><li>Si la especialidad indicada no existe entre las cargadas, se ofrece un listado de especialidades similares.</li><li>Si no se puede determinar la ubicación del usuario, se pide la localidad de forma manual y la búsqueda continúa sin el criterio de cercanía.</li></ul></div></div>
+  </div>
+
+  <div class="req">
+    <div class="req-h"><span class="id">RF-04</span><h3>Reservar un turno con el asistente guiado</h3><span class="mod tag s">Asistente de reserva</span></div>
+    <div class="req-r"><div class="lb">4.1 Introducción</div><div class="bd"><ul><li>El solicitante confirma la reserva de un turno con la ayuda de un asistente que lo guía paso a paso en lenguaje claro.</li></ul></div></div>
+    <div class="req-r"><div class="lb">4.2 Inputs<small>Entradas</small></div><div class="bd"><ul><li>Turno seleccionado del listado de disponibles.</li><li>Pedido expresado en lenguaje natural, por texto o por voz (por ejemplo: "necesito un turno con el oculista cerca de casa").</li><li>Datos ya registrados del solicitante y confirmación de cada paso.</li></ul></div></div>
+    <div class="req-r"><div class="lb">4.3 Processing<small>Proceso</small></div><div class="bd"><ul><li>El asistente interpreta el pedido en lenguaje natural y propone la especialidad, el centro de salud y la fecha correspondientes.</li><li>Se presenta un único paso por pantalla, en lenguaje simple y con opción de lectura en voz alta.</li><li>Se pide la confirmación explícita del usuario antes de pasar de un paso al siguiente.</li><li>Antes de confirmar, se verifica que el turno siga disponible y que el solicitante no tenga otro turno superpuesto.</li><li>Se registra la reserva, se bloquea el cupo en la agenda y se genera el comprobante.</li></ul></div></div>
+    <div class="req-r"><div class="lb">4.4 Outputs<small>Salidas</small></div><div class="bd"><ul><li>Turno reservado con número de identificación correlativo.</li><li>Comprobante en pantalla y por correo electrónico, con centro de salud, especialidad, fecha, hora, dirección y requisitos.</li><li>Resumen final leído en voz alta, cuando la preferencia está activada.</li><li>Agenda del centro de salud actualizada: ese cupo deja de ofrecerse.</li></ul></div></div>
+    <div class="req-r err"><div class="lb">4.5 Error Handling<small>Manejo de errores</small></div><div class="bd"><ul><li>Si otra persona tomó el turno mientras se completaba el trámite, se informa la situación y se ofrecen los turnos alternativos más cercanos, sin perder los datos ya cargados.</li><li>Si el asistente no logra interpretar el pedido en lenguaje natural, se ofrece la búsqueda tradicional por menús, sin interrumpir el trámite.</li><li>Si el usuario ya tiene un turno reservado para la misma especialidad y fecha, se advierte la superposición y se pide confirmación antes de continuar.</li><li>Si el usuario abandona el flujo antes de confirmar, la reserva no se registra, el cupo se libera y el avance queda guardado como borrador para retomarlo.</li><li>Si el servicio de interpretación en lenguaje natural no está disponible, la reserva se completa igualmente por el flujo guiado por menús.</li></ul></div></div>
+  </div>
+
+  <div class="req">
+    <div class="req-h"><span class="id">RF-05</span><h3>Cancelar o reprogramar un turno</h3><span class="mod tag s">Asistente de reserva</span></div>
+    <div class="req-r"><div class="lb">5.1 Introducción</div><div class="bd"><ul><li>El solicitante da de baja un turno reservado o lo reemplaza por otro, y libera el cupo para el resto de los usuarios.</li></ul></div></div>
+    <div class="req-r"><div class="lb">5.2 Inputs<small>Entradas</small></div><div class="bd"><ul><li>Número de identificación del turno reservado.</li><li>Acción solicitada: cancelación o reprogramación.</li><li>Nuevo turno elegido, en caso de reprogramación.</li></ul></div></div>
+    <div class="req-r"><div class="lb">5.3 Processing<small>Proceso</small></div><div class="bd"><ul><li>Se listan los turnos vigentes del solicitante.</li><li>Se pide la confirmación de la acción en lenguaje simple, advirtiendo sus consecuencias.</li><li>En una cancelación, el estado del turno pasa a "cancelado" y el cupo se libera en la agenda.</li><li>En una reprogramación, se verifica la disponibilidad del nuevo turno, se libera el cupo anterior y se registra el nuevo.</li><li>Se dan de baja los recordatorios asociados al turno original.</li></ul></div></div>
+    <div class="req-r"><div class="lb">5.4 Outputs<small>Salidas</small></div><div class="bd"><ul><li>Turno cancelado o reprogramado, con su estado actualizado.</li><li>Cupo liberado y nuevamente disponible en la búsqueda.</li><li>Notificación de la cancelación o del nuevo turno al solicitante y, si corresponde, al acompañante autorizado.</li></ul></div></div>
+    <div class="req-r err"><div class="lb">5.5 Error Handling<small>Manejo de errores</small></div><div class="bd"><ul><li>Si el turno ya se cumplió o está vencido, no se permite la cancelación y se informa el motivo.</li><li>Si el nuevo turno elegido deja de estar disponible durante la reprogramación, se conserva el turno original y se informa la situación.</li><li>Si la cancelación se hace fuera del plazo mínimo establecido por el centro de salud, se advierte al usuario antes de confirmar y se registra el evento.</li></ul></div></div>
+  </div>
+
+  <div class="req">
+    <div class="req-h"><span class="id">RF-06</span><h3>Emitir recordatorios y notificaciones</h3><span class="mod tag s">Recordatorios y notificaciones</span></div>
+    <div class="req-r"><div class="lb">6.1 Introducción</div><div class="bd"><ul><li>El sistema avisa al usuario de sus turnos y de los cambios que los afectan, por canales visuales y sonoros.</li></ul></div></div>
+    <div class="req-r"><div class="lb">6.2 Inputs<small>Entradas</small></div><div class="bd"><ul><li>Turnos reservados, con su fecha y hora.</li><li>Antelación configurada por el usuario y canal de notificación preferido.</li><li>Eventos del sistema: reserva confirmada, cancelación, reprogramación o cambio dispuesto por el centro de salud.</li></ul></div></div>
+    <div class="req-r"><div class="lb">6.3 Processing<small>Proceso</small></div><div class="bd"><ul><li>Al confirmarse la reserva, los avisos se programan según la antelación configurada.</li><li>Todos los días se recorren los turnos próximos y se generan las notificaciones correspondientes.</li><li>El aviso se emite por el canal preferido: notificación en la aplicación, correo electrónico y señal sonora.</li><li>Se registran la entrega y la lectura de cada notificación.</li><li>Cuando el modo asistido está activo, los avisos se replican al acompañante autorizado.</li></ul></div></div>
+    <div class="req-r"><div class="lb">6.4 Outputs<small>Salidas</small></div><div class="bd"><ul><li>Recordatorio del turno con fecha, hora, centro de salud, dirección e indicaciones de cómo llegar.</li><li>Aviso visual y sonoro según las preferencias de accesibilidad del usuario.</li><li>Registro del estado de cada notificación: enviada, entregada o leída.</li></ul></div></div>
+    <div class="req-r err"><div class="lb">6.5 Error Handling<small>Manejo de errores</small></div><div class="bd"><ul><li>Si la notificación no se pudo entregar por el canal preferido, se reintenta y se usa el canal alternativo disponible.</li><li>Si el servidor de destino rechaza el correo electrónico del usuario, el aviso se muestra dentro de la aplicación y se pide actualizar el dato.</li><li>Si el turno se canceló o se reprogramó, los recordatorios pendientes se anulan y se reemplazan por los del nuevo turno.</li></ul></div></div>
+  </div>
+
+  <div class="req">
+    <div class="req-h"><span class="id">RF-07</span><h3>Habilitar el modo asistido con un acompañante autorizado</h3><span class="mod tag s">Modo asistido</span></div>
+    <div class="req-r"><div class="lb">7.1 Introducción</div><div class="bd"><ul><li>El solicitante autoriza a otra persona a realizar el trámite junto a él, y queda registro del consentimiento.</li></ul></div></div>
+    <div class="req-r"><div class="lb">7.2 Inputs<small>Entradas</small></div><div class="bd"><ul><li>Datos de contacto del acompañante que se invita: nombre y correo electrónico.</li><li>Alcance de la autorización: consulta de turnos, reserva, cancelación o todas.</li><li>Aceptación de la invitación por parte del acompañante y consentimiento explícito del solicitante.</li></ul></div></div>
+    <div class="req-r"><div class="lb">7.3 Processing<small>Proceso</small></div><div class="bd"><ul><li>El solicitante genera la invitación e indica el alcance de la autorización.</li><li>La invitación se envía al acompañante, que debe tener una cuenta o registrarse.</li><li>Se registra el consentimiento del solicitante con fecha, hora y alcance otorgado.</li><li>Se habilita al acompañante la visualización compartida del trámite, limitada al alcance autorizado.</li><li>El solicitante puede revocar la autorización en cualquier momento.</li></ul></div></div>
+    <div class="req-r"><div class="lb">7.4 Outputs<small>Salidas</small></div><div class="bd"><ul><li>Vínculo de acompañamiento activo entre las dos cuentas, con su alcance.</li><li>Constancia del consentimiento, registrada y consultable por el solicitante.</li><li>Acceso del acompañante a las funciones autorizadas y notificaciones replicadas.</li></ul></div></div>
+    <div class="req-r err"><div class="lb">7.5 Error Handling<small>Manejo de errores</small></div><div class="bd"><ul><li>Si la invitación no se acepta dentro del plazo establecido, caduca y debe generarse de nuevo.</li><li>Si el acompañante intenta una acción fuera del alcance autorizado, la operación se rechaza y se informa la restricción.</li><li>Si el solicitante revoca la autorización, el acceso del acompañante se interrumpe de inmediato y se le notifica.</li><li>En ningún caso el acompañante accede a información médica del solicitante distinta de los turnos gestionados.</li></ul></div></div>
+  </div>
+
+  <div class="req">
+    <div class="req-h"><span class="id">RF-08</span><h3>Administrar centros de salud, especialidades y agendas</h3><span class="mod tag s">Panel administrativo</span></div>
+    <div class="req-r"><div class="lb">8.1 Introducción</div><div class="bd"><ul><li>El administrador mantiene actualizada la información sobre la que opera la plataforma en el entorno de prueba.</li></ul></div></div>
+    <div class="req-r"><div class="lb">8.2 Inputs<small>Entradas</small></div><div class="bd"><ul><li>Datos del centro de salud: nombre, tipo, dirección, localidad, teléfono, horarios y condiciones de accesibilidad edilicia.</li><li>Especialidades atendidas por cada centro de salud y profesionales asignados.</li><li>Agenda de turnos: fechas, horarios, cupos y requisitos previos.</li></ul></div></div>
+    <div class="req-r"><div class="lb">8.3 Processing<small>Proceso</small></div><div class="bd"><ul><li>El administrador da de alta, modifica o da de baja centros de salud, especialidades y agendas.</li><li>Se validan los datos obligatorios y la consistencia entre los horarios de atención y los cupos cargados.</li><li>Se verifica que no se generen turnos superpuestos para un mismo profesional.</li><li>Los cambios impactan de inmediato en la búsqueda de turnos disponibles.</li></ul></div></div>
+    <div class="req-r"><div class="lb">8.4 Outputs<small>Salidas</small></div><div class="bd"><ul><li>Catálogo de centros de salud y especialidades actualizado.</li><li>Agenda de turnos disponible para la búsqueda y la reserva.</li><li>Registro de auditoría de cada alta, modificación y baja, con usuario y fecha.</li></ul></div></div>
+    <div class="req-r err"><div class="lb">8.5 Error Handling<small>Manejo de errores</small></div><div class="bd"><ul><li>Si se intenta cargar un turno superpuesto con otro del mismo profesional, la carga se rechaza y se indica el conflicto.</li><li>Si se intenta dar de baja un centro de salud o una agenda con turnos ya reservados, la baja no se realiza hasta reasignar o cancelar esos turnos, y se notifica a los solicitantes afectados.</li><li>Si faltan datos obligatorios del centro de salud, no se habilita su publicación en la búsqueda.</li></ul></div></div>
+  </div>
+
+  <div class="req">
+    <div class="req-h"><span class="id">RF-09</span><h3>Generar métricas y reportes de uso</h3><span class="mod tag s">Panel administrativo</span></div>
+    <div class="req-r"><div class="lb">9.1 Introducción</div><div class="bd"><ul><li>El administrador consulta indicadores que permiten medir la reducción de fricción respecto del circuito tradicional.</li></ul></div></div>
+    <div class="req-r"><div class="lb">9.2 Inputs<small>Entradas</small></div><div class="bd"><ul><li>Registros de búsquedas, reservas, cancelaciones, reprogramaciones y turnos completados.</li><li>Registros de uso de las funciones de accesibilidad y del modo asistido.</li><li>Período y criterios de agrupamiento seleccionados: centro de salud, especialidad o localidad.</li></ul></div></div>
+    <div class="req-r"><div class="lb">9.3 Processing<small>Proceso</small></div><div class="bd"><ul><li>Los eventos de uso se recolectan de forma agregada y anónima.</li><li>Se calculan los indicadores: turnos buscados, reservados, cancelados y completados; tiempo promedio de reserva; proporción de trámites completados de forma autónoma frente a los realizados en modo asistido.</li><li>Los resultados se agrupan según el período y los criterios seleccionados.</li><li>Se genera el reporte para su visualización y exportación.</li></ul></div></div>
+    <div class="req-r"><div class="lb">9.4 Outputs<small>Salidas</small></div><div class="bd"><ul><li>Tablero con las métricas del período seleccionado.</li><li>Reportes exportables en formato PDF y en planilla de cálculo.</li></ul></div></div>
+    <div class="req-r err"><div class="lb">9.5 Error Handling<small>Manejo de errores</small></div><div class="bd"><ul><li>Si no hay datos para el período solicitado, se informa la situación y no se genera el reporte.</li><li>Si la exportación falla, se conserva la visualización en pantalla y se informa el error.</li><li>Si quien solicita el reporte no tiene rol de administrador, se rechaza el acceso y se registra el intento.</li></ul></div></div>
+  </div>
+</section>
+
+<!-- ======================= 3. RNF ======================= -->
+<section class="part">
+  <div class="part-head"><span class="n" style="background:var(--turquesa)">3</span><div><h2>Requerimientos no funcionales</h2><div class="sub">Atributos de calidad que el sistema debe cumplir en todas sus funciones</div></div></div>
+
+  <table class="t nfrt">
+    <thead><tr><th style="width:40mm">Atributo</th><th>Criterios</th></tr></thead>
+    <tbody>
+      <tr><td class="k"><span class="id">RNF-01</span><br>Desempeño</td><td><ul>
+    <li>La búsqueda de turnos devuelve resultados en menos de 3 segundos con la carga de datos de prueba prevista.</li>
+    <li>La confirmación de una reserva se completa en menos de 5 segundos desde la aceptación del último paso.</li>
+    <li>Las pantallas están diseñadas para funcionar con conexiones móviles lentas: el renderizado del lado del servidor entrega contenido útil antes de que terminen de cargarse los recursos secundarios.</li></ul></td></tr>
+      <tr><td class="k"><span class="id">RNF-02</span><br>Confiabilidad</td><td><ul>
+    <li>Un turno reservado no puede asignarse a dos solicitantes: la reserva se registra como una operación indivisible sobre el cupo.</li>
+    <li>Toda cancelación, reprogramación o modificación de agenda queda registrada con usuario, fecha y hora.</li>
+    <li>Se realizan copias de respaldo diarias de la base de datos, con posibilidad de restaurar el estado del día anterior.</li></ul></td></tr>
+      <tr><td class="k"><span class="id">RNF-03</span><br>Disponibilidad</td><td><ul>
+    <li>La plataforma está disponible las 24 horas, con una disponibilidad objetivo del 99 % mensual sobre el entorno de prueba.</li>
+    <li>La caída del servicio de interpretación de lenguaje natural no impide reservar un turno: el flujo guiado por menús sigue operativo.</li>
+    <li>Las tareas de mantenimiento se anuncian con antelación y se realizan en las franjas de menor uso.</li></ul></td></tr>
+      <tr><td class="k"><span class="id">RNF-04</span><br>Seguridad</td><td><ul>
+    <li>El acceso se controla por rol (solicitante, acompañante autorizado y administrador), con permisos diferenciados.</li>
+    <li>La base de datos aplica control de acceso por fila: cada usuario accede únicamente a sus propios turnos y datos.</li>
+    <li>Las contraseñas se almacenan cifradas y toda la comunicación se realiza sobre HTTPS.</li>
+    <li>El acompañante autorizado accede solo al alcance que el solicitante consintió de forma explícita, con registro de ese consentimiento y posibilidad de revocarlo.</li>
+    <li>No se almacena información clínica: la plataforma gestiona turnos, no historia clínica ni recetas.</li>
+    <li>El tratamiento de los datos personales se ajusta a la Ley 25.326 de Protección de los Datos Personales.</li></ul></td></tr>
+      <tr><td class="k"><span class="id">RNF-05</span><br>Mantenibilidad</td><td><ul>
+    <li>El código separa la interfaz de usuario de la lógica de negocio, que se expone como API.</li>
+    <li>Se usa control de versiones Git con repositorio remoto, junto con la documentación técnica del proyecto.</li>
+    <li>La incorporación de un nuevo centro de salud o de una especialidad se resuelve por configuración desde el panel administrativo, sin modificar el código.</li></ul></td></tr>
+      <tr><td class="k"><span class="id">RNF-06</span><br>Portabilidad</td><td><ul>
+    <li>La aplicación es web y responsive, y funciona en las últimas versiones de los navegadores de uso corriente, en computadora, tableta y celular.</li>
+    <li>Se empaqueta como PWA instalable, por lo que no requiere desarrollo nativo para Android ni iOS.</li>
+    <li>Se usan software de código abierto y servicios con capa gratuita, lo que permite trasladar el despliegue entre proveedores.</li></ul></td></tr>
+      <tr><td class="k"><span class="id">RNF-07</span><br>Usabilidad y accesibilidad</td><td><ul>
+    <li>La interfaz cumple las pautas WCAG 2.1 nivel AA: contraste adecuado, tipografía escalable y textos alternativos en las imágenes.</li>
+    <li>La plataforma se opera por completo con teclado y es compatible con lectores de pantalla, condición que se verifica durante las pruebas.</li>
+    <li>Todos los textos se redactan en lenguaje simple, sin vocabulario administrativo ni sanitario sin explicar.</li>
+    <li>El flujo de reserva presenta un paso por pantalla, con confirmación explícita antes de avanzar y la posibilidad de retroceder sin perder lo cargado.</li>
+    <li>No se usan animaciones agresivas, temporizadores de sesión sin aviso ni notificaciones que generen ansiedad.</li>
+    <li>La accesibilidad es un requisito prioritario del producto y no un agregado posterior, en línea con la Ley 26.653 de accesibilidad de la información en las páginas web.</li></ul></td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:7mm"><span class="k">3.8</span>Restricciones</h3>
+  <p class="lead" style="font-size:10pt">Resultantes de estándares, políticas o reglamentaciones, limitaciones de hardware, etc.</p>
+  <table class="t">
+    <thead><tr><th style="width:36mm">Tipo</th><th>Restricción</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Integración</td><td>El sistema no se integra con los sistemas oficiales de turnos de las provincias ni de las obras sociales: opera sobre un conjunto acotado de datos de prueba. La integración real queda documentada como trabajo futuro.</td></tr>
+      <tr><td class="k">Identidad</td><td>No se realiza autenticación oficial contra ReNaPer, AFIP o ANSES; ese paso se simula en el entorno de prueba.</td></tr>
+      <tr><td class="k">Información médica</td><td>La plataforma no emite recetas, no accede a la historia clínica ni gestiona ninguna otra información médica sensible.</td></tr>
+      <tr><td class="k">Disponibilidad real</td><td>La plataforma no garantiza la disponibilidad real de los turnos fuera del entorno de prueba, condición que se explicita en los términos de uso.</td></tr>
+      <tr><td class="k">Normativa</td><td>El desarrollo debe cumplir la Ley 26.653 de accesibilidad de la información en las páginas web y la Ley 25.326 de Protección de los Datos Personales.</td></tr>
+      <tr><td class="k">Licencias y costo</td><td>Se usa únicamente software de código abierto o servicios con capa gratuita, para mantener en cero el costo de licenciamiento y sostenimiento del prototipo.</td></tr>
+      <tr><td class="k">Infraestructura</td><td>El despliegue se realiza sobre la capa gratuita del proveedor en la nube, con las limitaciones de cómputo, almacenamiento y transferencia que ello implica.</td></tr>
+      <tr><td class="k">Servicio de IA</td><td>El servicio de interpretación de lenguaje natural se invoca siempre del lado del servidor y su uso se limita al asistente de reserva, sin ser crítico para el funcionamiento base.</td></tr>
+      <tr><td class="k">Marco académico</td><td>El proyecto se desarrolla en el marco de la cursada de Metodología de Sistemas I, con el equipo y el cronograma de la cátedra, y entrega un prototipo funcional, no un producto en producción.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ======================= 4. MODELO DE DATOS ======================= -->
+<section class="part">
+  <div class="part-head"><span class="n" style="background:var(--violeta-oscuro)">4</span><div><h2>Modelo de datos</h2><div class="sub">Tablas de Supabase Postgres · todas con control de acceso por fila (RLS)</div></div></div>
+  <p>Las tablas se agrupan en cuatro áreas. Las operaciones que deben ser atómicas (reservar, cancelar, reprogramar, invitar) se hacen mediante funciones SQL que validan los permisos: la interfaz nunca escribe directamente en <code>reservas</code>.</p>
+  <figure>
+    <svg viewBox="0 0 680 168" role="img" aria-label="Relaciones principales entre tablas">
+      <g font-family="Lexend, sans-serif" font-size="11" font-weight="600" text-anchor="middle">
+        <g fill="#fff" stroke-width="1.6">
+          <rect x="10" y="20" width="110" height="34" rx="10" stroke="#5B2BD9"/>
+          <rect x="10" y="110" width="110" height="34" rx="10" stroke="#5B2BD9"/>
+          <rect x="190" y="20" width="110" height="34" rx="10" stroke="#C2410C"/>
+          <rect x="190" y="110" width="130" height="34" rx="10" stroke="#C2410C"/>
+          <rect x="380" y="20" width="110" height="34" rx="10" stroke="#0B7A75"/>
+          <rect x="380" y="110" width="110" height="34" rx="10" stroke="#0B7A75"/>
+          <rect x="560" y="20" width="110" height="34" rx="10" stroke="#0B7A75"/>
+          <rect x="560" y="110" width="110" height="34" rx="10" stroke="#0B7A75"/>
+        </g>
+        <g fill="#1E1633">
+          <text x="65" y="41">perfiles</text><text x="65" y="131">preferencias</text>
+          <text x="245" y="41">reservas</text><text x="255" y="131">acompanamientos</text>
+          <text x="435" y="41">turnos</text><text x="435" y="131">notificaciones</text>
+          <text x="615" y="41">profesionales</text><text x="615" y="131">centros</text>
+        </g>
+        <g stroke="#4A4160" stroke-width="1.4" fill="none">
+          <path d="M65 54 V110"/><path d="M120 37 H190"/><path d="M120 50 C160 80 170 110 190 120"/>
+          <path d="M300 37 H380"/><path d="M490 37 H560"/><path d="M615 54 V110"/><path d="M490 50 C530 90 540 110 560 122"/>
+          <path d="M300 50 C340 90 350 120 380 127"/>
+        </g>
+        <g fill="#4A4160" font-size="8.5" font-weight="400">
+          <text x="86" y="86">1 : 1</text><text x="155" y="31">1 : N</text><text x="340" y="31">N : 1</text><text x="525" y="31">N : 1</text><text x="636" y="86">N : 1</text>
+          <text x="164" y="102">1 : N</text><text x="356" y="96">1 : N</text>
+        </g>
+      </g>
+    </svg>
+    <figcaption>Figura 2. Relaciones principales. Una persona tiene sus preferencias, sus reservas y sus acompañamientos; cada reserva toma un turno de un profesional en un centro de salud y genera avisos.</figcaption>
+  </figure>
+  <table class="t compact">
+    <thead><tr><th style="width:31mm">Tabla</th><th>Campos principales</th><th style="width:44mm">Para qué sirve</th></tr></thead>
+    <tbody>
+      <tr class="grp"><td colspan="3" style="background:var(--s-violeta);font-family:var(--display);font-weight:700;font-size:8.8pt;color:var(--violeta-oscuro)">Personas y cuentas</td></tr>
+      <tr><td class="k">perfiles</td><td>id (= auth.users.id), nombre, apellido, dni, fecha_nacimiento, telefono, localidad, rol (solicitante | acompanante | admin)</td><td>Datos personales y rol. <span class="tag">RF-01</span></td></tr>
+      <tr><td class="k">preferencias</td><td>usuario_id, tamano_texto, alto_contraste, reducir_movimiento, lectura_voz, velocidad_voz, lenguaje_simple, canal_aviso, antelacion_horas</td><td>Preferencias de accesibilidad y de aviso. <span class="tag">RF-02</span></td></tr>
+      <tr><td class="k">intentos_ingreso</td><td>correo, fallidos, bloqueado_hasta</td><td>Bloqueo tras cinco intentos fallidos. <span class="tag">RF-01</span></td></tr>
+      <tr class="grp"><td colspan="3" style="background:var(--s-turquesa);font-family:var(--display);font-weight:700;font-size:8.8pt;color:#08524F">Oferta de turnos</td></tr>
+      <tr><td class="k">localidades</td><td>nombre, lat, lng</td><td>Referencia para ordenar por cercanía.</td></tr>
+      <tr><td class="k">centros</td><td>id, nombre, tipo, direccion, localidad, telefono, horario, lat, lng, accesibilidad, activo</td><td>Centros de salud. <span class="tag">RF-08</span></td></tr>
+      <tr><td class="k">especialidades</td><td>id, nombre, nombre_simple, descripcion, palabras_clave[], activa</td><td>Nombre técnico y en lenguaje simple. <span class="tag">RF-03</span></td></tr>
+      <tr><td class="k">profesionales</td><td>id, nombre, especialidad_id, centro_id</td><td>Quién atiende y dónde.</td></tr>
+      <tr><td class="k">turnos</td><td>id, profesional_id, centro_id, especialidad_id, inicio, estado, requisitos</td><td>Cupos de la agenda. <span class="tag">RF-03</span></td></tr>
+      <tr class="grp"><td colspan="3" style="background:var(--s-coral);font-family:var(--display);font-weight:700;font-size:8.8pt;color:#8A2E08">Reservas, avisos y acompañamiento</td></tr>
+      <tr><td class="k">reservas</td><td>numero (correlativo), turno_id, solicitante_id, creada_por, estado, asistida, segundos, reserva_origen, creada_en</td><td>Reserva y su historia (cancelada, reprogramada). <span class="tag">RF-04</span> <span class="tag">RF-05</span></td></tr>
+      <tr><td class="k">notificaciones</td><td>id, usuario_id, reserva_id, tipo, titulo, mensaje, enviar_desde, leida_en</td><td>Avisos y recordatorios. <span class="tag">RF-06</span></td></tr>
+      <tr><td class="k">acompanamientos</td><td>id, solicitante_id, acompanante_id, correo_invitado, alcance[], token, vence_en, estado, consentido_en, revocado_en</td><td>Invitación, alcance y consentimiento. <span class="tag">RF-07</span></td></tr>
+      <tr class="grp"><td colspan="3" style="background:var(--s-sol);font-family:var(--display);font-weight:700;font-size:8.8pt">Control y métricas</td></tr>
+      <tr><td class="k">eventos_uso</td><td>id, tipo, datos (jsonb, anónimo), creado_en</td><td>Métricas anónimas. <span class="tag">RF-09</span></td></tr>
+      <tr><td class="k">auditoria</td><td>id, tabla, accion, registro_id, usuario_id, creado_en</td><td>Quién cambió qué y cuándo. <span class="tag">RF-08</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ======================= 5. PLAN DE VERSIONES ======================= -->
+<section class="part">
+  <div class="part-head"><span class="n" style="background:var(--coral)">5</span><div><h2>Plan de versiones</h2><div class="sub">Seis versiones incrementales · cada integrante es responsable de dos</div></div></div>
+  <p>Cada versión es una funcionalidad completa que se puede mostrar funcionando y se entrega en su propia solicitud de cambios (PR). Cada versión se apoya en la anterior: la rama <code>version/N</code> sale de <code>version/N-1</code>, y se integran en orden, de v0.1 a v0.6.</p>
+  <figure>
+    <svg viewBox="0 0 680 92" role="img" aria-label="Línea de tiempo de las seis versiones">
+      <g font-family="Lexend, sans-serif" text-anchor="middle">
+        <line x1="50" y1="34" x2="630" y2="34" stroke="#E4DEEC" stroke-width="6" stroke-linecap="round"/>
+        <g font-size="12" font-weight="800" fill="#fff">
+          <circle cx="50" cy="34" r="20" fill="#5B2BD9"/><text x="50" y="38">v0.1</text>
+          <circle cx="166" cy="34" r="20" fill="#0B7A75"/><text x="166" y="38">v0.2</text>
+          <circle cx="282" cy="34" r="20" fill="#C2410C"/><text x="282" y="38">v0.3</text>
+          <circle cx="398" cy="34" r="20" fill="#5B2BD9"/><text x="398" y="38">v0.4</text>
+          <circle cx="514" cy="34" r="20" fill="#0B7A75"/><text x="514" y="38">v0.5</text>
+          <circle cx="630" cy="34" r="20" fill="#C2410C"/><text x="630" y="38">v0.6</text>
+        </g>
+        <g font-size="10" fill="#1E1633" font-weight="600">
+          <text x="50" y="72">Base</text><text x="166" y="72">Cuentas</text><text x="282" y="72">Búsqueda</text><text x="398" y="72">Reserva</text><text x="514" y="72">Avisos</text><text x="630" y="72">Admin y PWA</text>
+        </g>
+        <g font-size="9" fill="#4A4160">
+          <text x="50" y="86">Marco</text><text x="166" y="86">Miguel</text><text x="282" y="86">Nicolas</text><text x="398" y="86">Marco</text><text x="514" y="86">Miguel</text><text x="630" y="86">Nicolas</text>
+        </g>
+      </g>
+    </svg>
+    <figcaption>Figura 3. Orden de integración de las versiones. El color identifica al responsable.</figcaption>
+  </figure>
+  <table class="t">
+    <thead><tr><th style="width:13mm">Versión</th><th style="width:55mm">Funcionalidad</th><th style="width:20mm">Responsable</th><th style="width:22mm">Cubre</th><th>Qué se demuestra</th></tr></thead>
+    <tbody>
+      <tr><td class="k">v0.1</td><td><b>Base, marca y accesibilidad</b><br><span style="font-size:8.6pt;color:var(--tinta-suave);line-height:1.4">Proyecto Nuxt 4, tokens de marca, layout, menú de accesibilidad (guardado en el navegador), componentes base, inicio, términos y declaración de accesibilidad.</span></td><td>Marco D'Antino</td><td><span class="tag">RF-02 (parcial)</span> <span class="tag t">RNF-07</span></td><td>Abrir la app, agrandar el texto, pasar a alto contraste y escuchar la página.</td></tr>
+      <tr><td class="k">v0.2</td><td><b>Cuentas y preferencias</b><br><span style="font-size:8.6pt;color:var(--tinta-suave);line-height:1.4">Perfiles con rol, registro con un dato por pantalla, verificación por correo, bloqueo tras cinco intentos, recuperación de contraseña, preferencias guardadas en la cuenta.</span></td><td>Miguel Tello</td><td><span class="tag">RF-01</span> <span class="tag">RF-02</span></td><td>Crear una cuenta, configurar las preferencias, salir y volver a entrar con todo igual.</td></tr>
+      <tr><td class="k">v0.3</td><td><b>Búsqueda de turnos</b><br><span style="font-size:8.6pt;color:var(--tinta-suave);line-height:1.4">Centros, especialidades, profesionales y turnos de prueba de la zona norte del conurbano; filtros, orden por cercanía, ficha del turno y sugerencias sin resultados.</span></td><td>Nicolas Rosso</td><td><span class="tag">RF-03</span></td><td>Buscar "cardiología" cerca de Pacheco y abrir la ficha de un turno.</td></tr>
+      <tr><td class="k">v0.4</td><td><b>Asistente de reserva y mis turnos</b><br><span style="font-size:8.6pt;color:var(--tinta-suave);line-height:1.4">Un paso por pantalla, pedido en lenguaje natural con IA y respaldo por menús, reserva atómica con comprobante, borrador, cancelar y cambiar de fecha.</span></td><td>Marco D'Antino</td><td><span class="tag">RF-04</span> <span class="tag">RF-05</span></td><td>Decir "necesito un turno con el oculista cerca de casa" y terminar con el comprobante.</td></tr>
+      <tr><td class="k">v0.5</td><td><b>Avisos y modo acompañante</b><br><span style="font-size:8.6pt;color:var(--tinta-suave);line-height:1.4">Avisos y recordatorios con antelación elegida, bandeja de avisos, invitación con alcance que vence a los 7 días, consentimiento y revocación.</span></td><td>Miguel Tello</td><td><span class="tag">RF-06</span> <span class="tag">RF-07</span></td><td>Rosa invita a su hija Lucía; Lucía le reserva un turno; Rosa revoca el permiso.</td></tr>
+      <tr><td class="k">v0.6</td><td><b>Panel administrativo, métricas y PWA</b><br><span style="font-size:8.6pt;color:var(--tinta-suave);line-height:1.4">Alta, edición y baja de centros, especialidades y agendas; validaciones; auditoría; métricas; exportación CSV y PDF; PWA instalable; despliegue en Vercel.</span></td><td>Nicolas Rosso</td><td><span class="tag">RF-08</span> <span class="tag">RF-09</span> <span class="tag t">RNF-06</span></td><td>Cargar una agenda nueva, verla en la búsqueda y descargar el reporte del mes.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ======================= 6. MATRIZ ======================= -->
+<section class="part">
+  <div class="part-head"><span class="n" style="background:var(--rosa)">6</span><div><h2>Matriz de trazabilidad</h2><div class="sub">Cada requerimiento, el módulo que lo resuelve, la versión que lo entrega y su responsable</div></div></div>
+  <table class="t compact">
+    <thead><tr><th style="width:15mm">ID</th><th>Requerimiento</th><th style="width:40mm">Módulo</th><th style="width:20mm">Versión</th><th style="width:30mm">Responsable</th></tr></thead>
+    <tbody>
+      <tr><td class="k">RF-01</td><td>Registrar y autenticar usuario</td><td>Gestión de usuarios</td><td>v0.2</td><td>Miguel Tello</td></tr>
+      <tr><td class="k">RF-02</td><td>Configurar preferencias de accesibilidad</td><td>Gestión de usuarios · Accesibilidad transversal</td><td>v0.1 (parcial)<br>v0.2</td><td>Marco D'Antino<br>Miguel Tello</td></tr>
+      <tr><td class="k">RF-03</td><td>Buscar turnos disponibles</td><td>Búsqueda de turnos</td><td>v0.3</td><td>Nicolas Rosso</td></tr>
+      <tr><td class="k">RF-04</td><td>Reservar un turno con el asistente guiado</td><td>Asistente de reserva</td><td>v0.4</td><td>Marco D'Antino</td></tr>
+      <tr><td class="k">RF-05</td><td>Cancelar o reprogramar un turno</td><td>Asistente de reserva (mis turnos)</td><td>v0.4</td><td>Marco D'Antino</td></tr>
+      <tr><td class="k">RF-06</td><td>Emitir recordatorios y notificaciones</td><td>Recordatorios y notificaciones</td><td>v0.5</td><td>Miguel Tello</td></tr>
+      <tr><td class="k">RF-07</td><td>Habilitar el modo asistido con un acompañante autorizado</td><td>Modo asistido</td><td>v0.5</td><td>Miguel Tello</td></tr>
+      <tr><td class="k">RF-08</td><td>Administrar centros de salud, especialidades y agendas</td><td>Panel administrativo</td><td>v0.6</td><td>Nicolas Rosso</td></tr>
+      <tr><td class="k">RF-09</td><td>Generar métricas y reportes de uso</td><td>Panel administrativo</td><td>v0.6</td><td>Nicolas Rosso</td></tr>
+    </tbody>
+  </table>
+  <h4>Requerimientos no funcionales</h4>
+  <p>Los RNF son transversales: cada versión debe respetarlos. La tabla indica dónde se establece o se demuestra cada uno.</p>
+  <table class="t compact">
+    <thead><tr><th style="width:17mm">ID</th><th style="width:44mm">Atributo</th><th>Dónde se establece o se demuestra</th></tr></thead>
+    <tbody>
+      <tr><td class="k">RNF-01</td><td>Desempeño</td><td>SSR desde v0.1; tiempos de búsqueda en v0.3 y de reserva en v0.4.</td></tr>
+      <tr><td class="k">RNF-02</td><td>Confiabilidad</td><td>Reserva atómica (<code>reservar_turno</code>) en v0.4; auditoría de cambios en v0.6.</td></tr>
+      <tr><td class="k">RNF-03</td><td>Disponibilidad</td><td>Respaldo por menús cuando falla la IA, en v0.4; despliegue en Vercel en v0.6.</td></tr>
+      <tr><td class="k">RNF-04</td><td>Seguridad</td><td>Roles y RLS desde v0.2; alcance del acompañante autorizado en v0.5.</td></tr>
+      <tr><td class="k">RNF-05</td><td>Mantenibilidad</td><td>Estructura y reglas de código desde v0.1; carga por configuración en v0.6.</td></tr>
+      <tr><td class="k">RNF-06</td><td>Portabilidad</td><td>Diseño responsive desde v0.1; PWA instalable en v0.6.</td></tr>
+      <tr><td class="k">RNF-07</td><td>Usabilidad y accesibilidad</td><td>Base y menú de accesibilidad en v0.1; se verifica en todas las versiones.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ======================= 7. IDENTIDAD VISUAL ======================= -->
+<section class="part">
+  <div class="part-head"><span class="n" style="background:var(--turquesa)">7</span><div><h2>Identidad visual</h2><div class="sub">Resumen · el detalle está en el documento "Karma Tech - Guía de marca"</div></div></div>
+  <p>La marca transmite <b>calidez, claridad y confianza</b>. Es colorida pero nunca ruidosa: cada color tiene una función y todos los pares de texto cumplen el contraste AA. La misma identidad se usa en la aplicación y en este documento.</p>
+  <div class="idv">
+    <div class="box"><svg viewBox="0 0 300 64" style="width:62mm;height:auto"><!--SVGINNER:logo--></svg></div>
+    <div class="box dark"><!--SVG:logo:on-dark idvdark--></div>
+    <div class="box" style="background:#fff;border:1px solid var(--linea)"><svg viewBox="0 0 68 64" style="width:20mm;height:auto"><!--SVGINNER:icono--></svg></div>
+    <div class="box" style="background:#fff;border:1px solid var(--linea)"><svg viewBox="0 0 268 64" style="width:62mm;height:auto"><!--SVGINNER:karma-tech--></svg></div>
+  </div>
+  <p class="small" style="font-size:8.8pt;color:var(--tinta-suave);margin-top:2mm">Logo del producto sobre fondo claro y oscuro, ícono (mínimo 24 px) y logo del equipo Karma Tech.</p>
+  <h4>Paleta</h4>
+  <div class="pal">
+    <div style="background:#5B2BD9;color:#fff">Violeta<br>#5B2BD9 · primario</div>
+    <div style="background:#0B7A75;color:#fff">Turquesa<br>#0B7A75 · éxito</div>
+    <div style="background:#C2410C;color:#fff">Coral<br>#C2410C · avisos</div>
+    <div style="background:#FFC233;color:#1E1633">Sol<br>#FFC233 · acento</div>
+    <div style="background:#C0266D;color:#fff">Rosa<br>#C0266D · errores</div>
+    <div style="background:#3F1A9E;color:#fff">Violeta oscuro<br>#3F1A9E · hover</div>
+    <div style="background:#1E1633;color:#fff">Tinta<br>#1E1633 · texto</div>
+    <div style="background:#4A4160;color:#fff">Tinta suave<br>#4A4160 · secundario</div>
+    <div style="background:#FFF9F0;color:#1E1633;border:1px solid var(--linea)">Crema<br>#FFF9F0 · fondo</div>
+    <div style="background:#000;color:#FFE14D">Alto contraste<br>#000 · #FFE14D</div>
+  </div>
+  <h4>Tipografía</h4>
+  <div class="fonts">
+    <div><div class="aa" style="font-family:var(--display);color:var(--violeta)">Aa</div><b style="font-family:var(--display)">Lexend</b> · títulos y botones<br><span style="font-size:9.2pt;color:var(--tinta-suave)">Diseñada para reducir el esfuerzo visual al leer.</span></div>
+    <div><div class="aa" style="font-family:var(--texto);color:var(--turquesa)">Aa</div><b>Atkinson Hyperlegible</b> · texto<br><span style="font-size:9.2pt;color:var(--tinta-suave)">Del Braille Institute: distingue I l 1 y O 0.</span></div>
+  </div>
+  <div class="callout" style="margin-top:4mm"><b class="h">Forma</b><p>Esquinas redondeadas (14 px en tarjetas, botones en píldora), objetivos táctiles de 56 px como mínimo, foco siempre visible (anillo de 4 px en sol con borde tinta) y nada por debajo de 18 px en la aplicación.</p></div>
+</section>
+
+<!-- ======================= 8. GLOSARIO ======================= -->
+<section class="part">
+  <div class="part-head"><span class="n" style="background:var(--sol);color:var(--tinta)">8</span><div><h2>Glosario</h2><div class="sub">Términos técnicos explicados en lenguaje simple</div></div></div>
+  <dl class="gl">
+    <dt>Acompañante autorizado</dt><dd>Persona de confianza (por ejemplo, un familiar) a quien el solicitante le permite ver o gestionar sus turnos. Solo puede hacer lo que el solicitante autorizó, y ese permiso se puede quitar en cualquier momento.</dd>
+    <dt>Administrador</dt><dd>Persona que carga y mantiene los centros de salud, las especialidades y las agendas, y consulta las métricas.</dd>
+    <dt>API</dt><dd>La "puerta" por la que una parte del sistema le pide datos o acciones a otra. Por ejemplo, la página le pide al servidor que interprete un pedido.</dd>
+    <dt>Centro de salud</dt><dd>Hospital, clínica o centro de atención primaria donde se atiende el turno. Reemplaza a palabras como "prestador" o "efector".</dd>
+    <dt>Entorno de prueba</dt><dd>Versión de la plataforma que funciona con datos de ejemplo, no con los turnos reales de los sistemas oficiales.</dd>
+    <dt>Lector de pantalla</dt><dd>Programa que lee en voz alta lo que aparece en la pantalla. Lo usan, por ejemplo, las personas ciegas o con baja visión.</dd>
+    <dt>Lenguaje simple</dt><dd>Forma de escribir con frases cortas, palabras de todos los días y un dato por oración, para que cualquier persona entienda a la primera.</dd>
+    <dt>Modelo de lenguaje (IA)<small>Claude</small></dt><dd>Programa que entiende pedidos escritos o dichos con palabras comunes, como "necesito un turno con el oculista". Si no está disponible, la plataforma sigue funcionando con menús.</dd>
+    <dt>PWA<small>Aplicación web progresiva</small></dt><dd>Página web que se puede instalar en el celular o la computadora y usar como una aplicación, sin pasar por una tienda de aplicaciones.</dd>
+    <dt>RLS<small>Seguridad a nivel de fila</small></dt><dd>Regla de la base de datos que hace que cada persona vea solo sus propios datos, aunque todos estén guardados en la misma tabla.</dd>
+    <dt>RPC<small>Función de la base de datos</small></dt><dd>Operación que la base de datos hace de una sola vez y sin interrupciones, como reservar un turno: o se completa toda, o no se hace nada.</dd>
+    <dt>Solicitante</dt><dd>Persona que necesita el turno y usa la plataforma para buscarlo y reservarlo.</dd>
+    <dt>SSR<small>Renderizado del lado del servidor</small></dt><dd>El servidor arma la página completa antes de enviarla. Así se ve más rápido en conexiones lentas y los lectores de pantalla la leen sin esperar.</dd>
+    <dt>WCAG 2.1 AA</dt><dd>Pautas internacionales de accesibilidad web. El nivel AA exige, entre otras cosas, buen contraste, uso completo con teclado y textos alternativos.</dd>
+    <dt>Web Speech API</dt><dd>Función incluida en el navegador que permite leer textos en voz alta y dictar con la voz, sin instalar nada.</dd>
+  </dl>
+</section>
+
+</body>
+</html>

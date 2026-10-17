@@ -1,188 +1,225 @@
-import type { Tables } from '~/types/database'
+// Cuenta de la persona: ingresar, registrarse, salir y recuperar la contraseña (Supabase Auth).
+// Cada función devuelve { ok: true } o { ok: false, mensaje } con un mensaje en lenguaje simple:
+// la página decide dónde mostrarlo.
 
-export type Perfil = Tables<'profiles'>
+// ofrecerRecuperar: mostrar el enlace para crear una contraseña nueva.
+// ofrecerReenvio: mostrar el botón para mandar de nuevo el correo de activación.
+export type Resultado =
+  | { ok: true }
+  | { ok: false; mensaje: string; ofrecerRecuperar?: boolean; ofrecerReenvio?: boolean }
 
-export interface Aviso {
-  titulo: string
-  ayuda: string
-}
+export type Rol = 'solicitante' | 'acompanante'
 
-export interface DatosRegistro {
+export type DatosRegistro = {
   nombre: string
   apellido: string
-  documento: string
+  dni: string
   fechaNacimiento: string
+  correo: string
+  telefono: string
   localidad: string
-  localidadId: number
-  email: string
+  rol: Rol
   clave: string
 }
 
-type Resultado<M extends string = string> = { ok: true } | { ok: false, motivo: M, aviso: Aviso }
+const MENSAJE_CREDENCIALES = 'El correo o la contraseña no coinciden. Revisalos y probá de nuevo.'
+const MENSAJE_GENERAL = 'No pudimos conectarnos. Revisá tu conexión a internet y probá de nuevo.'
 
-const SIN_CONEXION: Aviso = {
-  titulo: 'No pudimos conectarnos.',
-  ayuda: 'Revisá tu conexión a internet y probá de nuevo.',
+// Hora en formato argentino: "15:42".
+function hora(fecha: string): string {
+  return new Date(fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
 }
 
-const DEMASIADOS_CORREOS: Aviso = {
-  titulo: 'Mandamos muchos correos seguidos.',
-  ayuda: 'Esperá unos minutos y probá de nuevo.',
+function mensajeBloqueo(hasta: string): string {
+  return (
+    `Por seguridad, pausamos el ingreso con este correo hasta las ${hora(hasta)} ` +
+    '(son 15 minutos). Si no te acordás la contraseña, podés crear una nueva.'
+  )
 }
 
-const DEMASIADOS_INTENTOS: Aviso = {
-  titulo: 'Hubo muchos intentos seguidos desde esta conexión.',
-  ayuda: 'Esperá unos minutos y probá de nuevo.',
+// Traduce los errores de Supabase Auth que puede ver la persona. El resto es un error general.
+function mensajeDeError(codigo: string | undefined): string {
+  switch (codigo) {
+    case 'over_email_send_rate_limit':
+    case 'over_request_rate_limit':
+      return 'Hubo muchos intentos seguidos. Esperá unos minutos y probá de nuevo.'
+    case 'weak_password':
+      return 'Esa contraseña es fácil de adivinar. Probá con otra más larga, con letras y números.'
+    case 'same_password':
+      return 'La contraseña nueva tiene que ser distinta de la anterior.'
+    case 'email_address_invalid':
+      return 'No podemos usar ese correo. Revisalo o probá con otro.'
+    case 'email_exists':
+      return 'Ya hay una cuenta con ese correo. Probá con otro.'
+    case 'session_not_found':
+    case 'session_expired':
+      return 'Pasó mucho tiempo y se cerró la sesión. Pedí un enlace nuevo y probá otra vez.'
+    default:
+      return MENSAJE_GENERAL
+  }
 }
-
-function avisoGeneral(error: { code?: string }): Aviso {
-  if (error.code === 'over_email_send_rate_limit') return DEMASIADOS_CORREOS
-  if (error.code === 'over_request_rate_limit') return DEMASIADOS_INTENTOS
-  return SIN_CONEXION
-}
-
-const minutos = (segundos: number) => Math.max(1, Math.ceil(segundos / 60))
 
 export function useSesion() {
   const supabase = useSupabaseClient()
-  const user = useSupabaseUser()
-  const perfil = useState<Perfil | null>('perfil', () => null)
+  const usuario = useSupabaseUser()
+  const cuenta = usePreferenciasCuenta()
+  const avisos = useAvisos()
+  const ayuda = useAyuda()
+  const origen = useRequestURL().origin
 
+  const conSesion = computed(() => usuario.value !== null)
 
-  async function cargarPerfil(forzar = false) {
-    const id = user.value?.sub
-    if (!id) {
-      perfil.value = null
-      return null
-    }
-    if (perfil.value?.id === id && !forzar) return perfil.value
-    const { data } = await supabase.from('profiles').select('*').eq('id', id).single()
-    perfil.value = data
-    return data
+  // El módulo de Supabase actualiza el usuario un poco después de ingresar.
+  // Lo hacemos ya, así el middleware lo ve en la próxima navegación.
+  async function actualizarUsuario() {
+    const { data } = await supabase.auth.getClaims()
+    usuario.value = data?.claims ?? null
   }
 
-  async function ingresar(email: string, clave: string): Promise<Resultado<'bloqueado' | 'credenciales' | 'sin-confirmar' | 'error'>> {
-    const { data: espera, error: errorBloqueo } = await supabase.rpc('estado_bloqueo', { p_email: email })
-    if (errorBloqueo) return { ok: false, motivo: 'error', aviso: SIN_CONEXION }
-    if (espera > 0) return { ok: false, motivo: 'bloqueado', aviso: avisoBloqueo(espera) }
+  async function ingresar(correo: string, clave: string): Promise<Resultado> {
+    const email = correo.trim().toLowerCase()
+
+    const { data: bloqueadoHasta } = await supabase.rpc('estado_bloqueo', { p_correo: email })
+    if (bloqueadoHasta) {
+      return { ok: false, mensaje: mensajeBloqueo(bloqueadoHasta), ofrecerRecuperar: true }
+    }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password: clave })
-
-    if (!error) {
-      await supabase.rpc('limpiar_intentos')
-      const { data } = await supabase.auth.getClaims()
-      user.value = data?.claims ?? null
-      await cargarPerfil(true)
-      return { ok: true }
-    }
-
-    if (error.code === 'email_not_confirmed') {
-      return {
-        ok: false,
-        motivo: 'sin-confirmar',
-        aviso: {
-          titulo: 'Todavía no confirmaste tu correo.',
-          ayuda: 'Buscá el mensaje que te mandamos y tocá el enlace. Si no lo encontrás, te lo mandamos de nuevo.',
-        },
+    if (error) {
+      if (error.code === 'invalid_credentials') {
+        const { data: hasta } = await supabase.rpc('registrar_fallo', { p_correo: email })
+        if (hasta) {
+          return { ok: false, mensaje: mensajeBloqueo(hasta), ofrecerRecuperar: true }
+        }
+        return { ok: false, mensaje: MENSAJE_CREDENCIALES, ofrecerRecuperar: true }
       }
-    }
-
-    if (error.code === 'invalid_credentials') {
-      const { data } = await supabase.rpc('registrar_fallo', { p_email: email })
-      const { restantes = 0, bloqueado_segundos = 0 } = (data ?? {}) as { restantes?: number, bloqueado_segundos?: number }
-      if (bloqueado_segundos > 0) return { ok: false, motivo: 'bloqueado', aviso: avisoBloqueo(bloqueado_segundos) }
-      return {
-        ok: false,
-        motivo: 'credenciales',
-        aviso: {
-          titulo: 'El correo o la contraseña no coinciden.',
-          ayuda: restantes <= 2
-            ? `Probá de nuevo. Te ${restantes === 1 ? 'queda 1 intento' : `quedan ${restantes} intentos`}. Si no te acordás la contraseña, podés crear una nueva.`
-            : 'Probá de nuevo. Si no te acordás la contraseña, podés crear una nueva.',
-        },
+      if (error.code === 'email_not_confirmed') {
+        return {
+          ok: false,
+          mensaje:
+            'Todavía no activaste tu cuenta. Abrí el correo que te mandamos y tocá el enlace. ' +
+            'Si no lo encontrás, te lo mandamos de nuevo.',
+          ofrecerReenvio: true,
+        }
       }
+      return { ok: false, mensaje: mensajeDeError(error.code) }
     }
 
-    return { ok: false, motivo: 'error', aviso: avisoGeneral(error) }
-  }
-
-  function avisoBloqueo(segundos: number): Aviso {
-    const m = minutos(segundos)
-    return {
-      titulo: 'Por seguridad, pausamos el ingreso con este correo.',
-      ayuda: `Probaste varias veces con una contraseña que no coincide. Esperá ${m} ${m === 1 ? 'minuto' : 'minutos'} y probá de nuevo, o creá una contraseña nueva.`,
-    }
-  }
-
-  async function registrar(datos: DatosRegistro): Promise<Resultado<'existe' | 'clave-debil' | 'error'>> {
-    const { data, error } = await supabase.auth.signUp({
-      email: datos.email,
-      password: datos.clave,
-      options: {
-        emailRedirectTo: `${window.location.origin}/confirmar-correo`,
-        data: {
-          nombre: datos.nombre,
-          apellido: datos.apellido,
-          documento: datos.documento,
-          fecha_nacimiento: datos.fechaNacimiento,
-          localidad: datos.localidad,
-          localidad_id: datos.localidadId,
-        },
-      },
-    })
-
-    const existe = {
-      ok: false as const,
-      motivo: 'existe' as const,
-      aviso: {
-        titulo: 'Ya hay una cuenta con ese correo.',
-        ayuda: 'Probá ingresar con ese correo. Si no te acordás la contraseña, podés crear una nueva.',
-      },
-    }
-
-    if (error?.code === 'user_already_exists' || error?.code === 'email_exists') return existe
-    if (error?.code === 'weak_password') {
-      return {
-        ok: false,
-        motivo: 'clave-debil',
-        aviso: { titulo: 'Esa contraseña es muy fácil de adivinar.', ayuda: 'Elegí otra más larga, con letras y números.' },
-      }
-    }
-    if (error) return { ok: false, motivo: 'error', aviso: avisoGeneral(error) }
-    if (data.user && data.user.identities?.length === 0) return existe
+    await supabase.rpc('limpiar_intentos')
+    await actualizarUsuario()
+    cuenta.olvidar()
+    await cuenta.cargar()
     return { ok: true }
   }
 
-  async function reenviarConfirmacion(email: string): Promise<Resultado> {
+  async function reenviarConfirmacion(correo: string): Promise<Resultado> {
     const { error } = await supabase.auth.resend({
       type: 'signup',
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/confirmar-correo` },
+      email: correo.trim().toLowerCase(),
+      options: { emailRedirectTo: `${origen}/confirmar` },
     })
-    return error ? { ok: false, motivo: 'error', aviso: avisoGeneral(error) } : { ok: true }
+    return error ? { ok: false, mensaje: mensajeDeError(error.code) } : { ok: true }
   }
 
-  async function pedirNuevaClave(email: string): Promise<Resultado> {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/restablecer-clave` })
-    return error ? { ok: false, motivo: 'error', aviso: avisoGeneral(error) } : { ok: true }
-  }
+  async function registrarse(datos: DatosRegistro): Promise<Resultado> {
+    const { data, error } = await supabase.auth.signUp({
+      email: datos.correo.trim().toLowerCase(),
+      password: datos.clave,
+      options: {
+        emailRedirectTo: `${origen}/confirmar`,
+        // Estos datos los usa el trigger de la base para crear el perfil.
+        data: {
+          nombre: datos.nombre.trim(),
+          apellido: datos.apellido.trim(),
+          dni: limpiarDni(datos.dni),
+          fecha_nacimiento: datos.fechaNacimiento,
+          telefono: limpiarTelefono(datos.telefono),
+          localidad: datos.localidad.trim(),
+          rol: datos.rol,
+        },
+      },
+    })
 
-  async function cambiarClave(clave: string): Promise<Resultado> {
-    const { error } = await supabase.auth.updateUser({ password: clave })
-    if (error?.code === 'same_password') {
-      return { ok: false, motivo: 'misma', aviso: { titulo: 'Esa es la contraseña que ya tenías.', ayuda: 'Elegí una distinta.' } }
+    // Si el correo ya tiene una cuenta confirmada, Supabase no da error (para no revelar qué
+    // correos existen): devuelve un usuario sin "identidades". Así lo detectamos.
+    const yaExiste = error?.code === 'user_already_exists' || data.user?.identities?.length === 0
+    if (yaExiste) {
+      return {
+        ok: false,
+        mensaje: 'Ya hay una cuenta con este correo. Podés ingresar o crear una contraseña nueva.',
+        ofrecerRecuperar: true,
+      }
     }
-    if (error?.code === 'weak_password') {
-      return { ok: false, motivo: 'clave-debil', aviso: { titulo: 'Esa contraseña es muy fácil de adivinar.', ayuda: 'Elegí otra más larga, con letras y números.' } }
+    if (error) {
+      return { ok: false, mensaje: mensajeDeError(error.code) }
     }
-    return error ? { ok: false, motivo: 'error', aviso: avisoGeneral(error) } : { ok: true }
+    return { ok: true }
   }
 
   async function salir() {
     await supabase.auth.signOut()
-    user.value = null
-    perfil.value = null
+    usuario.value = null
+    cuenta.olvidar()
+    // v0.5: los avisos y el modo "Estás ayudando a..." son de esta cuenta.
+    avisos.olvidar()
+    ayuda.dejar()
   }
 
-  return { user, perfil, cargarPerfil, ingresar, registrar, reenviarConfirmacion, pedirNuevaClave, cambiarClave, salir }
+  // Siempre responde lo mismo: no contamos si el correo tiene cuenta o no.
+  async function pedirRecuperacion(correo: string): Promise<Resultado> {
+    await supabase.auth.resetPasswordForEmail(correo.trim().toLowerCase(), {
+      redirectTo: `${origen}/nueva-clave`,
+    })
+    return { ok: true }
+  }
+
+  /**
+   * Cambiar el correo (v0.5: por ejemplo, si un aviso por correo rebotó). Supabase manda un enlace
+   * para confirmar; hasta que se confirme, sigue el correo de antes.
+   */
+  async function cambiarCorreo(nuevo: string): Promise<Resultado> {
+    const { error } = await supabase.auth.updateUser(
+      { email: nuevo.trim().toLowerCase() },
+      { emailRedirectTo: `${origen}/perfil` },
+    )
+    if (error) {
+      return { ok: false, mensaje: mensajeDeError(error.code) }
+    }
+    return { ok: true }
+  }
+
+  async function cambiarClave(nueva: string): Promise<Resultado> {
+    const { error } = await supabase.auth.updateUser({ password: nueva })
+    if (error) {
+      return { ok: false, mensaje: mensajeDeError(error.code) }
+    }
+    return { ok: true }
+  }
+
+  /**
+   * Para /confirmar y /nueva-clave: el enlace del correo abre la página y Supabase arma la
+   * sesión solo (con `?code=`). Si el correo usa `?token_hash=`, la armamos acá.
+   * Devuelve si hay sesión.
+   */
+  async function sesionDesdeEnlace(tokenHash: unknown, tipo: 'email' | 'recovery'): Promise<boolean> {
+    if (typeof tokenHash === 'string' && tokenHash !== '') {
+      await supabase.auth.verifyOtp({ token_hash: tokenHash, type: tipo })
+    }
+    const { data } = await supabase.auth.getSession()
+    await actualizarUsuario()
+    return data.session !== null
+  }
+
+  return {
+    usuario,
+    conSesion,
+    ingresar,
+    reenviarConfirmacion,
+    registrarse,
+    salir,
+    pedirRecuperacion,
+    cambiarCorreo,
+    cambiarClave,
+    sesionDesdeEnlace,
+  }
 }

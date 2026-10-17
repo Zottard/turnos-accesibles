@@ -1,60 +1,139 @@
+/*
+  Tokens de marca de Turnos Accesibles (ver docs/marca.md).
+  Las pantallas usan los tokens semánticos (--fondo, --texto, --primario...).
+  Los temas (alto contraste) solo cambian esos tokens: el resto del CSS no se toca.
+*/
+
 :root {
-  /* Tipografía — base 18px */
-  --font-sans: "Atkinson Hyperlegible", system-ui, sans-serif; /* diseñada para baja visión */
-  --text-base: 1.125rem;   /* 18px */
-  --text-sm:   1rem;       /* 16px — mínimo absoluto */
-  --text-lg:   1.375rem;
-  --text-xl:   1.75rem;
-  --text-2xl:  2.25rem;
-  --leading-body: 1.6;     /* WCAG 1.4.12 */
+  /* Colores de marca */
+  --color-violeta: #5b2bd9;
+  --color-violeta-oscuro: #3f1a9e;
+  --color-turquesa: #0b7a75;
+  --color-coral: #c2410c;
+  --color-sol: #ffc233;
+  --color-rosa: #c0266d;
+  --color-tinta: #1e1633;
+  --color-tinta-suave: #4a4160;
+  --color-crema: #fff9f0;
+  --color-blanco: #ffffff;
 
-  /* Espaciado */
-  --space-1: 0.5rem; --space-2: 1rem; --space-3: 1.5rem;
-  --space-4: 2rem;   --space-5: 3rem;
+  /* Versiones suaves: 10 % del color sobre crema. Para fondos de tarjetas y avisos. */
+  --color-violeta-suave: color-mix(in srgb, var(--color-violeta) 10%, var(--color-crema));
+  --color-turquesa-suave: color-mix(in srgb, var(--color-turquesa) 10%, var(--color-crema));
+  --color-coral-suave: color-mix(in srgb, var(--color-coral) 10%, var(--color-crema));
+  --color-sol-suave: color-mix(in srgb, var(--color-sol) 20%, var(--color-crema));
+  --color-rosa-suave: color-mix(in srgb, var(--color-rosa) 10%, var(--color-crema));
 
-  /* Targets táctiles */
-  --target-min: 48px;
-  --button-height: 56px;
+  /* Tokens semánticos: lo que usan los componentes */
+  --fondo: var(--color-crema);
+  --superficie: var(--color-blanco);
+  --texto: var(--color-tinta);
+  --texto-suave: var(--color-tinta-suave);
+  --primario: var(--color-violeta);
+  --primario-hover: var(--color-violeta-oscuro);
+  --sobre-primario: var(--color-blanco);
+  --exito: var(--color-turquesa);
+  --atencion: var(--color-coral);
+  --error: var(--color-rosa);
+  --borde: #d8cfe6;
+  --borde-campo: var(--color-tinta-suave);
+  --foco: var(--color-sol);
+  --foco-borde: var(--color-tinta);
+  --sombra: 0 6px 20px rgb(30 22 51 / 0.08);
+  --grosor-borde: 2px;
 
-  /* Color — tema claro (verificar cada par con el validador) */
-  --c-bg:            #ffffff;
-  --c-surface:       #f4f6f8;
-  --c-text:          #10161c;  /* 17.4:1 sobre bg → AAA */
-  --c-text-muted:    #45525f;  /* 8.1:1 → AAA */
-  --c-border:        #6b7885;
-  --c-primary:       #0b4f9e;  /* 8.0:1 sobre blanco */
-  --c-primary-text:  #ffffff;
-  --c-success:       #0f6b3d;
-  --c-warning:       #8a5a00;
-  --c-danger:        #a4161a;
-  --c-focus:         #b45309;  /* distinto de primary para que el foco se distinga */
+  /* Fondos suaves con su color de texto, para avisos y tarjetas */
+  --fondo-info: var(--color-violeta-suave);
+  --fondo-exito: var(--color-turquesa-suave);
+  --fondo-atencion: var(--color-coral-suave);
+  --fondo-error: var(--color-rosa-suave);
+  --fondo-resaltado: var(--color-sol-suave);
 
-  --radius: 8px;
-  --focus-ring: 3px solid var(--c-focus);
-  --focus-offset: 2px;
+  /* Tipografías */
+  --fuente-titulos: 'Lexend', 'Segoe UI', Arial, sans-serif;
+  --fuente-texto: 'Atkinson Hyperlegible', 'Segoe UI', Arial, sans-serif;
+
+  /* Formas */
+  --radio-tarjeta: 14px;
+  --radio-boton: 999px;
+  --radio-chico: 8px;
+  --alto-tactil: 56px;
+
+  /* Espacios (en rem: crecen junto con el texto) */
+  --espacio-1: 0.25rem;
+  --espacio-2: 0.5rem;
+  --espacio-3: 1rem;
+  --espacio-4: 1.5rem;
+  --espacio-5: 2rem;
+  --espacio-6: 3rem;
+  /* Relleno de tarjetas: en pantallas angostas no crece con el texto, para dejar lugar al contenido. */
+  --relleno-tarjeta: min(var(--espacio-4), 5vw);
+
+  --transicion: 150ms ease-out;
 }
 
-:root[data-theme="alto-contraste"] {
-  --c-bg: #000000; --c-surface: #0d0d0d; --c-text: #ffffff;
-  --c-text-muted: #e6e6e6; --c-border: #ffffff;
-  --c-primary: #ffdd00; --c-primary-text: #000000;
-  --c-success: #4ade80; --c-warning: #fbbf24; --c-danger: #ff6b6b;
-  --c-focus: #00e5ff;
+/*
+  Tamaño del texto. 112,5 % del navegador son 18 px: es nuestro 100 %.
+  Todo lo demás se mide en rem, así que crece junto con esta base.
+*/
+html,
+html[data-texto='100'] {
+  font-size: 112.5%;
+}
+html[data-texto='125'] {
+  font-size: calc(112.5% * 1.25);
+}
+html[data-texto='150'] {
+  font-size: calc(112.5% * 1.5);
+}
+html[data-texto='175'] {
+  font-size: calc(112.5% * 1.75);
+}
+html[data-texto='200'] {
+  font-size: calc(112.5% * 2);
 }
 
-:root[data-text-scale="125"] { font-size: 125%; }
-:root[data-text-scale="150"] { font-size: 150%; }
-:root[data-text-scale="200"] { font-size: 200%; }
+/* Alto contraste: fondo negro, texto blanco, primario amarillo y bordes blancos de 3 px. */
+html[data-contraste='alto'] {
+  --color-violeta-suave: #000;
+  --color-turquesa-suave: #000;
+  --color-coral-suave: #000;
+  --color-sol-suave: #000;
+  --color-rosa-suave: #000;
 
-*:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-offset);
+  --fondo: #000;
+  --superficie: #000;
+  --texto: #fff;
+  --texto-suave: #fff;
+  --primario: #ffe14d;
+  --primario-hover: #fff;
+  --sobre-primario: #000;
+  --exito: #fff;
+  --atencion: #fff;
+  --error: #fff;
+  --borde: #fff;
+  --borde-campo: #fff;
+  --foco: #ffe14d;
+  --foco-borde: #000;
+  --sombra: none;
+  --grosor-borde: 3px;
+}
+
+/* Sin animaciones si la persona lo eligió o si el sistema lo pide. */
+html[data-movimiento='reducido'] *,
+html[data-movimiento='reducido'] *::before,
+html[data-movimiento='reducido'] *::after {
+  transition: none !important;
+  animation: none !important;
+  scroll-behavior: auto !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
   }
 }
-:root[data-reduce-motion="true"] * { animation: none !important; transition: none !important; }

@@ -1,103 +1,116 @@
+<!--
+  Panel de administración (v0.6, RF-08 y RF-09): números rápidos y una tarjeta por sección.
+  Solo para el rol admin (middleware/admin.ts; la base igual lo controla).
+-->
+<script setup lang="ts">
+definePageMeta({ middleware: 'admin' })
+useSeoMeta({ title: 'Panel de administración' })
+
+const { cargarResumen } = useAdmin()
+const { data: resumen } = await useAsyncData('admin-resumen', () => cargarResumen())
+
+const SECCIONES = [
+  {
+    ruta: '/admin/centros',
+    icono: '🏥',
+    titulo: 'Centros de salud',
+    texto: 'Cargá un centro nuevo, corregí sus datos o dalo de baja.',
+  },
+  {
+    ruta: '/admin/especialidades',
+    icono: '🩺',
+    titulo: 'Especialidades',
+    texto: 'El nombre técnico, el nombre simple y las palabras con que la gente las busca.',
+  },
+  { ruta: '/admin/profesionales', icono: '👩‍⚕️', titulo: 'Profesionales', texto: 'Quién atiende cada especialidad y en qué centro.' },
+  {
+    ruta: '/admin/agendas',
+    icono: '📅',
+    titulo: 'Agendas',
+    texto: 'Cargá los turnos de un profesional o dá de baja los turnos libres.',
+  },
+  { ruta: '/admin/auditoria', icono: '📝', titulo: 'Auditoría', texto: 'Quién cambió qué y cuándo.' },
+  {
+    ruta: '/admin/metricas',
+    icono: '📊',
+    titulo: 'Métricas y reportes',
+    texto: 'Turnos buscados, reservados y cumplidos. Descargá la planilla o el PDF.',
+  },
+]
+</script>
+
 <template>
-  <div class="flex flex-col gap-8">
-    <AdminNav />
-    <h1 class="text-2xl font-bold">Panel de administración</h1>
+  <div class="contenedor pagina">
+    <NavPanel />
+    <h1>Panel de administración</h1>
+    <p class="pagina__bajada">Lo que cambies acá se ve enseguida en la búsqueda de turnos.</p>
 
-    <VistaEstados :estado="estado" @reintentar="cargar">
-      <div class="flex flex-col gap-10">
-        <section aria-labelledby="titulo-resumen" class="flex flex-col gap-4">
-          <h2 id="titulo-resumen" class="text-xl font-bold">Resumen</h2>
-          <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <li v-for="d in datos" :key="d.etiqueta" class="flex flex-col gap-1 border-2 border-default rounded-md p-4">
-              <span class="text-2xl font-bold">{{ d.valor.toLocaleString('es-AR') }}</span>
-              <span>{{ d.etiqueta }}</span>
-            </li>
-          </ul>
-        </section>
+    <Aviso v-if="resumen?.error" tipo="error">
+      <p>{{ resumen.error }}</p>
+    </Aviso>
 
-        <section aria-labelledby="titulo-cambios" class="flex flex-col gap-4">
-          <h2 id="titulo-cambios" class="text-xl font-bold">Últimos cambios</h2>
-          <p v-if="!cambios.length" class="text-lg">Todavía no hay cambios registrados.</p>
-          <ul v-else class="flex flex-col">
-            <li v-for="c in cambios" :key="c.id" class="flex flex-wrap gap-x-4 gap-y-1 border-b-2 border-default py-3">
-              <span class="font-bold">{{ ACCIONES[c.accion] ?? c.accion }} {{ ENTIDADES[c.entidad] ?? c.entidad }}</span>
-              <span class="text-muted">{{ fechaHoraEnPalabras(c.creado_en) }}</span>
-            </li>
-          </ul>
-        </section>
+    <section v-if="resumen?.datos" aria-labelledby="titulo-numeros">
+      <h2 id="titulo-numeros" class="sr-only">Números de hoy</h2>
+      <dl class="numeros">
+        <div class="tarjeta numero">
+          <dt>Centros publicados</dt>
+          <dd>{{ resumen.datos.centrosPublicados }} <span class="numero__de">de {{ resumen.datos.centros }}</span></dd>
+        </div>
+        <div class="tarjeta numero">
+          <dt>Especialidades activas</dt>
+          <dd>{{ resumen.datos.especialidades }}</dd>
+        </div>
+        <div class="tarjeta numero">
+          <dt>Profesionales</dt>
+          <dd>{{ resumen.datos.profesionales }}</dd>
+        </div>
+        <div class="tarjeta numero">
+          <dt>Turnos libres en los próximos 30 días</dt>
+          <dd>{{ resumen.datos.turnosLibres }}</dd>
+        </div>
+      </dl>
+    </section>
 
-        <section aria-labelledby="titulo-consultas" class="flex flex-col gap-4">
-          <h2 id="titulo-consultas" class="text-xl font-bold">Mensajes recibidos</h2>
-          <p v-if="!consultas.length" class="text-lg">Todavía nadie escribió.</p>
-          <ul v-else class="flex flex-col">
-            <li v-for="c in consultas" :key="c.id" class="flex flex-col gap-1 border-b-2 border-default py-3">
-              <span class="flex flex-wrap gap-x-4 gap-y-1">
-                <span class="font-bold">{{ TIPOS_CONSULTA[c.tipo] ?? c.tipo }}</span>
-                <span class="text-muted">{{ fechaHoraEnPalabras(c.creado_en) }}</span>
-                <span v-if="c.correo" class="text-muted">{{ c.correo }}</span>
-              </span>
-              <span class="whitespace-pre-line">{{ c.mensaje }}</span>
-            </li>
-          </ul>
-        </section>
-      </div>
-    </VistaEstados>
+    <ul class="lista-tarjetas">
+      <li v-for="seccion in SECCIONES" :key="seccion.ruta" class="tarjeta">
+        <h2><span aria-hidden="true">{{ seccion.icono }}</span> {{ seccion.titulo }}</h2>
+        <p>{{ seccion.texto }}</p>
+        <div>
+          <Boton :to="seccion.ruta" variante="secundario">Ir a {{ seccion.titulo.toLowerCase() }}</Boton>
+        </div>
+      </li>
+    </ul>
+
+    <p class="texto-suave">Datos de prueba: los centros, profesionales y turnos son inventados.</p>
   </div>
 </template>
 
-<script setup lang="ts">
-import type { EstadoVista } from '~/components/patrones/VistaEstados.vue'
-
-const ACCIONES: Record<string, string> = { insert: 'Se agregó', update: 'Se cambió', delete: 'Se borró' }
-const TIPOS_CONSULTA: Record<string, string> = { accesibilidad: 'Accesibilidad', datos: 'Datos personales', otra: 'Otra consulta' }
-const ENTIDADES: Record<string, string> = {
-  centros: 'un centro',
-  especialidades: 'una especialidad',
-  profesionales: 'un profesional',
-  agendas: 'una agenda',
-  reservas: 'una reserva',
+<style scoped>
+.numeros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: var(--espacio-3);
 }
 
-definePageMeta({ middleware: ['auth', 'rol'], roles: ['admin'] })
-useHead({ title: 'Administración' })
-
-const supabase = useSupabaseClient()
-
-const estado = ref<EstadoVista>('cargando')
-const datos = ref<{ etiqueta: string, valor: number }[]>([])
-const consultas = ref<{ id: number, tipo: string, mensaje: string, correo: string | null, creado_en: string }[]>([])
-const cambios = ref<{ id: number, accion: string, entidad: string, creado_en: string }[]>([])
-
-async function contar(tabla: 'centros' | 'especialidades' | 'profesionales' | 'reservas') {
-  const { count, error } = await supabase.from(tabla).select('id', { count: 'exact', head: true })
-  if (error) throw error
-  return count ?? 0
+.numero {
+  border-top-color: var(--exito);
 }
 
-async function cargar() {
-  estado.value = 'cargando'
-  try {
-    const [centros, especialidades, profesionales, reservas, auditoria, mensajes] = await Promise.all([
-      contar('centros'),
-      contar('especialidades'),
-      contar('profesionales'),
-      contar('reservas'),
-      supabase.from('auditoria').select('id, accion, entidad, creado_en').neq('entidad', 'agendas').order('creado_en', { ascending: false }).limit(10),
-      supabase.from('consultas').select('id, tipo, mensaje, correo, creado_en').order('creado_en', { ascending: false }).limit(10),
-    ])
-    datos.value = [
-      { etiqueta: 'Centros', valor: centros },
-      { etiqueta: 'Especialidades', valor: especialidades },
-      { etiqueta: 'Profesionales', valor: profesionales },
-      { etiqueta: 'Reservas', valor: reservas },
-    ]
-    cambios.value = auditoria.data ?? []
-    consultas.value = mensajes.data ?? []
-    estado.value = 'contenido'
-  } catch {
-    estado.value = 'error'
-  }
+.numero dt {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
 }
 
-onMounted(cargar)
-</script>
+.numero dd {
+  margin: 0;
+  font-family: var(--fuente-titulos);
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.numero__de {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+</style>

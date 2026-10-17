@@ -1,4 +1,4 @@
-# Nuxt dev/build outputs
+# Nuxt
 .output
 .data
 .nuxt
@@ -6,30 +6,24 @@
 .cache
 dist
 
-# Node dependencies
+# Dependencias
 node_modules
 
 # Logs
 logs
 *.log
 
-# Misc
+# Varios
 .DS_Store
 .fleet
 .idea
+.vscode/*
+!.vscode/extensions.json
 
-# Local env files
+# Variables de entorno (las claves nunca se suben)
 .env
 .env.*
 !.env.example
 
-# Tests
-test-results
-playwright-report
-
-# Sesiones de Playwright
-tests/e2e/.auth
-
-.vercel
-.env*
-!.env.example
+# Archivos temporales de Word
+docs/~$*

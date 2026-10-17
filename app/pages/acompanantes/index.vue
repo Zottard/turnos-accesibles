@@ -1,110 +1,114 @@
+<!--
+  Personas que te ayudan (RF-07): a quién invitaste, qué puede hacer cada una y en qué estado está.
+  Las vigentes arriba; las anteriores (permiso quitado, invitación vencida o no aceptada) abajo,
+  porque también son constancia. Cada una lleva a su constancia, donde se puede quitar el permiso.
+  ?revocado=<id> viene de quitar un permiso: lo confirma con un aviso.
+-->
+<script setup lang="ts">
+definePageMeta({ middleware: 'auth' })
+useSeoMeta({ title: 'Personas que te ayudan' })
+
+const route = useRoute()
+const { cargarMios } = useAcompanantes()
+const { data: cargado, refresh } = await useAsyncData('acompanantes', () => cargarMios())
+
+const vigentes = computed(() => (cargado.value?.datos ?? []).filter((fila) => esVigente(fila.estado)))
+const anteriores = computed(() => (cargado.value?.datos ?? []).filter((fila) => !esVigente(fila.estado)))
+const revocado = computed(() => (cargado.value?.datos ?? []).find((fila) => fila.id === route.query.revocado) ?? null)
+</script>
+
 <template>
-  <div class="max-w-3xl flex flex-col gap-10">
-    <div class="flex flex-col gap-4">
-      <h1 class="text-2xl font-bold">Mis acompañantes</h1>
-      <p class="text-lg">Un acompañante es alguien de confianza que te ayuda con tus turnos desde su teléfono o computadora. Vos elegís qué puede hacer y se lo podés quitar cuando quieras.</p>
-      <UButton to="/acompanantes/invitar" color="primary" variant="solid" icon="i-lucide-user-plus" label="Invitar a alguien" class="self-start" />
+  <div class="contenedor pagina">
+    <h1>Personas que te ayudan</h1>
+    <p class="pagina__bajada">
+      Podés dejar que alguien de confianza vea tus turnos o te saque turnos. Vos decidís qué puede
+      hacer y le podés quitar el permiso cuando quieras.
+    </p>
+
+    <Aviso v-if="revocado" tipo="exito" :titulo="revocado.aceptadoEn ? 'Le quitaste el permiso' : 'Cancelaste la invitación'">
+      <p v-if="revocado.aceptadoEn">
+        Desde ahora {{ revocado.nombreInvitado }} ya no puede ver tus turnos ni hacer nada con ellos. Le avisamos.
+      </p>
+      <p v-else>El enlace que le mandaste a {{ revocado.nombreInvitado }} ya no sirve.</p>
+    </Aviso>
+
+    <div>
+      <Boton to="/acompanantes/invitar"><span aria-hidden="true">➕</span> Invitar a alguien</Boton>
     </div>
 
-    <VistaEstados
-      :estado="estado"
-      texto-cargando="Estamos buscando tus acompañantes. Esperá un momento."
-      error-titulo="No pudimos mostrar tus acompañantes."
-      error-ayuda="Revisá tu conexión a internet y probá de nuevo."
-      @reintentar="cargar()"
-    >
-      <div class="flex flex-col gap-10">
-        <section aria-labelledby="titulo-me-ayudan" class="flex flex-col gap-4">
-          <h2 id="titulo-me-ayudan" class="text-xl font-bold">Quiénes te ayudan</h2>
-          <p v-if="!acompanantes.length" class="text-lg">Todavía no invitaste a nadie.</p>
-          <ul v-else class="flex flex-col gap-4">
-            <li v-for="a in acompanantes" :key="a.id">
-              <article :aria-labelledby="`acomp-${a.id}`" class="flex flex-col gap-3 border-2 border-default rounded-md p-4 sm:p-5">
-                <div class="flex flex-wrap items-start justify-between gap-3">
-                  <h3 :id="`acomp-${a.id}`" class="min-w-0 text-lg font-bold">{{ a.nombre ?? a.email_invitado }}</h3>
-                  <UBadge
-                    :color="a.estado === 'activo' ? 'success' : 'warning'"
-                    :icon="a.estado === 'activo' ? 'i-lucide-user-check' : 'i-lucide-hourglass'"
-                    :label="a.estado === 'activo' ? 'Te acompaña' : a.vencida ? 'La invitación venció' : 'Todavía no aceptó'"
-                  />
-                </div>
-                <p v-if="a.nombre" class="text-muted">{{ a.email_invitado }}</p>
-                <div>
-                  <p class="font-bold">Puede:</p>
-                  <ul class="list-disc ps-6">
-                    <li v-for="permiso in textosAlcance(a.alcance)" :key="permiso">{{ permiso }}</li>
-                  </ul>
-                </div>
-                <div v-if="quitando === a.id" class="flex flex-col gap-3 border-t-2 border-default pt-3">
-                  <p class="text-lg">¿Seguro? {{ a.nombre ?? a.email_invitado }} ya no va a poder ayudarte con tus turnos.</p>
-                  <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                    <UButton color="error" variant="solid" icon="i-lucide-user-x" label="Sí, quitar" @click="quitar(a.id, a.nombre ?? a.email_invitado)" />
-                    <UButton icon="i-lucide-arrow-left" label="No, dejarlo" @click="quitando = undefined" />
-                  </div>
-                </div>
-                <div v-else class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                  <UButton v-if="a.estado === 'pendiente' && !a.vencida" size="lg" icon="i-lucide-copy" label="Copiar el enlace de invitación" :aria-describedby="`acomp-${a.id}`" @click="copiar(a.token_invitacion)" />
-                  <UButton size="lg" color="error" variant="outline" icon="i-lucide-user-x" :label="a.estado === 'activo' ? 'Quitar' : 'Cancelar la invitación'" :aria-describedby="`acomp-${a.id}`" @click="quitando = a.id" />
-                </div>
-              </article>
-            </li>
-          </ul>
-        </section>
-
-        <section v-if="ayudo.length" aria-labelledby="titulo-ayudo" class="flex flex-col gap-4">
-          <h2 id="titulo-ayudo" class="text-xl font-bold">A quiénes ayudás vos</h2>
-          <ul class="flex flex-col gap-3">
-            <li v-for="p in ayudo" :key="p.id">
-              <UButton :to="`/asistiendo/${p.id}`" block class="justify-start" icon="i-lucide-hand-heart" :label="`Ayudar a ${p.nombre}`" />
-            </li>
-          </ul>
-        </section>
+    <template v-if="cargado?.error">
+      <Aviso tipo="error">
+        <p>{{ cargado.error }}</p>
+      </Aviso>
+      <div>
+        <Boton @click="refresh()">Probar de nuevo</Boton>
       </div>
-    </VistaEstados>
+    </template>
+
+    <template v-else>
+      <section class="pila" aria-labelledby="titulo-vigentes">
+        <h2 id="titulo-vigentes">Ahora</h2>
+        <p v-if="vigentes.length === 0">Nadie te ayuda por ahora. Si querés, invitá a alguien de confianza.</p>
+        <ul v-else class="lista">
+          <li v-for="fila in vigentes" :key="fila.id" class="persona">
+            <EstadoAcompanamiento :estado="fila.estado" />
+            <h3 :id="`persona-${fila.id}`">{{ fila.nombreInvitado }}</h3>
+            <p class="texto-suave">{{ fila.correoInvitado }}</p>
+            <p>Puede {{ alcanceEnPalabras(fila.alcance, 'tuyo') }}.</p>
+            <p v-if="fila.estado === 'pendiente'" class="texto-suave">
+              La invitación vence el {{ momentoEnPalabras(fila.venceEn) }}.
+            </p>
+            <div>
+              <Boton :to="`/acompanantes/${fila.id}`" variante="secundario" :aria-describedby="`persona-${fila.id}`">
+                {{ fila.estado === 'pendiente' ? 'Ver la invitación' : 'Ver la constancia' }}
+              </Boton>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section v-if="anteriores.length > 0" class="pila" aria-labelledby="titulo-anteriores">
+        <h2 id="titulo-anteriores">Anteriores</h2>
+        <ul class="lista">
+          <li v-for="fila in anteriores" :key="fila.id" class="persona persona--anterior">
+            <EstadoAcompanamiento :estado="fila.estado" />
+            <h3 :id="`persona-${fila.id}`">{{ fila.nombreInvitado }}</h3>
+            <p class="texto-suave">{{ fila.correoInvitado }}</p>
+            <p>
+              <NuxtLink :to="`/acompanantes/${fila.id}`" :aria-describedby="`persona-${fila.id}`">Ver la constancia</NuxtLink>
+            </p>
+          </li>
+        </ul>
+      </section>
+    </template>
   </div>
 </template>
 
-<script setup lang="ts">
-import type { Accion, Asistiendo } from '~/composables/useAcompanamiento'
-import type { EstadoVista } from '~/components/patrones/VistaEstados.vue'
-
-definePageMeta({ middleware: 'auth' })
-useHead({ title: 'Mis acompañantes' })
-
-const { misAcompanantes, aQuienesAyudo, revocar, enlaceInvitacion } = useAcompanamiento()
-const { announce, alert } = useAnuncio()
-
-const acompanantes = ref<Awaited<ReturnType<typeof misAcompanantes>>>([])
-const ayudo = ref<Asistiendo[]>([])
-const estado = ref<EstadoVista>('cargando')
-const quitando = ref<string>()
-
-const textosAlcance = (alcance: Accion[]) => ALCANCES.filter((a) => alcance.includes(a.value)).map((a) => a.paraVos)
-
-async function cargar(silencioso = false) {
-  if (!silencioso) estado.value = 'cargando'
-  try {
-    ;[acompanantes.value, ayudo.value] = await Promise.all([misAcompanantes(), aQuienesAyudo()])
-    estado.value = 'contenido'
-  } catch {
-    estado.value = 'error'
-  }
+<style scoped>
+.lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: var(--espacio-3);
+  padding: 0;
+  list-style: none;
 }
 
-async function copiar(token: string) {
-  await navigator.clipboard.writeText(enlaceInvitacion(token)).catch(() => undefined)
-  announce('Copiamos el enlace. Mandáselo por WhatsApp o por correo.')
+.persona {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espacio-2);
+  max-width: none;
+  padding: var(--relleno-tarjeta);
+  background: var(--superficie);
+  border: var(--grosor-borde) solid var(--borde);
+  border-left: 8px solid var(--exito);
+  border-radius: var(--radio-tarjeta);
+  box-shadow: var(--sombra);
 }
 
-async function quitar(id: string, nombre: string) {
-  if (await revocar(id)) {
-    quitando.value = undefined
-    await cargar(true)
-    announce(`Listo. ${nombre} ya no te acompaña.`)
-  } else {
-    alert('No pudimos quitar el permiso. Revisá tu conexión a internet y probá de nuevo.')
-  }
+.persona--anterior {
+  border-left-color: var(--borde);
+  box-shadow: none;
 }
-
-onMounted(() => cargar())
-</script>
+</style>

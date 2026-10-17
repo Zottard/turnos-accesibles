@@ -1,81 +1,144 @@
-<template>
-  <div class="max-w-2xl flex flex-col gap-8">
-    <AsistentePaso :paso="paso + 1" :total="PASOS.length" :titulo="actual.titulo" :descripcion="actual.descripcion">
-      <PreferenciaControl v-if="actual.clave" :key="actual.clave" :clave="actual.clave" :legend="actual.titulo" legend-oculta />
-
-      <dl v-else class="flex flex-col">
-        <div v-for="r in resumen" :key="r.etiqueta" class="flex flex-wrap gap-x-6 gap-y-1 border-b-2 border-default py-3">
-          <dt class="min-w-48 font-bold">{{ r.etiqueta }}</dt>
-          <dd>{{ r.valor }}</dd>
-        </div>
-      </dl>
-
-      <template #acciones>
-        <AccionesPaso
-          :confirmar="esUltimo ? 'Guardar y empezar' : undefined"
-          :cargando="guardando"
-          :sin-volver="paso === 0"
-          @confirmar="avanzar"
-          @volver="paso--"
-        />
-        <UButton v-if="paso === 0" variant="link" label="Lo configuro después" class="self-start" :loading="guardando" @click="terminar" />
-      </template>
-    </AsistentePaso>
-  </div>
-</template>
-
+<!--
+  Primer ingreso (RF-02): una preferencia por pantalla. Cada cambio se ve enseguida.
+  Al final (o con "Saltar y usar lo recomendado") se guardan en la cuenta.
+-->
 <script setup lang="ts">
-import type { ClavePreferencia } from '~/components/preferencias/PreferenciaControl.vue'
-
-const PASOS: { clave?: ClavePreferencia, titulo: string, descripcion: string }[] = [
-  { clave: 'textScale', titulo: '¿Qué tamaño de letra te queda más cómodo?', descripcion: 'Cuando elegís una opción, la pantalla cambia al instante. Probá las que quieras.' },
-  { clave: 'contrast', titulo: '¿Cómo ves mejor?', descripcion: 'Elegí los colores con los que te cuesta menos leer.' },
-  { clave: 'voz', titulo: '¿Querés que te leamos las pantallas en voz alta?', descripcion: 'Si decís que sí, en cada pantalla te leemos la pregunta.' },
-  { clave: 'plainLanguage', titulo: '¿Cómo querés que te expliquemos las cosas?', descripcion: 'Podés cambiarlo cuando quieras.' },
-  { clave: 'avisos', titulo: '¿Cómo querés que te avisemos de tus turnos?', descripcion: 'Te recordamos cada turno el día anterior.' },
-  { titulo: 'Listo, así queda la app', descripcion: 'Si querés cambiar algo, volvé atrás. También lo podés cambiar después desde "Mi perfil".' },
-]
-
-const TEXTOS_TAMANO = { 100: 'Normal', 125: 'Grande', 150: 'Muy grande', 200: 'Enorme' }
-const TEXTOS_CANAL = { ambos: 'Aviso en la pantalla y sonido', visual: 'Solo aviso en la pantalla', sonoro: 'Solo sonido' }
-const TEXTOS_VELOCIDAD = { lenta: 'despacio', normal: 'a velocidad normal', rapida: 'rápido' }
-
 definePageMeta({ middleware: 'auth' })
-useHead({ title: 'Bienvenida' })
+useSeoMeta({ title: 'Bienvenida' })
 
-const route = useRoute()
-const { prefs } = useAccesibilidad()
-const { guardar } = usePreferenciasCuenta()
-const { announce, alert } = useAnuncio()
+const PASOS = [
+  { clave: 'tamano', pregunta: '¿De qué tamaño querés la letra?' },
+  { clave: 'contraste', pregunta: '¿Querés usar alto contraste?' },
+  { clave: 'voz', pregunta: '¿Querés que te leamos en voz alta?' },
+  { clave: 'lenguaje', pregunta: '¿Preferís frases cortas y simples?' },
+  { clave: 'canal', pregunta: '¿Cómo querés que te avisemos?' },
+  { clave: 'antelacion', pregunta: '¿Cuándo querés el recordatorio del turno?' },
+] as const
 
-const paso = ref(0)
+const { restablecer } = useAccesibilidad()
+const cuenta = usePreferenciasCuenta()
+const { anunciar } = useAnuncio()
+
+const indice = ref(0)
+const titulo = ref<HTMLElement | null>(null)
+const errorAlGuardar = ref(false)
 const guardando = ref(false)
 
-const actual = computed(() => PASOS[paso.value] ?? PASOS[0]!)
-const esUltimo = computed(() => paso.value === PASOS.length - 1)
+const paso = computed(() => PASOS[indice.value]!)
+const esElUltimo = computed(() => indice.value === PASOS.length - 1)
 
-const resumen = computed(() => [
-  { etiqueta: 'Letra', valor: TEXTOS_TAMANO[prefs.value.textScale] },
-  { etiqueta: 'Colores', valor: prefs.value.contrast === 'alto' ? 'Fondo negro con letras blancas' : 'Fondo blanco con letras negras' },
-  { etiqueta: 'Lectura en voz alta', valor: prefs.value.voiceEnabled ? `Sí, ${TEXTOS_VELOCIDAD[prefs.value.voiceRate]}` : 'No' },
-  { etiqueta: 'Explicaciones', valor: prefs.value.plainLanguage ? 'Con palabras simples' : 'Con los términos de siempre' },
-  { etiqueta: 'Avisos', valor: `${TEXTOS_CANAL[prefs.value.notificationChannel]}${prefs.value.emailReminders ? ', y también por correo' : ''}` },
-])
-
-function avanzar() {
-  if (esUltimo.value) return terminar()
-  paso.value++
+async function irAPaso(nuevo: number) {
+  indice.value = nuevo
+  await nextTick()
+  titulo.value?.focus()
+  anunciar(`Paso ${nuevo + 1} de ${PASOS.length}. ${PASOS[nuevo]!.pregunta}`)
 }
 
 async function terminar() {
-  guardando.value = true
-  const ok = await guardar()
-  guardando.value = false
-  if (!ok) {
-    alert('No pudimos guardar tus preferencias. Revisá tu conexión y probá de nuevo.')
+  if (guardando.value) {
     return
   }
-  announce('Guardamos tus preferencias.')
-  await navigateTo(rutaSegura(route.query.volver))
+  guardando.value = true
+  errorAlGuardar.value = false
+  const guardado = await cuenta.guardarEnCuenta()
+  guardando.value = false
+  if (!guardado) {
+    errorAlGuardar.value = true
+    return
+  }
+  anunciar('Guardamos tus preferencias.')
+  await navigateTo('/inicio')
+}
+
+function siguiente() {
+  if (esElUltimo.value) {
+    terminar()
+  } else {
+    irAPaso(indice.value + 1)
+  }
+}
+
+function saltar() {
+  restablecer()
+  cuenta.aviso.value = { ...AVISO_PREDETERMINADO }
+  terminar()
 }
 </script>
+
+<template>
+  <div class="contenedor pagina formulario-angosto">
+    <p class="progreso">Paso {{ indice + 1 }} de {{ PASOS.length }} · Tus preferencias</p>
+    <h1 ref="titulo" tabindex="-1">{{ paso.pregunta }}</h1>
+
+    <Aviso v-if="errorAlGuardar" tipo="error">
+      <p>No pudimos guardar tus preferencias en tu cuenta. Probá de nuevo en un rato.</p>
+    </Aviso>
+
+    <form class="tarjeta pila" novalidate @submit.prevent="siguiente">
+      <template v-if="paso.clave === 'tamano'">
+        <p>Tocá los botones hasta que leas cómodo. El cambio se ve enseguida en toda la página.</p>
+        <fieldset>
+          <legend class="sr-only">Tamaño del texto</legend>
+          <PreferenciasTamano prefijo="bienvenida" />
+        </fieldset>
+        <p class="muestra">Así se ve: tu turno es el martes 14 a las 9:30, en el Hospital de Pacheco.</p>
+      </template>
+
+      <template v-else-if="paso.clave === 'contraste'">
+        <p>Fondo negro con letras blancas y amarillas. Ayuda si ves poco o si hay mucha luz.</p>
+        <PreferenciasSiNo id="bienvenida-contraste" clave="altoContraste" etiqueta="Alto contraste" />
+      </template>
+
+      <template v-else-if="paso.clave === 'voz'">
+        <p>Leemos en voz alta los avisos y el nombre de cada pantalla.</p>
+        <PreferenciasSiNo id="bienvenida-voz" clave="lecturaVoz" etiqueta="Lectura en voz alta" />
+        <PreferenciasVelocidad prefijo="bienvenida" />
+        <LeerEnVoz texto="Hola. Así suena la voz que lee la página." etiqueta="Probar la voz" />
+      </template>
+
+      <template v-else-if="paso.clave === 'lenguaje'">
+        <p>Usamos palabras de todos los días. El texto técnico queda guardado para quien lo quiera ver.</p>
+        <PreferenciasSiNo id="bienvenida-lenguaje" clave="lenguajeSimple" etiqueta="Lenguaje simple" />
+      </template>
+
+      <fieldset v-else-if="paso.clave === 'canal'">
+        <legend class="sr-only">{{ paso.pregunta }}</legend>
+        <p class="explicacion">Te vamos a avisar cuando reserves, cambies o canceles un turno.</p>
+        <PreferenciasCanal prefijo="bienvenida" />
+      </fieldset>
+
+      <fieldset v-else>
+        <legend class="sr-only">{{ paso.pregunta }}</legend>
+        <PreferenciasAntelacion prefijo="bienvenida" />
+      </fieldset>
+
+      <div class="acciones">
+        <Boton type="submit">
+          {{ esElUltimo ? (guardando ? 'Guardando…' : 'Guardar y terminar') : 'Siguiente' }}
+        </Boton>
+        <Boton v-if="indice > 0" variante="secundario" @click="irAPaso(indice - 1)">Volver</Boton>
+      </div>
+    </form>
+
+    <div class="saltar">
+      <p class="texto-suave">
+        ¿No querés elegir ahora? Usamos letra un poco más grande, sin animaciones y con lenguaje
+        simple. Lo podés cambiar cuando quieras desde tu perfil.
+      </p>
+      <Boton variante="texto" @click="saltar">Saltar y usar lo recomendado</Boton>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.muestra {
+  padding: var(--espacio-3);
+  background: var(--fondo-resaltado);
+  border-radius: var(--radio-chico);
+  font-size: 1.1rem;
+}
+
+.explicacion {
+  margin-bottom: var(--espacio-3);
+}
+</style>

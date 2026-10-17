@@ -1,4 +1,7 @@
-export default defineNuxtRouteMiddleware((to) => {
-  const user = useSupabaseUser()
-  if (user.value) return navigateTo(rutaSegura(to.query.volver))
+// Páginas para quien todavía no ingresó (/ingresar, /registrarme).
+// Si ya tiene la sesión iniciada, la llevamos a su inicio.
+export default defineNuxtRouteMiddleware(() => {
+  if (useSupabaseUser().value) {
+    return navigateTo('/inicio')
+  }
 })

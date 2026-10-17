@@ -1,186 +1,401 @@
-<template>
-  <div class="max-w-2xl flex flex-col gap-8">
-    <AsistentePaso :paso="estado.paso + 1" :total="PASOS.length" :titulo="actual.titulo" :descripcion="actual.descripcion">
-      <UForm
-        :key="estado.paso"
-        method="post"
-        :validate-on="['input']"
-        :schema="actual.schema"
-        :state="estado"
-        class="flex flex-col gap-8"
-        @submit="avanzar"
-        @error="alFallar"
-      >
-        <div v-if="estado.paso === 0" class="flex flex-col gap-6">
-          <UFormField label="Tu nombre" name="nombre">
-            <UInput id="registro-nombre" v-model="estado.nombre" autocomplete="given-name" class="w-full" />
-          </UFormField>
-          <UFormField label="Tu apellido" name="apellido">
-            <UInput id="registro-apellido" v-model="estado.apellido" autocomplete="family-name" class="w-full" />
-          </UFormField>
-        </div>
-
-        <UFormField v-else-if="estado.paso === 1" label="Número de documento" name="documento" description="Por ejemplo: 12345678">
-          <UInput id="registro-documento" v-model="estado.documento" inputmode="numeric" autocomplete="off" class="w-full" />
-        </UFormField>
-
-        <fieldset v-else-if="estado.paso === 2" class="min-w-0 flex flex-col gap-6">
-          <legend class="sr-only">Fecha de nacimiento</legend>
-          <UFormField label="Día" name="dia" description="Por ejemplo: 14">
-            <UInput id="registro-dia" v-model="estado.dia" inputmode="numeric" autocomplete="bday-day" maxlength="2" class="w-full sm:w-32" />
-          </UFormField>
-          <UFormField label="Mes" name="mes">
-            <USelect id="registro-mes" v-model="estado.mes" :items="ITEMS_MESES" placeholder="Elegí el mes" class="w-full sm:w-72" />
-          </UFormField>
-          <UFormField label="Año" name="anio" description="Por ejemplo: 1955">
-            <UInput id="registro-anio" v-model="estado.anio" inputmode="numeric" autocomplete="bday-year" maxlength="4" class="w-full sm:w-40" />
-          </UFormField>
-        </fieldset>
-
-        <UFormField v-else-if="estado.paso === 3" label="Tu localidad" name="localidad" description="Podés escribir para buscar. Por ejemplo: General Pacheco.">
-          <USelectMenu id="registro-localidad" v-model="estado.localidad" :items="itemsLocalidades" value-key="value" placeholder="Elegí tu localidad" class="w-full" />
-        </UFormField>
-
-        <UFormField v-else-if="estado.paso === 4" label="Tu correo" name="email" description="Por ejemplo: nombre@gmail.com">
-          <UInput id="registro-email" v-model="estado.email" type="email" autocomplete="email" class="w-full" />
-        </UFormField>
-
-        <UFormField v-else-if="estado.paso === 5" label="Tu contraseña nueva" name="clave">
-          <CampoClave id="registro-clave" v-model="estado.clave" autocomplete="new-password" />
-        </UFormField>
-
-        <div v-else class="flex flex-col gap-6">
-          <dl class="flex flex-col">
-            <div v-for="dato in resumen" :key="dato.paso" class="flex flex-wrap items-center gap-x-6 gap-y-2 border-b-2 border-default py-4">
-              <div class="min-w-0 flex-1">
-                <dt class="text-base text-muted">{{ dato.etiqueta }}</dt>
-                <dd class="text-lg font-bold">{{ dato.valor }}</dd>
-              </div>
-              <UButton size="lg" icon="i-lucide-pencil" label="Cambiar" :aria-label="`Cambiar ${dato.etiqueta.toLowerCase()}`" @click="editar(dato.paso)" />
-            </div>
-          </dl>
-
-          <UFormField name="terminos">
-            <UCheckbox id="registro-terminos" v-model="estado.terminos" label="Leí y acepto los términos de uso" />
-          </UFormField>
-          <p class="text-lg">
-            <NuxtLink to="/terminos" target="_blank" class="underline">Leer los términos de uso (se abre en otra pestaña)</NuxtLink>
-          </p>
-
-          <UAlert v-if="aviso" color="error" icon="i-lucide-circle-x" :title="aviso.titulo" :description="aviso.ayuda" />
-        </div>
-
-        <AccionesPaso
-          submit
-          :confirmar="estado.paso === ULTIMO ? 'Sí, crear mi cuenta' : undefined"
-          :cargando="enviando"
-          :sin-volver="estado.paso === 0"
-          @volver="volver"
-        />
-      </UForm>
-    </AsistentePaso>
-
-    <p v-if="estado.paso === 0" class="text-lg">
-      <NuxtLink to="/ingresar" class="inline-flex items-center min-h-12 underline">Ya tengo cuenta. Quiero ingresar.</NuxtLink>
-    </p>
-  </div>
-</template>
-
+<!--
+  Registro con un dato por pantalla (RF-01). Al final, "Revisá tus datos" y se crea la cuenta.
+  Lo cargado se guarda en sessionStorage (menos la contraseña): si se recarga la página, no se pierde.
+-->
 <script setup lang="ts">
-import type { Aviso } from '~/composables/useSesion'
-
-const PASOS = [
-  { titulo: '¿Cómo te llamás?', descripcion: 'Escribí tu nombre y tu apellido como figuran en tu documento.', schema: SCHEMA_NOMBRE },
-  { titulo: '¿Cuál es tu número de documento?', descripcion: 'Lo usamos para pedir los turnos a tu nombre. Escribí solo los números.', schema: SCHEMA_DOCUMENTO },
-  { titulo: '¿Cuándo naciste?', descripcion: 'Escribí el día, elegí el mes y escribí el año.', schema: SCHEMA_NACIMIENTO },
-  { titulo: '¿En qué localidad vivís?', descripcion: 'Así te mostramos los hospitales que te quedan cerca.', schema: SCHEMA_LOCALIDAD },
-  { titulo: '¿Cuál es tu correo electrónico?', descripcion: 'Te vamos a mandar un mensaje para confirmar que es tuyo.', schema: SCHEMA_REGISTRO_CORREO },
-  { titulo: 'Elegí una contraseña', descripcion: 'Tiene que tener al menos 8 letras o números. Anotala en un lugar seguro.', schema: SCHEMA_CLAVE_NUEVA },
-  { titulo: 'Revisá tus datos', descripcion: 'Si algo está mal, tocá "Cambiar". Si está todo bien, creá tu cuenta.', schema: SCHEMA_TERMINOS },
-]
-const ULTIMO = PASOS.length - 1
-const PASO_CLAVE = 5
-const ITEMS_MESES = MESES.map((label, i) => ({ label, value: String(i + 1) }))
-
 definePageMeta({ middleware: 'invitado' })
-useHead({ title: 'Crear una cuenta' })
+useSeoMeta({ title: 'Crear una cuenta' })
 
-const { borrador, descartar } = useRegistro()
-const { registrar } = useSesion()
-const { localidades } = useTurnos()
-const { alFallar } = useFormulario()
-const { alert } = useAnuncio()
-const correoRegistrado = useState('correo-registrado', () => '')
+type ClaveDato = keyof DatosRegistro
 
-const estado = reactive({ ...borrador.value, clave: '', terminos: false })
+type Paso = {
+  clave: ClaveDato
+  pregunta: string
+  etiqueta: string
+  ayuda?: string
+  type?: 'text' | 'email' | 'tel' | 'date'
+  autocomplete?: string
+  inputmode?: 'text' | 'numeric' | 'tel' | 'email'
+  validar: (valor: string) => string | undefined
+}
+
+const PASOS: Paso[] = [
+  {
+    clave: 'nombre',
+    pregunta: '¿Cuál es tu nombre?',
+    etiqueta: 'Nombre',
+    autocomplete: 'given-name',
+    validar: (valor) => validarRequerido(valor, 'Escribí tu nombre.'),
+  },
+  {
+    clave: 'apellido',
+    pregunta: '¿Cuál es tu apellido?',
+    etiqueta: 'Apellido',
+    autocomplete: 'family-name',
+    validar: (valor) => validarRequerido(valor, 'Escribí tu apellido.'),
+  },
+  {
+    clave: 'dni',
+    pregunta: '¿Cuál es tu número de documento?',
+    etiqueta: 'Número de DNI',
+    ayuda: 'Solo los números. Si lo escribís con puntos, también está bien.',
+    inputmode: 'numeric',
+    autocomplete: 'off',
+    validar: validarDni,
+  },
+  {
+    clave: 'fechaNacimiento',
+    pregunta: '¿Cuándo naciste?',
+    etiqueta: 'Fecha de nacimiento',
+    ayuda: 'Día, mes y año.',
+    type: 'date',
+    autocomplete: 'bday',
+    validar: (valor) => validarFechaNacimiento(valor),
+  },
+  {
+    clave: 'correo',
+    pregunta: '¿Cuál es tu correo electrónico?',
+    etiqueta: 'Correo electrónico',
+    ayuda: 'Te vamos a mandar un correo para activar la cuenta.',
+    type: 'email',
+    autocomplete: 'email',
+    inputmode: 'email',
+    validar: validarCorreo,
+  },
+  {
+    clave: 'telefono',
+    pregunta: '¿Cuál es tu número de teléfono?',
+    etiqueta: 'Teléfono',
+    ayuda: 'Con el código de área. Por ejemplo: 11 4567 8901.',
+    type: 'tel',
+    autocomplete: 'tel',
+    inputmode: 'tel',
+    validar: validarTelefono,
+  },
+  {
+    clave: 'localidad',
+    pregunta: '¿En qué localidad vivís?',
+    etiqueta: 'Localidad',
+    ayuda: 'Así te mostramos los centros de salud más cerca. Por ejemplo: General Pacheco.',
+    autocomplete: 'address-level2',
+    validar: (valor) => validarRequerido(valor, 'Escribí tu localidad.'),
+  },
+  {
+    clave: 'rol',
+    pregunta: '¿Para qué vas a usar Turnos Accesibles?',
+    etiqueta: 'Uso de la cuenta',
+    validar: (valor) => (valor ? undefined : 'Elegí una de las dos opciones.'),
+  },
+  {
+    clave: 'clave',
+    pregunta: 'Elegí una contraseña',
+    etiqueta: 'Contraseña',
+    ayuda: 'Como mínimo 8 letras o números, con al menos un número.',
+    validar: validarClave,
+  },
+]
+
+const ROLES: { valor: Rol; titulo: string; descripcion: string }[] = [
+  { valor: 'solicitante', titulo: 'Solicitante', descripcion: 'Quiero sacar turnos para mí.' },
+  { valor: 'acompanante', titulo: 'Acompañante', descripcion: 'Quiero ayudar a alguien de confianza.' },
+]
+
+const CLAVE_BORRADOR = 'ta_registro_borrador'
+
+const { registrarse } = useSesion()
+const { anunciar } = useAnuncio()
+
+const datos = reactive<Record<ClaveDato, string>>({
+  nombre: '',
+  apellido: '',
+  dni: '',
+  fechaNacimiento: '',
+  correo: '',
+  telefono: '',
+  localidad: '',
+  rol: '',
+  clave: '',
+})
+
+const pantalla = ref<'paso' | 'revisar' | 'enviado'>('paso')
+const indice = ref(0)
+const error = ref<string | undefined>()
+const desdeRevisar = ref(false)
+const resultado = ref<{ mensaje: string; ofrecerRecuperar?: boolean } | null>(null)
 const enviando = ref(false)
-const aviso = ref<Aviso>()
+const titulo = ref<HTMLElement | null>(null)
 
-const itemsLocalidades = computed(() => localidades.value.map((l) => ({ label: l.nombre, description: l.partido, value: l.id })))
-const localidadElegida = computed(() => localidades.value.find((l) => l.id === estado.localidad))
+const paso = computed(() => PASOS[indice.value]!)
+const idCampo = computed(() => `registro-${paso.value.clave}`)
 
-const actual = computed(() => PASOS[estado.paso] ?? PASOS[0]!)
+function textoDelDato(clave: ClaveDato): string {
+  if (clave === 'clave') return '••••••••'
+  if (clave === 'rol') return ROLES.find((rol) => rol.valor === datos.rol)?.titulo ?? ''
+  if (clave === 'fechaNacimiento' && datos.fechaNacimiento) {
+    return new Date(`${datos.fechaNacimiento}T12:00:00`).toLocaleDateString('es-AR', { dateStyle: 'long' })
+  }
+  return datos[clave]
+}
 
-const resumen = computed(() => [
-  { paso: 0, etiqueta: 'Nombre', valor: `${estado.nombre} ${estado.apellido}` },
-  { paso: 1, etiqueta: 'Documento', valor: limpiarDocumento(estado.documento) },
-  { paso: 2, etiqueta: 'Fecha de nacimiento', valor: `${Number(estado.dia)} de ${MESES[Number(estado.mes) - 1]} de ${estado.anio}` },
-  { paso: 3, etiqueta: 'Localidad', valor: localidadElegida.value?.nombre ?? '' },
-  { paso: 4, etiqueta: 'Correo', valor: estado.email },
-  { paso: 5, etiqueta: 'Contraseña', valor: 'La que elegiste' },
-])
+async function enfocarTitulo(mensaje: string) {
+  await nextTick()
+  titulo.value?.focus()
+  anunciar(mensaje)
+}
 
-function editar(paso: number) {
-  estado.editandoDesdeResumen = true
-  estado.paso = paso
+function irAPaso(nuevo: number) {
+  pantalla.value = 'paso'
+  indice.value = nuevo
+  error.value = undefined
+  enfocarTitulo(`Paso ${nuevo + 1} de ${PASOS.length}. ${PASOS[nuevo]!.pregunta}`)
+}
+
+function irARevisar() {
+  pantalla.value = 'revisar'
+  desdeRevisar.value = false
+  error.value = undefined
+  enfocarTitulo('Revisá tus datos antes de crear la cuenta.')
+}
+
+function siguiente() {
+  error.value = paso.value.validar(datos[paso.value.clave])
+  if (error.value) {
+    // El campo del paso; en el paso del rol, la primera opción.
+    const campo = document.getElementById(idCampo.value) ?? document.querySelector<HTMLElement>('[name="registro-rol"]')
+    campo?.focus()
+    anunciar(error.value)
+    return
+  }
+  if (desdeRevisar.value || indice.value === PASOS.length - 1) {
+    irARevisar()
+  } else {
+    irAPaso(indice.value + 1)
+  }
 }
 
 function volver() {
-  if (estado.editandoDesdeResumen) {
-    estado.editandoDesdeResumen = false
-    estado.paso = ULTIMO
-    return
+  if (pantalla.value === 'revisar') {
+    irAPaso(PASOS.length - 1)
+  } else if (indice.value > 0) {
+    irAPaso(indice.value - 1)
   }
-  estado.paso = Math.max(0, estado.paso - 1)
 }
 
-async function avanzar() {
-  if (estado.paso < ULTIMO) {
-    estado.paso = estado.editandoDesdeResumen ? ULTIMO : estado.paso + 1
-    estado.editandoDesdeResumen = false
+function cambiarDato(i: number) {
+  desdeRevisar.value = true
+  irAPaso(i)
+}
+
+async function crearCuenta() {
+  if (enviando.value) {
+    return
+  }
+  // Por las dudas (por ejemplo, un borrador viejo), revisamos todo otra vez.
+  const conError = PASOS.findIndex((p) => p.validar(datos[p.clave]))
+  if (conError >= 0) {
+    desdeRevisar.value = true
+    irAPaso(conError)
+    error.value = PASOS[conError]!.validar(datos[PASOS[conError]!.clave])
     return
   }
 
   enviando.value = true
-  aviso.value = undefined
-  const resultado = await registrar({
-    nombre: estado.nombre.trim(),
-    apellido: estado.apellido.trim(),
-    documento: limpiarDocumento(estado.documento),
-    fechaNacimiento: fechaIso(estado.dia, estado.mes, estado.anio),
-    localidadId: estado.localidad,
-    localidad: localidadElegida.value?.nombre ?? '',
-    email: estado.email.trim(),
-    clave: estado.clave,
-  })
+  resultado.value = null
+  anunciar('Creando tu cuenta…')
+  const respuesta = await registrarse({ ...datos, rol: datos.rol as Rol })
   enviando.value = false
 
-  if (resultado.ok) {
-    correoRegistrado.value = estado.email.trim()
-    descartar()
-    return navigateTo('/confirmar-correo')
+  if (!respuesta.ok) {
+    resultado.value = respuesta
+    return
   }
-  aviso.value = resultado.aviso
-  alert(`${resultado.aviso.titulo} ${resultado.aviso.ayuda}`)
+  datos.clave = ''
+  sessionStorage.removeItem(CLAVE_BORRADOR)
+  pantalla.value = 'enviado'
+  enfocarTitulo('Te mandamos un correo para activar tu cuenta.')
 }
 
-watch(borrador, (guardado) => {
-  const { clave, terminos } = estado
-  Object.assign(estado, guardado, { clave, terminos })
-  if (estado.paso > PASO_CLAVE && !estado.clave) estado.paso = PASO_CLAVE
-}, { once: true })
+// --- Borrador en sessionStorage (nunca la contraseña) ---
+onMounted(() => {
+  try {
+    const guardado = JSON.parse(sessionStorage.getItem(CLAVE_BORRADOR) ?? 'null')
+    if (guardado && typeof guardado === 'object') {
+      for (const p of PASOS) {
+        if (p.clave !== 'clave' && typeof guardado.datos?.[p.clave] === 'string') {
+          datos[p.clave] = guardado.datos[p.clave]
+        }
+      }
+      const guardadoIndice = Number(guardado.indice)
+      if (Number.isInteger(guardadoIndice) && guardadoIndice >= 0 && guardadoIndice < PASOS.length) {
+        indice.value = guardadoIndice
+      }
+    }
+  } catch {
+    // Si el borrador está roto, empezamos de cero.
+  }
+})
 
-watch(estado, ({ clave: _clave, terminos: _terminos, ...resto }) => {
-  borrador.value = resto
-}, { deep: true })
+watch([datos, indice], () => {
+  if (pantalla.value === 'enviado') {
+    return
+  }
+  const { clave: _clave, ...sinClave } = datos
+  sessionStorage.setItem(CLAVE_BORRADOR, JSON.stringify({ datos: sinClave, indice: indice.value }))
+})
 </script>
+
+<template>
+  <div class="contenedor pagina formulario-angosto">
+    <!-- Un paso -->
+    <template v-if="pantalla === 'paso'">
+      <p class="progreso">Paso {{ indice + 1 }} de {{ PASOS.length }}</p>
+      <h1 ref="titulo" tabindex="-1">{{ paso.pregunta }}</h1>
+
+      <form class="tarjeta pila" novalidate @submit.prevent="siguiente">
+        <fieldset v-if="paso.clave === 'rol'" :aria-describedby="error ? `${idCampo}-error` : undefined">
+          <legend class="sr-only">{{ paso.pregunta }}</legend>
+          <p v-if="error" :id="`${idCampo}-error`" class="error-campo">
+            <span aria-hidden="true">✕</span> {{ error }}
+          </p>
+          <div class="opciones">
+            <OpcionTarjeta
+              v-for="rol in ROLES"
+              :key="rol.valor"
+              v-model="datos.rol"
+              nombre="registro-rol"
+              :valor="rol.valor"
+              :titulo="rol.titulo"
+              :descripcion="rol.descripcion"
+            />
+          </div>
+        </fieldset>
+
+        <CampoClave
+          v-else-if="paso.clave === 'clave'"
+          :id="idCampo"
+          v-model="datos.clave"
+          autocomplete="new-password"
+          :ayuda="paso.ayuda"
+          :error="error"
+        />
+
+        <Campo
+          v-else
+          :id="idCampo"
+          :key="paso.clave"
+          v-model="datos[paso.clave]"
+          :etiqueta="paso.etiqueta"
+          :type="paso.type"
+          :autocomplete="paso.autocomplete"
+          :inputmode="paso.inputmode"
+          :ayuda="paso.ayuda"
+          :error="error"
+          requerido
+        />
+
+        <div class="acciones">
+          <Boton type="submit">{{ desdeRevisar ? 'Listo' : 'Siguiente' }}</Boton>
+          <Boton v-if="indice > 0 && !desdeRevisar" variante="secundario" @click="volver">Volver</Boton>
+        </div>
+      </form>
+
+      <p v-if="indice === 0">¿Ya tenés cuenta? <NuxtLink to="/ingresar">Ingresá</NuxtLink></p>
+    </template>
+
+    <!-- Revisar -->
+    <template v-else-if="pantalla === 'revisar'">
+      <p class="progreso">Último paso</p>
+      <h1 ref="titulo" tabindex="-1">Revisá tus datos</h1>
+      <p class="pagina__bajada">Si algo está mal, tocá "Cambiar".</p>
+
+      <Aviso v-if="resultado" tipo="error">
+        <p>{{ resultado.mensaje }}</p>
+        <p v-if="resultado.ofrecerRecuperar">
+          <NuxtLink :to="{ path: '/ingresar', query: { correo: datos.correo } }">Ingresar</NuxtLink>
+          ·
+          <NuxtLink :to="{ path: '/recuperar', query: { correo: datos.correo } }">Crear una contraseña nueva</NuxtLink>
+        </p>
+      </Aviso>
+
+      <dl class="tarjeta resumen">
+        <div v-for="(p, i) in PASOS" :key="p.clave" class="resumen__fila">
+          <dt>{{ p.etiqueta }}</dt>
+          <dd>{{ textoDelDato(p.clave) }}</dd>
+          <dd>
+            <button type="button" class="boton boton--texto" @click="cambiarDato(i)">
+              Cambiar<span class="sr-only"> {{ p.etiqueta.toLowerCase() }}</span>
+            </button>
+          </dd>
+        </div>
+      </dl>
+
+      <div class="acciones">
+        <Boton @click="crearCuenta">{{ enviando ? 'Creando la cuenta…' : 'Crear mi cuenta' }}</Boton>
+        <Boton variante="secundario" @click="volver">Volver</Boton>
+      </div>
+    </template>
+
+    <!-- Enviado -->
+    <template v-else>
+      <h1 ref="titulo" tabindex="-1">Te mandamos un correo</h1>
+      <Aviso tipo="exito" titulo="Falta un paso">
+        <p>
+          Abrí el correo que te mandamos a <strong>{{ datos.correo }}</strong> y tocá el enlace para
+          activar tu cuenta.
+        </p>
+        <p>Si no lo ves, buscalo en "Correo no deseado". Puede tardar unos minutos.</p>
+      </Aviso>
+      <div class="acciones">
+        <Boton to="/ingresar">Ir a ingresar</Boton>
+      </div>
+    </template>
+  </div>
+</template>
+
+<style scoped>
+.opciones {
+  display: grid;
+  gap: var(--espacio-2);
+}
+
+.error-campo {
+  display: flex;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-2);
+  font-weight: 700;
+  color: var(--error);
+}
+
+.resumen {
+  margin: 0;
+}
+
+.resumen__fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--espacio-3);
+  padding-block: var(--espacio-2);
+  border-top: var(--grosor-borde) solid var(--borde);
+}
+
+.resumen__fila:first-child {
+  border-top: 0;
+}
+
+.resumen dt {
+  flex: 1 1 100%;
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+
+.resumen dd {
+  margin: 0;
+}
+
+.resumen dd:first-of-type {
+  flex: 1 1 12rem;
+  overflow-wrap: anywhere;
+}
+</style>

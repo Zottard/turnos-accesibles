@@ -1,207 +1,163 @@
-# Turnos Accesibles
+# Turnos Accesibles — guía para agentes
 
-El contexto completo del proyecto está en [docs/CONTEXTO.md](docs/CONTEXTO.md) y es vinculante.
-Patrones de front de referencia en [docs/manual-front.md](docs/manual-front.md).
+Antes de tocar código, leé:
 
-## Decisiones que pisan al CONTEXTO
-
-Acordadas con el grupo al arrancar (2026-09-28). Donde choquen con `docs/CONTEXTO.md`, gana esto:
-
-- **Nuxt 4** (carpeta `app/`), no Nuxt 3. Las rutas de §7 del CONTEXTO van dentro de `app/`.
-- **Nuxt UI 4** como librería de componentes (usa Reka UI por debajo). No se escriben primitivas
-  `Base*` propias: los componentes propios son de dominio o de a11y (`components/a11y/`).
-- Los tokens de `app/assets/css/tokens.css` son la fuente de verdad. `main.css` mapea las
-  variables `--ui-*` de Nuxt UI a esos tokens, así los componentes siguen al tema y la escala.
-- `--text-xs` se fuerza a 1rem: nada baja de 16 px, ni siquiera dentro de Nuxt UI.
-- Las preferencias de accesibilidad se guardan en la **cookie `ta_prefs`** (no en localStorage):
-  el server renderiza `<html>` con los atributos correctos y no hay flash. Supabase se suma en la Fase 3.
-- **TypeScript 5.9**, no 7: `vue-tsc` todavía no funciona con TS 7.
-- Validación con `UForm` de Nuxt UI + zod 4 (schemas en `utils/validacion.ts`). Sin vee-validate.
-- `pnpm` como gestor de paquetes.
-- El manual de front dice "sin Paso 1 de 2" y "front en JS": acá **no aplica**. Rige el CONTEXTO
-  (progreso visible en el asistente, TS strict).
+- `docs/arquitectura.md` — stack, carpetas, reglas de código y de accesibilidad (obligatorias).
+- `docs/marca.md` — colores, tipografías, formas y tono de voz.
+- `docs/plan-versiones.md` — qué entra en cada versión. No adelantes features de otra versión.
 
 ## Comandos
 
 ```bash
-pnpm dev              # http://localhost:3000, /demo-ui solo en dev
-pnpm check:contrast   # valida los pares de tokens
-pnpm typecheck
-pnpm test:unit        # Vitest + vitest-axe
-pnpm test:e2e         # Playwright + axe, levanta build + preview
+pnpm install
+pnpm dev         # http://localhost:3000
+pnpm typecheck   # tiene que dar 0 errores
+pnpm test        # Vitest, solo funciones puras (tests/*.test.ts)
+pnpm build
 ```
 
-## Design system (Fase 1)
+## Convenciones de la v0.1
 
-- El tema de Nuxt UI se ajusta en `app/app.config.ts`. Ojo: las clases de `variants.size.xl` pisan a
-  las de `slots`, así que los tamaños van en la variante, no en el slot.
-- Componentes propios: `a11y/` (SkipLink, LiveRegion, AccessibilityMenu, ReadAloudButton,
-  VoiceInputButton), `patrones/` (AccionesPaso, VistaEstados, OpcionesTarjeta), `asistente/AsistentePaso`,
-  `turnos/EstadoBadge`. Los estados de dominio viven en `utils/estados.ts` con fallback.
-- Textos con variante de lenguaje simple: `utils/copys.ts` + `useLenguajeSimple().t()`.
-- El botón de confirmar nunca se deshabilita por falta de datos: se deja activo y al tocarlo se
-  explica qué falta (error en el campo + `alert` en la live region).
-- Radios y checkboxes van en variante tarjeta: toda la tarjeta es el objetivo táctil.
-- `overflow-wrap: anywhere` + `hyphens: auto` en el body: sin eso, a 360 px con texto al 200 %
-  las palabras largas desbordan los items flex.
+- Código simple y correcto. Sin librerías nuevas sin justificarlas.
+- Nombres y comentarios en español. Texto de la interfaz en español rioplatense neutro, con
+  "vos", frases cortas y lenguaje simple.
+- Estilos: CSS propio. Usá los tokens semánticos de `app/assets/css/tokens.css` (`--fondo`,
+  `--texto`, `--primario`...), nunca colores sueltos: así funciona el alto contraste.
+- Medidas en `rem`: crecen con el tamaño de texto que elige la persona.
+- Preferencias: `useAccesibilidad()` (cookie `ta_prefs`, la lee también el servidor) y
+  `normalizarPreferencias()` en `app/utils/preferencias.ts`. Se aplican como atributos de
+  `<html>`: `data-texto`, `data-contraste`, `data-movimiento`.
+- Anuncios para lectores de pantalla: `useAnuncio().anunciar(texto)`.
+- Voz: `app/utils/voz.ts` (`hablar`, `callar`, `vozDisponible`). Solo en el navegador.
+- Al cambiar de página el foco va al `h1` (`app/plugins/foco-al-navegar.client.ts`).
+  Cada página tiene un solo `h1` y su `useSeoMeta({ title })`.
+- Botones: `<Boton>` (enlace si tiene `to`). Nunca se deshabilitan por datos faltantes.
+- Commits: conventional commits en inglés.
 
-## Auth (Fase 2)
+## Convenciones de la v0.2 (cuentas)
 
-- Proyecto Supabase `turnos-accesibles` (`ynolirfzjcjsvesnfpes`, sa-east-1). Migraciones en
-  `supabase/migrations/`, usuarios demo en `supabase/seed.sql`, tipos en `app/types/database.ts`
-  (regenerarlos después de cada migración).
-- Toda la lógica de sesión vive en `useSesion()`: devuelve `{ ok }` o `{ ok: false, motivo, aviso }`,
-  y `aviso` ya viene en lenguaje simple (qué pasó + qué hacer).
-- `useSupabaseUser()` devuelve los claims del JWT: el id es `user.sub`, no `user.id`.
-- Bloqueo tras 5 intentos: funciones `estado_bloqueo` / `registrar_fallo` / `limpiar_intentos` en la base.
-  Se cuenta por correo (exista o no la cuenta). **Límite conocido:** alguien que llame a la API de
-  Supabase directo se lo saltea. La solución de fondo es el Password Verification Hook, que es del plan Teams.
-- `es_admin()` vive en el schema `privado`, no expuesto en la API.
-- Middlewares: `auth` (pide sesión), `invitado` (saca a quien ya tiene sesión), `rol` (lee `meta.roles`,
-  por defecto `['admin']`). El `?volver=` pasa siempre por `rutaSegura()`.
-- Formularios: `UForm` con `method="post"` y `:validate-on="['input']"`. El POST evita que un envío
-  antes de hidratar mande datos en la URL. Sin validar en blur, porque el error que desaparece al salir
-  del campo mueve el botón entre el mousedown y el mouseup, y el click se pierde.
-  Errores de envío: `useFormulario().alFallar` (lleva el foco al primer campo y lo anuncia).
-- Sin sesiones que venzan mientras la app está abierta: Supabase renueva el token solo (WCAG 2.2.1).
+- Variables: `SUPABASE_URL` y `SUPABASE_KEY` (publishable) en `.env`. Nunca la clave secreta.
+- Supabase: `useSupabaseClient()` y `useSupabaseUser()` de `@nuxtjs/supabase` (v2).
+  `useSupabaseUser()` devuelve los *claims* del JWT: el id es `usuario.value?.sub` (no `.id`).
+  `redirect: false`: las redirecciones las hacen `middleware/auth.ts` e `invitado.ts`.
+- Sesión: todo pasa por `useSesion()` (ingresar, registrarse, salir, recuperar, cambiar
+  clave). Devuelve `{ ok: true }` o `{ ok: false, mensaje }` en lenguaje simple.
+  Después de ingresar, `useSesion` actualiza `useSupabaseUser()` a mano: el módulo lo hace
+  un rato después y el middleware lo necesita ya.
+- Preferencias de la cuenta: `usePreferenciasCuenta()`. La cookie `ta_prefs` sigue siendo la
+  que pinta la página; la fila de `preferencias` se lee una vez al ingresar o al abrir la app
+  (`plugins/preferencias-cuenta.ts`). Sin fila → `/bienvenida`. Si la consulta falla, no se
+  redirige. Conversión fila ↔ app en `utils/preferencias.ts` (`aFilaPreferencias`,
+  `desdeFilaPreferencias`).
+- Páginas con sesión: `definePageMeta({ middleware: 'auth' })`. Para invitados: `'invitado'`.
+- `?volver=` siempre pasa por `rutaSegura()` (`utils/validar.ts`): solo rutas internas.
+- Validaciones de formularios en `utils/validar.ts` (puras, con tests).
+- Controles de accesibilidad sueltos en `components/preferencias/` (`PreferenciasTamano`,
+  `PreferenciasSiNo`, `PreferenciasVelocidad`, `PreferenciasCanal`, `PreferenciasAntelacion`):
+  los usan el menú, `/bienvenida` y `/perfil/accesibilidad`.
+- Base: una migración por versión en `supabase/migrations/` (`0201_cuentas.sql`). Se aplica el
+  archivo tal cual. Funciones auxiliares en el esquema `privado` (no expuesto). Toda función
+  `security definer` lleva `set search_path = ''`. Si cambia el esquema, regenerar
+  `app/types/database.types.ts`.
+- El rol nunca se cambia desde la app: la columna `rol` no tiene permiso de `update` y el
+  registro no acepta `admin`.
+- El correo de Supabase por defecto solo llega al equipo del proyecto: para probar el registro
+  de punta a punta hace falta un SMTP propio. Los usuarios de `seed.sql` ya están confirmados.
 
-## Preferencias (Fase 3)
+## Convenciones de la v0.3 (búsqueda de turnos)
 
-- Tabla `preferencias_accesibilidad`. Sin fila = no configuró: el middleware `auth` lo manda a
-  `/bienvenida`. Si la consulta falla, el estado queda desconocido y **no** se redirige.
-- La cookie `ta_prefs` se lee solo en el servidor; el cliente usa el estado hidratado y reescribe la cookie.
-  Al ingresar se cargan las de la cuenta (una vez por usuario, `prefs-cargadas-de`) y cada cambio se guarda
-  solo (`plugins/preferencias.client.ts`, debounce 600 ms). Si la persona cambia algo mientras llega la
-  respuesta, gana lo que eligió.
-- `PreferenciaControl` es la pregunta de una preferencia: el wizard muestra una por pantalla,
-  `/perfil/accesibilidad` todas juntas.
-- **Todo campo de formulario lleva `id` explícito** (`<pagina>-<campo>`). Nuxt UI asocia label e input con
-  `useId()` y, con íconos asíncronos en SSR, el contador no coincide entre servidor y cliente: el label
-  queda apuntando a un id que no existe. `a11y.spec.ts` revisa que cada `label[for]` exista.
-- No hacer `await` en el setup de páginas con formularios: cargar en `onMounted` y mostrar `VistaEstados`
-  en `cargando` hasta tener los datos (si no, se puede enviar el formulario a medio llenar).
-- El service worker **no** cachea navegaciones (`navigateFallback: null`): servía el HTML de `/` para
-  cualquier página, con datos y preferencias viejas.
+- Base: `0301_turnos.sql`. El catálogo se lee sin sesión (`anon`): solo centros activos,
+  especialidades activas y turnos futuros (RLS). Nadie lo escribe desde la app todavía
+  (el panel es la v0.6). `avisos_disponibilidad`: cada persona inserta y ve solo los suyos.
+- Búsqueda: una sola llamada, la RPC `buscar_turnos` (security invoker, así respeta RLS).
+  Distancia con haversine en SQL; sin centro elegido trae como mucho 3 turnos por centro.
+  Mañana = antes de las 13, en hora argentina (igual en SQL y en `franjaDe()`).
+- Datos de prueba en la sección v0.3 de `seed.sql`. **Si la demo se queda sin turnos:**
+  `select privado.generar_turnos(30);` en el editor SQL (no duplica los que ya existen).
+  Los requisitos de cada especialidad están en esa función.
+- Datos en `useTurnos()`: `cargarCatalogo`, `buscarTurnos`, `cargarTurno`, `pedirAviso`.
+- Funciones puras (con tests): `shared/utils/fechas.ts` (fechas en palabras con `Intl` y la zona
+  `America/Argentina/Buenos_Aires`, nunca la del navegador), `shared/utils/especialidades.ts`
+  (`normalizar`, `buscarEspecialidades`, `elegirEspecialidad`, `nombreCompleto`) y
+  `utils/turnos.ts` (filtros ↔ query, distancia, resumen para leer).
+- Las especialidades parecidas se calculan en el navegador con `buscarEspecialidades` (son
+  pocas y ya están cargadas): no hace falta `unaccent` ni otra RPC.
+- `/buscar` guarda todo en la query (`esp`, `q`, `loc`, `lat`, `lng`, `centro`, `desde`, `hasta`,
+  `franja`). La dirección manda: el formulario se copia desde ahí y cada cambio de query
+  vuelve a buscar. La ubicación va redondeada a 2 decimales.
+- Los utils que usan otro util lo importan explícito (`import ... from './fechas'`) para que
+  Vitest los encuentre (Nuxt los auto-importa, Vitest no).
+- Siempre mostrar el nombre simple con el técnico: `nombreCompleto()` → "Oculista (Oftalmología)".
+- Las pantallas con datos de prueba lo dicen ("Datos de prueba").
 
-## Datos y búsqueda (Fase 4)
+## Convenciones de la v0.4 (asistente de reserva y mis turnos)
 
-- Centros **reales** del REFES (diciembre 2025) y localidades de la API Georef. Teléfono, horario y
-  accesibilidad edilicia quedan vacíos porque el REFES no los trae: no se inventan.
-  Especialidades por centro, profesionales, agendas y turnos son **de prueba**, y la ficha lo dice.
-- `privado.generar_turnos_demo(dias)` completa agendas y turnos para los días que falten (~30 %
-  ocupados). Volver a correrla si la demo se queda sin turnos: `select privado.generar_turnos_demo(30);`
-- `buscar_turnos()` (SQL): sin centro devuelve el primer turno libre de cada centro; con centro, sus
-  horarios. Calcula la distancia y filtra la franja en hora de Argentina.
-- Columnas `modo_turnos`/`web_turnos`/`telefono_turnos`/`instrucciones_turno` de `centros`: preparadas
-  para el modo derivación (la ficha ya muestra el bloque si el centro es `derivacion`).
-- Fechas y horas siempre con `utils/fechas.ts` (zona America/Argentina/Buenos_Aires, en palabras).
-- Íconos que vienen de la base van en `icon.clientBundle.icons` de `nuxt.config.ts`.
+- Base: `0401_reservas.sql`. `reservas` solo tiene política de `select` (cada persona ve las
+  suyas): se escribe únicamente con las RPC `reservar_turno`, `cancelar_reserva` y
+  `reprogramar_reserva` (security definer, validan `auth.uid()` adentro). `mis_reservas` también
+  es security definer porque `turnos` solo deja ver turnos futuros.
+- Las RPC devuelven jsonb `{ ok: true, numero, ... }` o `{ ok: false, motivo }`. Motivos:
+  `sin_sesion`, `no_existe`, `vencido`, `tomado`, `superpuesto` (trae `conflicto`), `ya_paso`,
+  `no_vigente`, `fuera_de_plazo` (trae `horas`), `otra_especialidad`, `mismo_turno`. El mensaje
+  para la persona sale siempre de `mensajeReserva(motivo)` (`utils/reservas.ts`).
+- Atomicidad: el cupo se toma con un único `update ... where estado = 'disponible'`; además hay un
+  índice único de una reserva confirmada por turno. Reprogramar toma primero el turno nuevo.
+- "Cumplido" no se guarda: `estadoVisible()` lo calcula (confirmada + turno pasado). Sin pg_cron.
+- Datos en `useReservas()`: `reservarTurno`, `cancelarReserva`, `reprogramarReserva`,
+  `cargarReservas`, `cargarReserva`.
+- Asistente (`pages/asistente.vue`): un paso por pantalla; al cambiar de paso, foco en el `h1`
+  (la pregunta) y `anunciar()` con la pregunta y el resumen (con lectura en voz alta activada, se
+  lee solo). Borrador en `sessionStorage` con la clave `ta_asistente` (solo ids y opciones, nunca
+  el texto libre). Se borra al reservar. Puras y con tests en `utils/asistente.ts`
+  (`validarPaso`, `normalizarBorrador`, `filtrosDelBorrador`).
+- Intérprete: `POST /api/interpretar` → `PedidoInterpretado` (`shared/utils/reglasAsistente.ts`).
+  Siempre reglas primero; Claude solo si hay `NUXT_ANTHROPIC_API_KEY` (`server/utils/claude.ts`,
+  `fetch` directo, 4 s). La respuesta de la IA pasa por `validarRespuestaIA`; si falla, reglas.
+  Nunca registrar ni guardar el texto de la persona. Límite: 10 pedidos por minuto por IP.
+  `NUXT_ANTHROPIC_BASE_URL` sirve para probar con un servidor falso.
+- `shared/utils/` tiene lo que usan la app y el servidor (`fechas.ts`, `especialidades.ts`,
+  `reglasAsistente.ts`). Nuxt lo auto-importa en los dos lados; entre archivos, import relativo.
+- Componentes nuevos: `ElegirEspecialidad` (cuadro + sugerencias, lo usan `/buscar` y el
+  asistente), `OpcionesTurno` (radios de turnos con "Ver más opciones"), `EstadoTurno` (ícono +
+  palabra), `DictarBoton` (dictado con `dictar()` de `utils/voz.ts`).
+- Impresión: `@media print` en `base.css` oculta encabezado, pie y todo lo que tenga
+  `.no-imprimir`.
 
-## Asistente y reservas (Fase 5)
+## Convenciones de la v0.5 (avisos y modo acompañante)
 
-- `reservas` se escribe **solo** con la RPC `reservar_turno` (transaccional: `UPDATE ... WHERE estado =
-  'disponible'`). Devuelve `{ ok, reserva_id, numero }` o `{ ok: false, motivo }` con motivo `tomado`,
-  `superpuesto` (otro turno de la persona a menos de 2 h; se reintenta con `p_confirmar_superposicion`),
-  `vencido`, `no_existe`, `sin_sesion`, `sin_permiso`. Los textos para cada motivo: `avisoReserva()`.
-- `privado.puede_actuar(actor, solicitante, accion)` decide si alguien reserva por otra persona (fase 8).
-- Paso 0 del asistente: Edge Function `interpretar` (reglas en `supabase/functions/interpretar/reglas.ts`,
-  testeadas en `tests/unit/interpretar.spec.ts`). El front llama a `/api/asistente/interpretar` (proxy con
-  rate limit y timeout de 4 s). Si falla o no entiende: "Vamos paso a paso entonces" y sigue por menús.
-  La función tiene `verify_jwt`: el proxy usa `NUXT_SUPABASE_ANON_JWT` (anon key JWT, pública).
-- Borrador del asistente en `sessionStorage` (`ta_asistente`): sobrevive a recargar y a ir a ingresar.
-- Para los datos de Supabase con tipos profundos usar `shallowRef` (con `ref` el typecheck explota) y
-  `fetch` nativo en vez de `$fetch` para endpoints propios (los tipos de rutas de Nitro también explotan).
-
-## Mis turnos (Fase 6)
-
-- `cancelar_reserva` y `reprogramar_reserva` (RPC): no dejan tocar un turno que ya pasó y liberan el lugar.
-  La reprogramación deja la vieja como `reprogramada` y la nueva con `reserva_origen_id`.
-- pg_cron `completar-reservas-pasadas` (minuto 15 de cada hora) pasa a `completada` las confirmadas viejas.
-- `tests/e2e/ayudas.ts`: helpers para crear turnos y reservas desde los tests.
-
-## Avisos (Fase 7)
-
-- `notificaciones`: un trigger en `reservas` crea el aviso inmediato (reserva, cambio, cancelación) y
-  programa el recordatorio para el día anterior a las 10 (hora de Argentina). Cancelar o cambiar borra
-  los recordatorios pendientes. La bandeja solo ve lo que ya salió (`estado <> 'programada'`).
-- pg_cron `despachar-avisos` (cada 10 min) libera los programados; `enviar-correos` (cada 10 min, minuto 5)
-  llama a la Edge Function `enviar-correos` con la clave de Vault `clave_cron`.
-- **Correo:** la función necesita el secreto `RESEND_API_KEY` (y opcional `CORREO_REMITENTE`) en
-  Supabase → Edge Functions → Secrets. Sin eso deja el error anotado en el aviso y la app sigue igual.
-- En la app: `plugins/avisos.client.ts` revisa cada minuto y en cada navegación. Si hay uno nuevo, según
-  la preferencia muestra un aviso fijo bajo el header (no toast: los toasts de Reka meten spans
-  focuseables con `aria-hidden` y además se van solos) y/o suena un tono.
-
-## Acompañantes (Fase 8)
-
-- `acompanamientos` (alcance `ver` siempre + `reservar`/`cancelar`, token que vence a los 7 días) y
-  `consentimientos` (registro de lo que se autorizó y cuándo se revocó). Todo se escribe por RPC:
-  `invitar_acompanante`, `ver_invitacion` (también sin sesión), `aceptar_invitacion` (el correo de la
-  cuenta tiene que ser el invitado), `revocar_acompanamiento`.
-- `privado.puede_actuar` ahora incluye `privado.acompana(actor, solicitante, accion)`: las RPC de reservar,
-  cancelar y cambiar respetan el alcance. RLS deja ver turnos y perfil solo con `ver`.
-- "Estás ayudando a X" vive en `sessionStorage` (`ta_asistiendo`) para no perderlo al recargar; el
-  borrador del asistente guarda `para` y se descarta si no coincide con la persona actual.
-- Demo: Lucía acompaña a Rosa con `ver` y `reservar` (sin `cancelar`), para mostrar el límite.
-- E2E con dos personas: `acompanantes.spec.ts` abre un contexto por sesión (Pablo y Lucía).
-- Playwright corre con 4 workers en local (con 10 la máquina se quedó sin memoria).
-
-## Administración (Fase 9)
-
-- Escritura de centros, especialidades, profesionales y oferta: políticas `for all` con `privado.es_admin()`.
-- Trigger `impedir_baja_con_reservas`: no deja dar de baja centro/especialidad ni borrar profesional con
-  reservas confirmadas a futuro; el mensaje (`P0001`) se muestra tal cual con `mensajeDeError()`.
-- `generar_agenda()` (RPC, solo admin): rechaza si se superpone con otra agenda del profesional y
-  devuelve las fechas que chocan. Crea la oferta centro-especialidad si no existía.
-- `auditoria`: trigger `privado.auditar()` en centros, especialidades, profesionales, agendas y reservas.
-- Listas de filas de Supabase en `shallowRef` (con `ref` el typecheck explota por `Json`).
-- Los tests de admin crean datos con nombres `Prueba <timestamp>` y agendas a +100 días.
-
-## Métricas (Fase 10)
-
-- `eventos_uso` guarda eventos anónimos (`busqueda`, `asistente_inicio`, `reserva_asistente` con
-  `segundos`): cualquiera inserta, nadie lee. `useEventos().registrar()` es fire-and-forget.
-- `metricas(p_desde, p_hasta)` (solo admin) junta eventos y reservas por día de Buenos Aires.
-- El gráfico de barras es `aria-hidden`: la tabla de abajo tiene los mismos datos. CSV con BOM y `;`
-  para que Excel en español lo abra bien. El layout oculta header/footer al imprimir (`print:hidden`).
-
-## PWA y contenido (Fase 11)
-
-- Sin conexión, el SW responde cualquier navegación con `public/offline/index.html` (estática, sin datos).
-  Va en una carpeta porque `@vite-pwa/nuxt` le saca el `.html` a las entradas del precache: un
-  `offline.html` suelto quedaba como `/offline`, que Nitro no sirve, y rompía la instalación del SW.
-- Íconos: `public/icono.svg` es la fuente; los PNG se regeneran con `node scripts/generar-iconos.mjs`.
-- `beforeinstallprompt` llega una sola vez al cargar: lo guarda `plugins/instalar.client.ts` y lo usa
-  `<InstalarApp>` (en `/inicio` y `/ayuda`).
-- `consultas`: formulario de `/ayuda#escribinos` (canal de contacto de la Ley 26.653 y pedidos de la
-  Ley 25.326). Insertan anon y autenticados, lee solo admin (`/admin`, "Mensajes recibidos").
-- `/ayuda` queda en borrador en el alcance: falta el video con subtítulos y LSA.
-
-## Deploy
-
-- Vercel, proyecto `turnos-accesibles` (https://turnos-accesibles.vercel.app), deploy con
-  `npx vercel deploy --prod`. Variables en el proyecto (producción): las 3 de Supabase y `NUXT_PUBLIC_DEMO=true`.
-- `.vercelignore` deja afuera `.env` y lo que no hace falta para el build.
-
-## Modo demo
-
-- `NUXT_PUBLIC_DEMO=true` muestra la barra de demo (entrar como cada usuario de prueba) y `/demo`
-  (alcance completo). También deja `/demo-ui` en el build. En el deploy real va apagado.
-- **Al terminar cada fase, actualizar el `estado` de sus pantallas en `app/utils/alcance.ts`.**
-
-## Notas
-
-- Sin `NUXT_PUBLIC_SUPABASE_URL` el SSR se cae. Copiar `.env.example` a `.env` (tiene placeholders).
-  En Vitest se pasa como `overrides` en `vitest.config.ts`; sin eso la app no arranca y Pinia no existe.
-- `@vite-pwa/nuxt` se excluye cuando corre Vitest (rompe el entorno de tests).
-- `/demo-ui` se saca del build de producción salvo con `DEMO_UI=1`, que es como lo corre Playwright.
-- E2E: importar `test`/`expect` de `tests/e2e/fixtures.ts` (espera la hidratación en `goto`/`reload`).
-  Las sesiones (solicitante, admin, prueba) se crean una vez en `sesiones.setup.ts` (Supabase limita
-  a ~30 ingresos cada 5 minutos por IP). `auth.spec.ts` corre solo en escritorio.
-- `prueba@demo.ar` es solo para tests que cambian datos (preferencias, perfil): no usar a Rosa.
-- Para verificar navegación usar `toHaveURL((u) => u.pathname === '/x')`: una regex como `/\/inicio$/`
-  también matchea `?volver=/inicio`.
-- CI necesita las variables de repo `NUXT_PUBLIC_SUPABASE_URL` y `NUXT_PUBLIC_SUPABASE_KEY` y el secreto
-  `NUXT_SUPABASE_ANON_JWT` (sin él, el asistente cae a menús y fallan sus tests).
-- Flechas en radios (Reka): elige la opción solo si la tecla sigue apretada al recibir foco.
-  En Playwright usar `keyboard.down/up`, no `press`.
+- Base: `0501_avisos_acompanantes.sql`. Reemplaza las cuatro RPC de reservas (ahora con `p_para`;
+  `reservar_turno` ya no recibe `p_asistida`: la base la calcula). Motivos nuevos: `sin_permiso`
+  (acompaña pero esa acción no está en el alcance) y `sin_vinculo` (no acompaña o le quitaron el
+  permiso). `mis_reservas` sin permiso da error `42501`.
+- Permisos: siempre `privado.puede_actuar(actor, solicitante, accion)` (acción `ver`, `reservar` o
+  `cancelar`; `cancelar` también cubre cambiar de fecha). La política de `reservas` la usa. El
+  acompañante nunca lee `perfiles` de otra persona: solo `personas_que_acompano()` (nombre y apellido).
+- `acompanamientos` no se borran (son la constancia) y no tienen escritura desde la app: RPC
+  `invitar_acompanante` (pide `p_consiento = true`), `ver_invitacion` y `rechazar_invitacion`
+  (también sin cuenta), `aceptar_invitacion` (el correo de la sesión tiene que ser el invitado),
+  `revocar_acompanamiento`. `vence_en` es de la invitación pendiente; un vínculo activo no vence.
+  El rol de la cuenta no cambia al aceptar: lo que da acceso es el vínculo.
+- `notificaciones`: las crean solo triggers y RPC (nunca la app). Guardan `tipo` + `datos` (foto del
+  turno). El texto sale de `textoAviso()` (`shared/utils/avisos.ts`), el mismo en la app y en el
+  correo: no escribir textos de avisos en SQL. La app solo actualiza `entregada_en` y `leida_en`
+  (permiso por columna). RLS: cada persona ve las suyas con `enviar_desde <= now()`.
+- Copias para acompañantes: `solicitante_id` distinto de `usuario_id`. Al revocar se borran.
+- Recordatorio: `privado.momento_recordatorio` en SQL = `momentoRecordatorio()` en `utils/avisos.ts`.
+  Si se cambia una, cambiar la otra.
+- App: `useAvisos()` (sin leer, bandeja, marcar), `plugins/avisos.client.ts` (revisa al navegar y
+  cada minuto; tono con `utils/sonido.ts`, voz con `hablar`), `BandaAvisos` (role="status", nunca se
+  va sola). `useAcompanantes()` (invitar, constancia, revocar, invitación).
+- Modo acompañante: `useAyuda()` (cookie de sesión `ta_ayudando`, no sessionStorage, para que el
+  servidor pinte lo mismo que el navegador). `useReservas()` agrega `p_para` solo; para lo propio
+  aunque esté ayudando: `cargarReservas(n, { propias: true })`. Las claves de `useAsyncData` de
+  "Mis turnos" llevan el id de la persona. `BandaAyuda` verifica el vínculo al montarse (no salir
+  del modo durante el SSR: rompe la hidratación). Lo que no está en el alcance se oculta y se
+  explica con `mensajeReserva(motivo, { nombre, accion })`.
+- El borrador del asistente guarda `para`: si cambió la persona, se descarta.
+- Correo: `server/utils/correo.ts` (Resend con `fetch`, `NUXT_RESEND_BASE_URL` para un servidor
+  falso). `/api/avisos/enviar` (GET o POST, bearer `NUXT_CRON_SECRET`, clave secreta de Supabase
+  solo ahí) responde 503 sin claves. `avisos_por_correo` solo la puede llamar `service_role`.
+- Los tests de la base se hacen con `execute_sql` dentro de un `do $$ ... $$` que termina en
+  `raise exception` con el resultado: así se deshace todo solo.
+- Ojo con el mismo nombre en `app/utils` y en componentes: el tipo de aviso de la app se llama
+  `Notificacion` (no `Aviso`, que es un componente).

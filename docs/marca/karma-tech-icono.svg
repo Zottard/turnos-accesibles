@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Karma Tech">
+  <g fill="none" stroke-width="10">
+    <path d="M33.92 10.08A22 22 0 0 1 53.92 30.08" stroke="#0B7A75"/>
+    <path d="M53.92 33.92A22 22 0 0 1 33.92 53.92" stroke="#FFC233"/>
+    <path d="M30.08 53.92A22 22 0 0 1 10.08 33.92" stroke="#C2410C"/>
+    <path d="M10.08 30.08A22 22 0 0 1 26 11"  stroke="#5B2BD9"/>
+  </g>
+  <path d="M25 2.5L35 10.5L25 18.5Z" fill="#5B2BD9"/>
+  <text x="32" y="40.5" text-anchor="middle" font-family="Lexend, 'Segoe UI', Arial, sans-serif" font-size="22" font-weight="800" fill="#1E1633">K</text>
+</svg>

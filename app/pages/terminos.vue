@@ -1,67 +1,107 @@
+<script setup lang="ts">
+useSeoMeta({
+  title: 'Términos de uso',
+  description: 'Las reglas de uso de Turnos Accesibles, explicadas en lenguaje simple.',
+})
+
+// Con "lenguaje simple" apagado, el texto legal completo se muestra abierto.
+const { preferencias } = useAccesibilidad()
+</script>
+
 <template>
-  <div class="max-w-prose flex flex-col gap-10">
-    <div class="flex flex-col gap-3">
-      <h1 class="text-2xl font-bold">Términos de uso</h1>
-      <p class="text-lg">Lo importante, en pocas palabras. Si usás la app, aceptás lo que dice esta página.</p>
-    </div>
+  <div class="contenedor pagina">
+    <h1>Términos de uso</h1>
+    <p class="pagina__bajada">Lo importante, en pocas palabras.</p>
+    <LeerEnVoz objetivo-id="terminos-resumen" />
 
-    <UAlert
-      color="warning"
-      icon="i-lucide-triangle-alert"
-      title="Esta app no es el sistema oficial de turnos."
-      description="Es un trabajo de la facultad. Los turnos son de prueba: no te presentes en el hospital con un turno de esta app. Para un turno real, usá el sistema oficial de tu municipio o provincia."
-    />
-
-    <section aria-labelledby="titulo-que-es" class="flex flex-col gap-3">
-      <h2 id="titulo-que-es" class="text-xl font-bold">Qué es esta app</h2>
-      <p class="text-lg">
-        Turnos Accesibles es un prototipo hecho para el Trabajo Final de Metodología de Sistemas I
-        de la UTN, Facultad Regional General Pacheco (Grupo 28). Muestra cómo podría ser una forma más simple de sacar turnos de salud pública.
-      </p>
-      <p class="text-lg">
-        Los hospitales y centros de salud son reales: salen del Registro Federal de Establecimientos de Salud (REFES).
-        Los médicos, los horarios y los turnos son inventados. Ningún hospital recibe las reservas que hacés acá.
-      </p>
+    <section id="terminos-resumen" aria-labelledby="titulo-resumen" class="pila">
+      <h2 id="titulo-resumen">Lo que tenés que saber</h2>
+      <ol class="puntos">
+        <li>
+          <strong>Es un prototipo.</strong> Lo hicimos para un trabajo de la facultad (UTN FRGP).
+        </li>
+        <li>
+          <strong>No reemplaza a los sistemas oficiales.</strong> Para un turno de verdad, usá el
+          sistema de tu hospital o centro de salud.
+        </li>
+        <li>
+          <strong>Los turnos que ves son de prueba.</strong> No te garantizamos que exista ese turno
+          ni que esté libre.
+        </li>
+        <li>
+          <strong>Cuidamos tus datos.</strong> Seguimos la Ley 25.326 de protección de datos
+          personales. Podés pedir ver, corregir o borrar tus datos.
+        </li>
+        <li>
+          <strong>No guardamos información de tu salud.</strong> No te pedimos diagnósticos ni
+          estudios médicos.
+        </li>
+      </ol>
     </section>
 
-    <section aria-labelledby="titulo-uso" class="flex flex-col gap-3">
-      <h2 id="titulo-uso" class="text-xl font-bold">Cómo usarla</h2>
-      <ul class="flex flex-col gap-2 list-disc ps-6 text-lg">
-        <li>No uses tus datos de salud reales. Si probás el asistente, contale algo inventado.</li>
-        <li>No la uses para emergencias. Si es urgente, llamá al 107 o andá a la guardia más cercana.</li>
-        <li>La app sugiere a qué médico ir según lo que le contás, pero no es un diagnóstico. Eso lo hace un profesional.</li>
-        <li>Puede dejar de andar o borrarse en cualquier momento, porque es un trabajo práctico.</li>
-      </ul>
-    </section>
-
-    <section aria-labelledby="titulo-datos" class="flex flex-col gap-3">
-      <h2 id="titulo-datos" class="text-xl font-bold">Tus datos personales</h2>
-      <p class="text-lg">Los cuidamos según la Ley 25.326 de Protección de los Datos Personales.</p>
-      <h3 class="text-lg font-bold">Qué guardamos</h3>
-      <ul class="flex flex-col gap-2 list-disc ps-6 text-lg">
-        <li>Lo que pusiste al crear la cuenta: nombre, apellido, documento, fecha de nacimiento, correo y localidad. El teléfono, si lo agregaste.</li>
-        <li>Cómo querés usar la app: tamaño de letra, colores, voz y avisos.</li>
-        <li>Los turnos que sacaste, cancelaste o cambiaste, y quién lo hizo (vos o tu acompañante).</li>
-        <li>Las personas que invitaste para que te ayuden.</li>
-      </ul>
-      <h3 class="text-lg font-bold">Para qué</h3>
-      <p class="text-lg">
-        Solo para que la app funcione: reservar turnos, avisarte y recordar cómo te gusta verla.
-        No vendemos ni compartimos tus datos. Las métricas que ve administración son anónimas: cuentan cuántas búsquedas y reservas hubo, no quién las hizo.
-      </p>
-      <h3 class="text-lg font-bold">Tus derechos</h3>
-      <p class="text-lg">
-        Podés pedir ver, corregir o borrar tus datos cuando quieras, sin costo. Los datos de tu perfil los podés cambiar vos mismo en <ULink to="/perfil" class="underline">Mi perfil</ULink>.
-        Para lo demás, escribinos.
-      </p>
-      <p class="text-lg">
-        La Agencia de Acceso a la Información Pública es el organismo de control de la Ley 25.326 y recibe denuncias si no se respetan tus derechos.
-      </p>
-      <UButton to="/ayuda#escribinos" icon="i-lucide-message-circle" label="Escribinos sobre tus datos" class="self-start" />
-    </section>
+    <details class="legal" :open="!preferencias.lenguajeSimple">
+      <summary>Ver el texto legal completo</summary>
+      <div class="pila legal__texto">
+        <p>
+          Turnos Accesibles es un prototipo académico desarrollado por el equipo Karma Tech en el
+          marco de la materia Metodología de Sistemas I (UTN, Facultad Regional General Pacheco,
+          Grupo 28). No es un servicio oficial ni está vinculado con ningún organismo de salud.
+        </p>
+        <p>
+          La información de centros, profesionales y turnos es ficticia y se usa solo con fines de
+          demostración. Ninguna reserva hecha en este sitio genera un turno real ni obliga a ningún
+          prestador de salud.
+        </p>
+        <p>
+          El tratamiento de datos personales se rige por la Ley 25.326 de Protección de los Datos
+          Personales. La persona titular puede ejercer en cualquier momento sus derechos de acceso,
+          rectificación y supresión. El sitio no solicita ni almacena datos sensibles de salud
+          (historia clínica, diagnósticos o estudios).
+        </p>
+        <p>
+          Las preferencias de accesibilidad se guardan en una cookie de este navegador
+          (<code>ta_prefs</code>), solo para mostrar el sitio como lo configuraste.
+        </p>
+      </div>
+    </details>
   </div>
 </template>
 
-<script setup lang="ts">
-useHead({ title: 'Términos de uso' })
-</script>
+<style scoped>
+.puntos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+.legal {
+  max-width: 70ch;
+  padding: var(--espacio-3) var(--relleno-tarjeta);
+  background: var(--superficie);
+  border: var(--grosor-borde) solid var(--borde);
+  border-radius: var(--radio-tarjeta);
+}
+
+.legal summary {
+  min-height: var(--alto-tactil);
+  display: flex;
+  align-items: center;
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  color: var(--primario);
+  cursor: pointer;
+}
+
+.legal summary::before {
+  content: '▸';
+  margin-right: var(--espacio-2);
+}
+
+.legal[open] summary::before {
+  content: '▾';
+}
+
+.legal__texto {
+  padding-top: var(--espacio-2);
+}
+</style>

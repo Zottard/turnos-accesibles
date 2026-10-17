@@ -1,104 +1,104 @@
+// Configuración de Nuxt para Turnos Accesibles.
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  compatibilityDate: '2026-08-01',
+  devtools: { enabled: false },
 
-  modules: [
-    '@nuxt/ui',
-    '@pinia/nuxt',
-    '@vueuse/nuxt',
-    '@nuxtjs/supabase',
-    ...(process.env.VITEST ? [] : ['@vite-pwa/nuxt']),
-    '@nuxt/test-utils/module',
-  ],
+  modules: ['@nuxtjs/supabase', '@vite-pwa/nuxt'],
 
-  css: ['~/assets/css/main.css'],
-
-  typescript: { strict: true },
-
-  runtimeConfig: {
-    // anon key en formato JWT: la Edge Function `interpretar` la pide (verify_jwt). Es pública por diseño.
-    supabaseAnonJwt: '',
-    public: { demo: false },
-  },
-
-  components: [{ path: '~/components', pathPrefix: false }],
-
-  ui: { fonts: false, colorMode: false },
-
-  icon: {
-    mode: 'svg',
-    clientBundle: {
-      scan: true,
-      // íconos que llegan desde la base (especialidades), el escaneo no los ve
-      icons: [
-        'lucide:eye', 'lucide:stethoscope', 'lucide:heart-pulse', 'lucide:smile', 'lucide:hand',
-        'lucide:bone', 'lucide:venus', 'lucide:baby', 'lucide:ear', 'lucide:brain', 'lucide:droplets',
-        'lucide:syringe', 'lucide:wind', 'lucide:test-tube', 'lucide:scan-line',
-      ],
-    },
-  },
-
-  app: {
-    head: {
-      htmlAttrs: { lang: 'es-AR' },
-      meta: [
-        { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
-        { name: 'description', content: 'Sacá un turno médico en el sistema público, paso a paso y en lenguaje claro.' },
-      ],
-      link: [
-        { rel: 'icon', href: '/icono.svg', type: 'image/svg+xml' },
-        { rel: 'apple-touch-icon', href: '/apple-touch-icon-180x180.png' },
-        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap' },
-      ],
-    },
-  },
-
+  // Cuentas con Supabase. La URL y la clave pública salen de SUPABASE_URL y SUPABASE_KEY (.env).
   supabase: {
+    // Las redirecciones las hacemos nosotros con middleware/auth.ts y middleware/invitado.ts.
     redirect: false,
-    types: '~/types/database.ts',
-    redirectOptions: { login: '/ingresar', callback: '/confirmar-correo' },
+    // Tipos de las tablas, generados desde la base (ver el comentario del archivo).
+    types: '~/types/database.types.ts',
   },
 
+  // Solo del servidor (nunca llegan al navegador). Se completan al arrancar con variables de
+  // entorno: NUXT_ANTHROPIC_API_KEY (opcional: sin clave, el asistente usa reglas) y
+  // NUXT_ANTHROPIC_BASE_URL (solo para probar con un servidor falso).
+  // v0.5, correo (opcional: sin estas claves los avisos quedan solo en la app):
+  // NUXT_CRON_SECRET (protege /api/avisos/enviar), NUXT_SUPABASE_SECRET_KEY (clave secreta de
+  // Supabase, para leer los avisos pendientes de todas las personas), NUXT_RESEND_API_KEY,
+  // NUXT_CORREO_REMITENTE ("Turnos Accesibles <avisos@tu-dominio>") y NUXT_RESEND_BASE_URL (solo
+  // para probar con un servidor falso).
+  runtimeConfig: {
+    anthropicApiKey: '',
+    anthropicBaseUrl: 'https://api.anthropic.com',
+    cronSecret: '',
+    resendApiKey: '',
+    resendBaseUrl: 'https://api.resend.com',
+    correoRemitente: '',
+    supabase: { secretKey: '' },
+  },
+
+  // v0.6 — App instalable (PWA). El service worker:
+  // - guarda de antemano solo los archivos de la app (JS, CSS, íconos) y la página sin conexión;
+  // - NUNCA guarda las páginas (HTML): pueden tener datos personales y tienen que estar al día.
+  //   Cada página se pide siempre a internet; si no hay conexión, se muestra /offline/index.html.
+  // Los íconos PNG se generan con `node scripts/iconos.mjs` desde public/icono.svg.
   pwa: {
     registerType: 'autoUpdate',
     manifest: {
       name: 'Turnos Accesibles',
       short_name: 'Turnos',
-      description: 'Sacá un turno médico en el sistema público, paso a paso y en lenguaje claro.',
+      description: 'Sacá turnos de salud pública paso a paso, con texto grande, alto contraste y lectura en voz alta.',
       lang: 'es-AR',
+      dir: 'ltr',
+      start_url: '/',
+      scope: '/',
       display: 'standalone',
-      background_color: '#000000',
-      theme_color: '#000000',
+      theme_color: '#5B2BD9',
+      background_color: '#FFF9F0',
       icons: [
-        { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-        { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
-        { src: '/maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        { src: '/icono-192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/icono-512.png', sizes: '512x512', type: 'image/png' },
+        { src: '/icono-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        { src: '/icono.svg', sizes: 'any', type: 'image/svg+xml' },
       ],
     },
-    // Las páginas tienen datos personales y dependen de la sesión: nunca se sirven desde la caché.
-    // Sin conexión, cualquier navegación muestra /offline (estática, sin datos).
     workbox: {
+      // Sin "página de reemplazo" para las navegaciones: no queremos servir HTML guardado.
       navigateFallback: null,
-      globPatterns: ['**/*.{js,css,ico,png,svg,woff2,webmanifest}', 'offline/index.html'],
-      runtimeCaching: [{
-        urlPattern: ({ request }) => request.mode === 'navigate',
-        handler: 'NetworkOnly',
-        options: { precacheFallback: { fallbackURL: '/offline' } },
-      }],
+      globPatterns: ['**/*.{js,css,svg,png,woff2}', 'offline/index.html'],
+      cleanupOutdatedCaches: true,
+      runtimeCaching: [
+        {
+          // Páginas: siempre de internet (nada se guarda). Sin conexión, la página sin conexión.
+          urlPattern: ({ request }) => request.mode === 'navigate',
+          handler: 'NetworkOnly',
+          options: { precacheFallback: { fallbackURL: '/offline/index.html' } },
+        },
+      ],
     },
-    devOptions: { enabled: false },
+    client: {
+      // Guardamos el aviso del navegador para mostrar nuestro botón "Instalar la app".
+      installPrompt: 'ta_ocultar_instalar',
+    },
   },
 
-  $production: {
-    hooks: {
-      'pages:extend'(pages) {
-        if (process.env.DEMO_UI || process.env.NUXT_PUBLIC_DEMO === 'true') return
-        for (let i = pages.length - 1; i >= 0; i--) {
-          if (pages[i]?.path.startsWith('/demo-ui')) pages.splice(i, 1)
-        }
-      },
+  css: ['~/assets/css/tokens.css', '~/assets/css/base.css'],
+
+  app: {
+    head: {
+      htmlAttrs: { lang: 'es-AR' },
+      titleTemplate: '%s · Turnos Accesibles',
+      meta: [
+        {
+          name: 'description',
+          content:
+            'Turnos Accesibles te ayuda a sacar turnos de salud pública paso a paso, con texto grande, alto contraste y lectura en voz alta.',
+        },
+        { name: 'theme-color', content: '#5B2BD9' },
+      ],
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/icono.svg' },
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Lexend:wght@600;700;800&display=swap',
+        },
+      ],
     },
   },
 })

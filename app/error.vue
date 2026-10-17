@@ -1,30 +1,39 @@
-<template>
-  <UApp :locale="es">
-    <NuxtLayout>
-      <div class="max-w-xl flex flex-col gap-6">
-        <h1 class="text-2xl font-bold">{{ texto.titulo }}</h1>
-        <p class="text-lg">{{ texto.ayuda }}</p>
-        <UButton color="primary" variant="solid" icon="i-lucide-house" label="Ir al inicio" class="self-start" @click="clearError({ redirect: '/' })" />
-      </div>
-    </NuxtLayout>
-  </UApp>
-</template>
-
+<!-- Pantalla de error (página que no existe o falla del servidor), en lenguaje simple. -->
 <script setup lang="ts">
 import type { NuxtError } from '#app'
-import { es } from '@nuxt/ui/locale'
 
-const props = defineProps<{ error: NuxtError }>()
+const props = defineProps<{
+  error: NuxtError
+}>()
 
-const TEXTOS: Record<number, { titulo: string, ayuda: string }> = {
-  403: { titulo: 'No podés ver esta página.', ayuda: 'Esta parte es solo para otras personas. Volvé al inicio para seguir.' },
-  404: { titulo: 'No encontramos esta página.', ayuda: 'Puede que la dirección esté mal escrita. Volvé al inicio para seguir.' },
+// Esta pantalla no pasa por app.vue: aplicamos acá también las preferencias.
+const { aplicarAlDocumento } = useAccesibilidad()
+aplicarAlDocumento()
+
+const noExiste = computed(() => props.error.statusCode === 404)
+
+const titulo = computed(() => (noExiste.value ? 'No encontramos esta página' : 'Algo salió mal'))
+
+useSeoMeta({ title: titulo })
+
+function irAlInicio() {
+  clearError({ redirect: '/' })
 }
-
-const texto = computed(() => TEXTOS[props.error.statusCode ?? 500] ?? {
-  titulo: 'Algo no funcionó.',
-  ayuda: 'Probá de nuevo en un momento. Si sigue pasando, volvé al inicio.',
-})
-
-useHead({ title: () => texto.value.titulo })
 </script>
+
+<template>
+  <NuxtLayout>
+    <div class="contenedor pagina">
+      <h1>{{ titulo }}</h1>
+      <p v-if="noExiste" class="pagina__bajada">
+        Puede que la dirección esté mal escrita o que esta parte todavía no exista.
+      </p>
+      <p v-else class="pagina__bajada">
+        No es tu culpa. Tuvimos un problema de nuestro lado. Probá de nuevo en un rato.
+      </p>
+      <div>
+        <Boton @click="irAlInicio">Volver al inicio</Boton>
+      </div>
+    </div>
+  </NuxtLayout>
+</template>
