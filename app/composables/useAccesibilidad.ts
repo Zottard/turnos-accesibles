@@ -1,9 +1,10 @@
 // Preferencias de accesibilidad compartidas por toda la app.
 //
-// En la v0.1 se guardan en una cookie del navegador (`ta_prefs`). Usamos cookie y no
-// localStorage porque el servidor también la lee: así la página llega ya con el texto
-// grande o el alto contraste aplicados, sin un "parpadeo" al cargar.
-// En la v0.2 también se van a guardar en la cuenta de la persona (tabla `preferencias`).
+// Se guardan en una cookie del navegador (`ta_prefs`). Usamos cookie y no localStorage
+// porque el servidor también la lee: así la página llega ya con el texto grande o el alto
+// contraste aplicados, sin un "parpadeo" al cargar.
+// Si la persona ingresó con su cuenta, además se guardan en la tabla `preferencias`:
+// de eso se encarga usePreferenciasCuenta(). La cookie sigue siendo lo que pinta la página.
 
 const UN_ANIO_EN_SEGUNDOS = 60 * 60 * 24 * 365
 
@@ -26,6 +27,11 @@ export function useAccesibilidad() {
     guardar(normalizarPreferencias({ ...preferencias.value, [clave]: valor }))
   }
 
+  // Reemplaza todas juntas (por ejemplo, las que llegan de la cuenta).
+  function aplicar(nuevas: Preferencias) {
+    guardar(normalizarPreferencias(nuevas))
+  }
+
   function restablecer() {
     guardar({ ...PREFERENCIAS_PREDETERMINADAS })
   }
@@ -45,6 +51,7 @@ export function useAccesibilidad() {
   return {
     preferencias: readonly(preferencias),
     cambiar,
+    aplicar,
     restablecer,
     aplicarAlDocumento,
   }

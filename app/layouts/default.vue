@@ -1,6 +1,41 @@
 <!-- Estructura común de todas las pantallas: encabezado, contenido y pie. -->
 <script setup lang="ts">
-const { anuncio } = useAnuncio()
+const { anuncio, anunciar } = useAnuncio()
+const { conSesion, salir } = useSesion()
+const { sinLeer } = useAvisos()
+const route = useRoute()
+
+const sinLeerCantidad = computed(() => sinLeer.value.length)
+
+async function salirDeLaCuenta() {
+  await salir()
+  anunciar('Saliste de tu cuenta.')
+  await navigateTo('/')
+}
+
+// Menú del celular (v0.5): con la sesión iniciada y la pantalla angosta, Inicio, Mis turnos, Mi cuenta
+// y Salir van dentro de "Menú". Avisos queda siempre a la vista. En pantallas anchas el botón no se
+// ve y todo está en una línea.
+const menuAbierto = ref(false)
+const botonMenu = ref<HTMLButtonElement | null>(null)
+
+function cerrarMenu() {
+  menuAbierto.value = false
+  botonMenu.value?.focus()
+}
+
+function alTocarTeclaEnMenu(evento: KeyboardEvent) {
+  if (evento.key === 'Escape' && menuAbierto.value) {
+    cerrarMenu()
+  }
+}
+
+watch(
+  () => route.fullPath,
+  () => {
+    menuAbierto.value = false
+  },
+)
 </script>
 
 <template>
@@ -9,23 +44,62 @@ const { anuncio } = useAnuncio()
 
     <header class="encabezado">
       <div class="contenedor encabezado__interior">
-        <NuxtLink to="/" class="encabezado__marca">
+        <!-- Con la sesión iniciada, el inicio es /inicio (y el logo lleva ahí). -->
+        <NuxtLink :to="conSesion ? '/inicio' : '/'" class="encabezado__marca">
           <picture>
             <source media="(max-width: 30rem)" srcset="/icono.svg" />
             <img src="/logo.svg" alt="Turnos Accesibles, ir al inicio" width="225" height="48" />
           </picture>
         </NuxtLink>
 
-        <nav class="encabezado__nav" aria-label="Principal">
-          <ul>
-            <li><NuxtLink to="/">Inicio</NuxtLink></li>
-            <li><NuxtLink to="/accesibilidad">Ayuda</NuxtLink></li>
+        <!-- Sin sesión, pocas opciones: entran en una línea. Con sesión, en el celular van en "Menú". -->
+        <nav
+          class="encabezado__nav"
+          :class="{ 'encabezado__nav--sesion': conSesion, 'encabezado__nav--abierto': menuAbierto }"
+          aria-label="Principal"
+          @keydown="alTocarTeclaEnMenu"
+        >
+          <button
+            v-if="conSesion"
+            ref="botonMenu"
+            type="button"
+            class="encabezado__menu"
+            :aria-expanded="menuAbierto ? 'true' : 'false'"
+            aria-controls="menu-principal"
+            @click="menuAbierto = !menuAbierto"
+          >
+            <span aria-hidden="true">{{ menuAbierto ? '✕' : '☰' }}</span>
+            Menú
+          </button>
+          <ul id="menu-principal">
+            <li class="encabezado__plegable"><NuxtLink :to="conSesion ? '/inicio' : '/'">Inicio</NuxtLink></li>
+            <!-- Con sesión, la ayuda sigue en el menú de accesibilidad y en el pie. -->
+            <li v-if="!conSesion"><NuxtLink to="/accesibilidad">Ayuda</NuxtLink></li>
+            <template v-if="conSesion">
+              <li class="encabezado__plegable"><NuxtLink to="/mis-turnos">Mis turnos</NuxtLink></li>
+              <!-- Avisos siempre a la vista, con la cantidad sin leer en número (no solo un color). -->
+              <li>
+                <NuxtLink to="/avisos" class="encabezado__avisos">
+                  Avisos
+                  <span v-if="sinLeerCantidad > 0" class="encabezado__contador" aria-hidden="true">{{ sinLeerCantidad }}</span>
+                  <span v-if="sinLeerCantidad > 0" class="sr-only">, {{ sinLeerCantidad }} sin leer</span>
+                </NuxtLink>
+              </li>
+              <li class="encabezado__plegable"><NuxtLink to="/perfil">Mi cuenta</NuxtLink></li>
+              <li class="encabezado__plegable">
+                <button type="button" class="encabezado__salir" @click="salirDeLaCuenta">Salir</button>
+              </li>
+            </template>
+            <li v-else><NuxtLink to="/ingresar">Ingresar</NuxtLink></li>
           </ul>
         </nav>
 
         <MenuAccesibilidad />
       </div>
     </header>
+
+    <BandaAyuda />
+    <BandaAvisos />
 
     <main id="contenido" tabindex="-1" class="contenido">
       <slot />
@@ -97,7 +171,8 @@ const { anuncio } = useAnuncio()
   list-style: none;
 }
 
-.encabezado__nav a {
+.encabezado__nav a,
+.encabezado__salir {
   display: inline-flex;
   align-items: center;
   min-height: var(--alto-tactil);
@@ -109,9 +184,17 @@ const { anuncio } = useAnuncio()
   text-decoration: none;
 }
 
-.encabezado__nav a:hover {
+.encabezado__nav a:hover,
+.encabezado__salir:hover {
   color: var(--primario);
   text-decoration: underline;
+}
+
+/* "Salir" es una acción (button), pero se ve igual que los enlaces del menú. */
+.encabezado__salir {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
 }
 
 /* Página actual: subrayado grueso, no solo color. */
@@ -122,11 +205,76 @@ const { anuncio } = useAnuncio()
   text-underline-offset: 8px;
 }
 
+/* Cantidad de avisos sin leer: un número en una pastilla (además del texto para lectores). */
+.encabezado__contador {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.7em;
+  height: 1.7em;
+  margin-left: 0.4em;
+  padding-inline: 0.4em;
+  border-radius: var(--radio-boton);
+  background: var(--atencion);
+  color: var(--sobre-primario);
+  font-size: 0.9em;
+  line-height: 1;
+}
+
+/* "Menú": solo en pantallas angostas y con la sesión iniciada. */
+.encabezado__menu {
+  display: none;
+  align-items: center;
+  gap: var(--espacio-2);
+  min-height: var(--alto-tactil);
+  padding-inline: 0.9rem;
+  background: var(--superficie);
+  color: var(--primario);
+  border: var(--grosor-borde) solid var(--primario);
+  border-radius: var(--radio-boton);
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  cursor: pointer;
+}
+
 /* En pantallas angostas la navegación pasa a su propia línea. */
 @media (max-width: 40rem) {
   .encabezado__nav {
     order: 3;
     width: 100%;
+  }
+
+  .encabezado__nav ul {
+    gap: var(--espacio-1);
+  }
+
+  .encabezado__nav a,
+  .encabezado__salir {
+    padding-inline: 0.5rem;
+  }
+
+  /* Con sesión: "Menú" y "Avisos" a la vista; el resto se despliega con "Menú". */
+  .encabezado__nav--sesion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--espacio-1) var(--espacio-2);
+  }
+
+  .encabezado__menu {
+    display: inline-flex;
+  }
+
+  .encabezado__nav--sesion .encabezado__plegable {
+    display: none;
+  }
+
+  .encabezado__nav--abierto ul {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .encabezado__nav--abierto .encabezado__plegable {
+    display: block;
   }
 }
 

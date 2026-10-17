@@ -175,6 +175,64 @@ strong {
   margin-top: var(--espacio-3);
 }
 
+/* Tarjeta blanca con borde violeta arriba (formularios, secciones destacadas). */
+.tarjeta {
+  padding: var(--relleno-tarjeta);
+  background: var(--superficie);
+  border: var(--grosor-borde) solid var(--borde);
+  border-top: 8px solid var(--primario);
+  border-radius: var(--radio-tarjeta);
+  box-shadow: var(--sombra);
+}
+
+/* Formularios de cuenta: angostos, para que la vista no tenga que recorrer mucho. */
+.formulario-angosto {
+  max-width: 40rem;
+}
+
+/* Pasos de los asistentes (registro, primer ingreso). */
+.progreso {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+}
+
+/* Botón grande con nombre y descripción: sugerencias de especialidades (/buscar y el asistente). */
+.sugerencia {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  min-height: var(--alto-tactil);
+  padding: var(--espacio-2) var(--espacio-3);
+  background: var(--superficie);
+  color: var(--texto);
+  border: var(--grosor-borde) solid var(--primario);
+  border-radius: var(--radio-tarjeta);
+  text-align: left;
+  cursor: pointer;
+}
+
+.sugerencia:hover {
+  background: var(--fondo-info);
+}
+
+.sugerencia__nombre {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  color: var(--primario);
+}
+
+.sugerencia__descripcion {
+  color: var(--texto-suave);
+}
+
 /* --- Botones (ver components/Boton.vue) --- */
 .boton {
   display: inline-flex;
@@ -265,6 +323,7 @@ input[type='password'],
 input[type='number'],
 input[type='date'],
 input[type='search'],
+input[type='time'],
 select,
 textarea {
   display: block;
@@ -302,4 +361,134 @@ html[data-contraste='alto'] .boton--peligro {
   background: #000;
   color: #fff;
   border-color: #fff;
+}
+
+/* --- Panel administrativo (v0.6) --- */
+
+/* Lista de tarjetas (centros, especialidades, profesionales). */
+.lista-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: var(--espacio-3);
+  padding: 0;
+  list-style: none;
+}
+
+.lista-tarjetas > li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  max-width: none;
+}
+
+/* Etiqueta de estado: ícono + palabra, nunca solo color ("✓ Publicado", "! Sin publicar"). */
+.insignia {
+  --color-insignia: var(--texto-suave);
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--espacio-2);
+  max-width: 100%;
+  padding: 0.1rem 0.8rem;
+  background: var(--superficie);
+  border: var(--grosor-borde) solid var(--color-insignia);
+  border-radius: var(--radio-boton);
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  overflow-wrap: normal;
+  hyphens: none;
+}
+
+.insignia--si {
+  --color-insignia: var(--exito);
+  background: var(--fondo-exito);
+}
+
+.insignia--no {
+  --color-insignia: var(--atencion);
+  background: var(--fondo-atencion);
+}
+
+/* Un <select> o <textarea> con su etiqueta (los <input> usan components/Campo.vue). */
+.campo-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+.formulario-admin {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  max-width: 44rem;
+}
+
+.formulario-admin .fila-campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: var(--espacio-3);
+}
+
+/* Lo que solo va en papel (el encabezado del reporte de métricas). */
+.solo-imprimir {
+  display: none;
+}
+
+/*
+  --- Impresión (comprobante del turno: "Imprimir o guardar como PDF") ---
+  Sin encabezado, menú ni pie: solo el contenido, en negro sobre blanco y sin sombras.
+  Lo que no sirve en papel (botones) lleva la clase .no-imprimir.
+*/
+@media print {
+  .encabezado,
+  .pie,
+  .saltar,
+  .no-imprimir {
+    display: none !important;
+  }
+
+  .solo-imprimir {
+    display: block !important;
+  }
+
+  /* Colores de papel, también si la persona usa alto contraste en pantalla. */
+  html,
+  html[data-texto],
+  html[data-contraste='alto'] {
+    --fondo: #fff;
+    --superficie: #fff;
+    --texto: #000;
+    --texto-suave: #333;
+    --primario: #000;
+    --exito: #000;
+    --error: #000;
+    --borde: #000;
+    --fondo-info: #fff;
+    --fondo-exito: #fff;
+    --fondo-atencion: #fff;
+    --fondo-error: #fff;
+    font-size: 12pt;
+  }
+
+  .contenedor {
+    max-width: none;
+    padding-inline: 0;
+  }
+
+  .pagina {
+    padding-block: 0;
+    gap: 0.6rem;
+  }
+
+  .tarjeta {
+    box-shadow: none;
+    border: 1px solid #000;
+    border-top-width: 3px;
+    break-inside: avoid;
+  }
+
+  a {
+    color: #000;
+  }
 }

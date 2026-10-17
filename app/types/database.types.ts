@@ -1,0 +1,708 @@
+// Tipos de la base de Supabase. Los usa useSupabaseClient() para autocompletar tablas y columnas.
+// Generados con `supabase gen types typescript` (o el MCP de Supabase) y recortados a lo que usamos.
+// Si cambia una migración, hay que volver a generarlos.
+// Cambios a mano (Postgres no informa qué puede ser null en lo que devuelve una función):
+// - las funciones de bloqueo pueden devolver null;
+// - en buscar_turnos, distancia_km (sin ubicación) y requisitos pueden ser null;
+// - en mis_reservas, origen_numero, nueva_numero, requisitos, creada_por_nombre y los datos
+//   opcionales del centro (teléfono, horario, accesibilidad) pueden ser null;
+// - en personas_que_acompano, aceptado_en puede ser null.
+// avisos_por_correo solo la puede llamar el servidor con la clave secreta (service_role).
+
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+
+export type Database = {
+  __InternalSupabase: {
+    PostgrestVersion: '14.18'
+  }
+  public: {
+    Tables: {
+      acompanamientos: {
+        Row: {
+          aceptado_en: string | null
+          acompanante_id: string | null
+          alcance: string[]
+          consentido_en: string
+          correo_invitado: string
+          creado_en: string
+          estado: string
+          id: string
+          nombre_invitado: string
+          revocado_en: string | null
+          solicitante_id: string
+          token: string
+          vence_en: string
+        }
+        Insert: {
+          aceptado_en?: string | null
+          acompanante_id?: string | null
+          alcance: string[]
+          consentido_en?: string
+          correo_invitado: string
+          creado_en?: string
+          estado?: string
+          id?: string
+          nombre_invitado: string
+          revocado_en?: string | null
+          solicitante_id: string
+          token?: string
+          vence_en?: string
+        }
+        Update: {
+          aceptado_en?: string | null
+          acompanante_id?: string | null
+          alcance?: string[]
+          consentido_en?: string
+          correo_invitado?: string
+          creado_en?: string
+          estado?: string
+          id?: string
+          nombre_invitado?: string
+          revocado_en?: string | null
+          solicitante_id?: string
+          token?: string
+          vence_en?: string
+        }
+        Relationships: []
+      }
+      auditoria: {
+        Row: {
+          accion: string
+          creado_en: string
+          detalle: Json
+          id: number
+          registro_id: string | null
+          tabla: string
+          usuario_id: string | null
+        }
+        Insert: {
+          accion: string
+          creado_en?: string
+          detalle?: Json
+          id?: never
+          registro_id?: string | null
+          tabla: string
+          usuario_id?: string | null
+        }
+        Update: {
+          accion?: string
+          creado_en?: string
+          detalle?: Json
+          id?: never
+          registro_id?: string | null
+          tabla?: string
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auditoria_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      avisos_disponibilidad: {
+        Row: {
+          creado_en: string
+          especialidad_id: number
+          id: number
+          localidad: string | null
+          usuario_id: string
+        }
+        Insert: {
+          creado_en?: string
+          especialidad_id: number
+          id?: never
+          localidad?: string | null
+          usuario_id?: string
+        }
+        Update: {
+          creado_en?: string
+          especialidad_id?: number
+          id?: never
+          localidad?: string | null
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'avisos_disponibilidad_especialidad_id_fkey'
+            columns: ['especialidad_id']
+            isOneToOne: false
+            referencedRelation: 'especialidades'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'avisos_disponibilidad_localidad_fkey'
+            columns: ['localidad']
+            isOneToOne: false
+            referencedRelation: 'localidades'
+            referencedColumns: ['nombre']
+          },
+        ]
+      }
+      centros: {
+        Row: {
+          accesibilidad: string | null
+          activo: boolean
+          direccion: string
+          horario: string | null
+          id: number
+          lat: number
+          lng: number
+          localidad: string
+          nombre: string
+          telefono: string | null
+          tipo: string
+        }
+        Insert: {
+          accesibilidad?: string | null
+          activo?: boolean
+          direccion: string
+          horario?: string | null
+          id?: never
+          lat: number
+          lng: number
+          localidad: string
+          nombre: string
+          telefono?: string | null
+          tipo: string
+        }
+        Update: {
+          accesibilidad?: string | null
+          activo?: boolean
+          direccion?: string
+          horario?: string | null
+          id?: never
+          lat?: number
+          lng?: number
+          localidad?: string
+          nombre?: string
+          telefono?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'centros_localidad_fkey'
+            columns: ['localidad']
+            isOneToOne: false
+            referencedRelation: 'localidades'
+            referencedColumns: ['nombre']
+          },
+        ]
+      }
+      especialidades: {
+        Row: {
+          activa: boolean
+          descripcion: string
+          id: number
+          nombre: string
+          nombre_simple: string
+          palabras_clave: string[]
+        }
+        Insert: {
+          activa?: boolean
+          descripcion: string
+          id?: never
+          nombre: string
+          nombre_simple: string
+          palabras_clave?: string[]
+        }
+        Update: {
+          activa?: boolean
+          descripcion?: string
+          id?: never
+          nombre?: string
+          nombre_simple?: string
+          palabras_clave?: string[]
+        }
+        Relationships: []
+      }
+      eventos_uso: {
+        Row: {
+          creado_en: string
+          datos: Json
+          id: number
+          tipo: string
+        }
+        Insert: {
+          creado_en?: string
+          datos?: Json
+          id?: never
+          tipo: string
+        }
+        Update: {
+          creado_en?: string
+          datos?: Json
+          id?: never
+          tipo?: string
+        }
+        Relationships: []
+      }
+      intentos_ingreso: {
+        Row: {
+          bloqueado_hasta: string | null
+          correo: string
+          fallidos: number
+        }
+        Insert: {
+          bloqueado_hasta?: string | null
+          correo: string
+          fallidos?: number
+        }
+        Update: {
+          bloqueado_hasta?: string | null
+          correo?: string
+          fallidos?: number
+        }
+        Relationships: []
+      }
+      localidades: {
+        Row: {
+          lat: number
+          lng: number
+          nombre: string
+        }
+        Insert: {
+          lat: number
+          lng: number
+          nombre: string
+        }
+        Update: {
+          lat?: number
+          lng?: number
+          nombre?: string
+        }
+        Relationships: []
+      }
+      notificaciones: {
+        Row: {
+          correo_error: string | null
+          correo_estado: string | null
+          creada_en: string
+          datos: Json
+          entregada_en: string | null
+          enviar_desde: string
+          id: string
+          intentos: number
+          leida_en: string | null
+          reserva_id: string | null
+          solicitante_id: string | null
+          tipo: string
+          usuario_id: string
+        }
+        Insert: {
+          correo_error?: string | null
+          correo_estado?: string | null
+          creada_en?: string
+          datos?: Json
+          entregada_en?: string | null
+          enviar_desde?: string
+          id?: string
+          intentos?: number
+          leida_en?: string | null
+          reserva_id?: string | null
+          solicitante_id?: string | null
+          tipo: string
+          usuario_id: string
+        }
+        Update: {
+          correo_error?: string | null
+          correo_estado?: string | null
+          creada_en?: string
+          datos?: Json
+          entregada_en?: string | null
+          enviar_desde?: string
+          id?: string
+          intentos?: number
+          leida_en?: string | null
+          reserva_id?: string | null
+          solicitante_id?: string | null
+          tipo?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'notificaciones_reserva_id_fkey'
+            columns: ['reserva_id']
+            isOneToOne: false
+            referencedRelation: 'reservas'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      perfiles: {
+        Row: {
+          apellido: string
+          creado_en: string
+          dni: string | null
+          fecha_nacimiento: string | null
+          id: string
+          localidad: string | null
+          nombre: string
+          rol: string
+          telefono: string | null
+        }
+        Insert: {
+          apellido?: string
+          creado_en?: string
+          dni?: string | null
+          fecha_nacimiento?: string | null
+          id: string
+          localidad?: string | null
+          nombre?: string
+          rol?: string
+          telefono?: string | null
+        }
+        Update: {
+          apellido?: string
+          creado_en?: string
+          dni?: string | null
+          fecha_nacimiento?: string | null
+          id?: string
+          localidad?: string | null
+          nombre?: string
+          rol?: string
+          telefono?: string | null
+        }
+        Relationships: []
+      }
+      preferencias: {
+        Row: {
+          actualizado_en: string
+          alto_contraste: boolean
+          antelacion_horas: number
+          canal_aviso: string
+          lectura_voz: boolean
+          lenguaje_simple: boolean
+          reducir_movimiento: boolean
+          tamano_texto: number
+          usuario_id: string
+          velocidad_voz: number
+        }
+        Insert: {
+          actualizado_en?: string
+          alto_contraste?: boolean
+          antelacion_horas?: number
+          canal_aviso?: string
+          lectura_voz?: boolean
+          lenguaje_simple?: boolean
+          reducir_movimiento?: boolean
+          tamano_texto?: number
+          usuario_id: string
+          velocidad_voz?: number
+        }
+        Update: {
+          actualizado_en?: string
+          alto_contraste?: boolean
+          antelacion_horas?: number
+          canal_aviso?: string
+          lectura_voz?: boolean
+          lenguaje_simple?: boolean
+          reducir_movimiento?: boolean
+          tamano_texto?: number
+          usuario_id?: string
+          velocidad_voz?: number
+        }
+        Relationships: []
+      }
+      profesionales: {
+        Row: {
+          centro_id: number
+          especialidad_id: number
+          id: number
+          nombre: string
+        }
+        Insert: {
+          centro_id: number
+          especialidad_id: number
+          id?: never
+          nombre: string
+        }
+        Update: {
+          centro_id?: number
+          especialidad_id?: number
+          id?: never
+          nombre?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'profesionales_centro_id_fkey'
+            columns: ['centro_id']
+            isOneToOne: false
+            referencedRelation: 'centros'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'profesionales_especialidad_id_fkey'
+            columns: ['especialidad_id']
+            isOneToOne: false
+            referencedRelation: 'especialidades'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      reservas: {
+        Row: {
+          actualizada_en: string
+          actualizada_por: string | null
+          asistida: boolean
+          cancelada_tarde: boolean
+          creada_en: string
+          creada_por: string | null
+          estado: string
+          id: string
+          numero: number
+          reserva_origen_id: string | null
+          segundos: number | null
+          solicitante_id: string
+          turno_id: number
+        }
+        Insert: {
+          actualizada_en?: string
+          actualizada_por?: string | null
+          asistida?: boolean
+          cancelada_tarde?: boolean
+          creada_en?: string
+          creada_por?: string | null
+          estado?: string
+          id?: string
+          numero?: never
+          reserva_origen_id?: string | null
+          segundos?: number | null
+          solicitante_id: string
+          turno_id: number
+        }
+        Update: {
+          actualizada_en?: string
+          actualizada_por?: string | null
+          asistida?: boolean
+          cancelada_tarde?: boolean
+          creada_en?: string
+          creada_por?: string | null
+          estado?: string
+          id?: string
+          numero?: never
+          reserva_origen_id?: string | null
+          segundos?: number | null
+          solicitante_id?: string
+          turno_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'reservas_reserva_origen_id_fkey'
+            columns: ['reserva_origen_id']
+            isOneToOne: false
+            referencedRelation: 'reservas'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'reservas_turno_id_fkey'
+            columns: ['turno_id']
+            isOneToOne: false
+            referencedRelation: 'turnos'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      turnos: {
+        Row: {
+          centro_id: number
+          duracion_min: number
+          especialidad_id: number
+          estado: string
+          id: number
+          inicio: string
+          profesional_id: number
+          requisitos: string | null
+        }
+        Insert: {
+          centro_id: number
+          duracion_min?: number
+          especialidad_id: number
+          estado?: string
+          id?: never
+          inicio: string
+          profesional_id: number
+          requisitos?: string | null
+        }
+        Update: {
+          centro_id?: number
+          duracion_min?: number
+          especialidad_id?: number
+          estado?: string
+          id?: never
+          inicio?: string
+          profesional_id?: number
+          requisitos?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'turnos_centro_id_fkey'
+            columns: ['centro_id']
+            isOneToOne: false
+            referencedRelation: 'centros'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'turnos_especialidad_id_fkey'
+            columns: ['especialidad_id']
+            isOneToOne: false
+            referencedRelation: 'especialidades'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'turnos_profesional_id_fkey'
+            columns: ['profesional_id']
+            isOneToOne: false
+            referencedRelation: 'profesionales'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      aceptar_invitacion: { Args: { p_token: string }; Returns: Json }
+      avisos_por_correo: {
+        Args: { p_limite?: number }
+        Returns: {
+          correo: string
+          datos: Json
+          id: string
+          intentos: number
+          tipo: string
+          usuario_id: string
+        }[]
+      }
+      borrar_profesional: { Args: { p_profesional_id: number }; Returns: Json }
+      buscar_turnos: {
+        Args: {
+          p_centro_id?: number
+          p_desde?: string
+          p_especialidad_id: number
+          p_franja?: string
+          p_hasta?: string
+          p_lat?: number
+          p_limite?: number
+          p_lng?: number
+        }
+        Returns: {
+          centro_direccion: string
+          centro_id: number
+          centro_localidad: string
+          centro_nombre: string
+          distancia_km: number | null
+          especialidad_nombre: string
+          especialidad_nombre_simple: string
+          id: number
+          inicio: string
+          profesional: string
+          requisitos: string | null
+        }[]
+      }
+      cancelar_reserva: {
+        Args: { p_confirmar_tarde?: boolean; p_para?: string; p_reserva_id: string }
+        Returns: Json
+      }
+      dar_de_baja_agenda: {
+        Args: { p_desde: string; p_hasta: string; p_profesional_id: number }
+        Returns: Json
+      }
+      estado_bloqueo: { Args: { p_correo: string }; Returns: string | null }
+      generar_agenda: {
+        Args: {
+          p_desde: string
+          p_dias: number[]
+          p_duracion: number
+          p_hasta: string
+          p_hora_desde: string
+          p_hora_hasta: string
+          p_profesional_id: number
+          p_requisitos?: string
+        }
+        Returns: Json
+      }
+      invitar_acompanante: {
+        Args: { p_alcance: string[]; p_consiento?: boolean; p_correo: string; p_nombre: string }
+        Returns: Json
+      }
+      limpiar_intentos: { Args: never; Returns: undefined }
+      metricas: {
+        Args: { p_agrupar?: string; p_desde: string; p_hasta: string }
+        Returns: Json
+      }
+      mis_reservas: {
+        Args: { p_numero?: number; p_para?: string }
+        Returns: {
+          actualizada_en: string
+          asistida: boolean
+          cancelada_tarde: boolean
+          centro_accesibilidad: string | null
+          centro_direccion: string
+          centro_horario: string | null
+          centro_id: number
+          centro_lat: number
+          centro_lng: number
+          centro_localidad: string
+          centro_nombre: string
+          centro_telefono: string | null
+          centro_tipo: string
+          creada_en: string
+          creada_por_nombre: string | null
+          duracion_min: number
+          especialidad_id: number
+          especialidad_nombre: string
+          especialidad_nombre_simple: string
+          estado: string
+          id: string
+          inicio: string
+          nueva_numero: number | null
+          numero: number
+          origen_numero: number | null
+          profesional: string
+          requisitos: string | null
+          turno_id: number
+        }[]
+      }
+      personas_que_acompano: {
+        Args: never
+        Returns: {
+          aceptado_en: string | null
+          acompanamiento_id: string
+          alcance: string[]
+          apellido: string
+          nombre: string
+          solicitante_id: string
+        }[]
+      }
+      rechazar_invitacion: { Args: { p_token: string }; Returns: Json }
+      registrar_acceso_denegado: { Args: { p_ruta: string }; Returns: undefined }
+      registrar_fallo: { Args: { p_correo: string }; Returns: string | null }
+      reprogramar_reserva: {
+        Args: { p_nuevo_turno_id: number; p_para?: string; p_reserva_id: string }
+        Returns: Json
+      }
+      reservar_turno: {
+        Args: {
+          p_confirmar_superposicion?: boolean
+          p_para?: string
+          p_segundos?: number
+          p_turno_id: number
+        }
+        Returns: Json
+      }
+      revocar_acompanamiento: { Args: { p_id: string }; Returns: Json }
+      ver_invitacion: { Args: { p_token: string }; Returns: Json }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}

@@ -12,6 +12,8 @@ más. Si algo se puede resolver con una función de 10 líneas, no se agrega una
 | Base de datos y cuentas | **Supabase** (Postgres + Auth + RLS) con `@nuxtjs/supabase` | Cuentas, correo de verificación y permisos por fila sin escribir un backend. |
 | Voz | **Web Speech API** del navegador | Leer en voz alta y dictar, gratis y sin servidor. |
 | IA | **Claude** (Anthropic) desde `server/api/interpretar.post.ts` | Solo del lado del servidor. Si no hay clave o falla, se usan reglas simples. |
+| Correo | **Resend** con `fetch` desde el servidor (v0.5), cron diario de Vercel | Opcional: sin claves, los avisos quedan en la app. |
+| Sonido de aviso | **Web Audio API** del navegador | Dos notas suaves, sin archivos de audio. |
 | PWA | `@vite-pwa/nuxt` (v0.6) | Instalable y con página sin conexión. |
 | Tests | **Vitest** | Funciones puras: validaciones, reglas del asistente, fechas. |
 | Deploy | **Vercel** | Capa gratuita. |
@@ -27,14 +29,20 @@ app/
   components/        componentes chicos y reutilizables (Boton, Campo, Aviso, LeerEnVoz...)
   composables/       lógica con estado: useAccesibilidad, useSesion, useTurnos, useReservas...
   layouts/           default.vue (header, menú de accesibilidad, footer)
-  middleware/        auth.ts (pide sesión), admin.ts (pide rol admin)
+  middleware/        auth.ts (pide sesión), invitado.ts (solo sin sesión), admin.ts (pide rol admin)
   pages/             una página por pantalla
-  utils/             funciones puras: validar.ts, fechas.ts, textos.ts
+  utils/             funciones puras: validar.ts, turnos.ts, reservas.ts, asistente.ts, voz.ts,
+                     avisos.ts, sonido.ts
+shared/
+  utils/             funciones puras de la app y del servidor: fechas.ts, especialidades.ts,
+                     reglasAsistente.ts (reglas del asistente), avisos.ts (texto de los avisos),
+                     acompanantes.ts (alcance, invitación)
 server/
-  api/               endpoints propios (interpretar)
-  utils/             reglas del asistente
+  api/               endpoints propios (interpretar.post.ts, avisos/enviar.ts,
+                     acompanantes/invitacion.post.ts)
+  utils/             claude.ts (pedido a la IA), limite.ts (pedidos por minuto), correo.ts (Resend)
 supabase/
-  migrations/        un archivo SQL por versión (v02_cuentas.sql, v03_turnos.sql...)
+  migrations/        archivos SQL numerados por versión (0201_cuentas.sql, 0301_turnos.sql...)
   seed.sql           datos de prueba
 public/              logo.svg, icono.svg, karma-tech.svg
 tests/               *.test.ts de Vitest
@@ -79,12 +87,18 @@ centros           id, nombre, tipo, direccion, localidad, telefono, horario, lat
                   accesibilidad, activo
 especialidades    id, nombre, nombre_simple, descripcion, palabras_clave[], activa
 profesionales     id, nombre, especialidad_id, centro_id
-turnos            id, profesional_id, centro_id, especialidad_id, inicio, estado, requisitos
-reservas          numero (correlativo), turno_id, solicitante_id, creada_por, estado,
-                  asistida, segundos, reserva_origen, creada_en
-notificaciones    id, usuario_id, reserva_id, tipo, titulo, mensaje, enviar_desde, leida_en
-acompanamientos   id, solicitante_id, acompanante_id, correo_invitado, alcance[], token,
-                  vence_en, estado, consentido_en, revocado_en
+turnos            id, profesional_id, centro_id, especialidad_id, inicio, duracion_min,
+                  estado (disponible | reservado), requisitos
+avisos_disponibilidad  id, usuario_id, especialidad_id, localidad, creado_en
+reservas          numero (correlativo), id, turno_id, solicitante_id, creada_por, estado
+                  (confirmada | cancelada | reprogramada | completada), asistida, segundos,
+                  reserva_origen_id, cancelada_tarde, creada_en, actualizada_en, actualizada_por
+notificaciones    id, usuario_id, solicitante_id (de quién es el turno), reserva_id, tipo, datos
+                  (jsonb: foto del turno; el texto lo arma textoAviso()), enviar_desde,
+                  entregada_en, leida_en, correo_estado, correo_error, intentos, creada_en
+acompanamientos   id, solicitante_id, acompanante_id, nombre_invitado, correo_invitado,
+                  alcance[] (ver | reservar | cancelar), token, vence_en, estado (pendiente | activo
+                  | revocado | vencido | rechazado), consentido_en, aceptado_en, revocado_en
 eventos_uso       id, tipo, datos (jsonb, anónimo), creado_en
 auditoria         id, tabla, accion, registro_id, usuario_id, creado_en
 ```
@@ -93,7 +107,7 @@ auditoria         id, tabla, accion, registro_id, usuario_id, creado_en
 
 ```bash
 pnpm install
-cp .env.example .env     # completar las claves de Supabase
+cp .env.example .env     # completar SUPABASE_URL y SUPABASE_KEY (y, opcional, NUXT_ANTHROPIC_API_KEY)
 pnpm dev                 # http://localhost:3000
 pnpm test                # Vitest
 pnpm typecheck

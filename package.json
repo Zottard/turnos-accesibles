@@ -14,11 +14,13 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@nuxtjs/supabase": "^2.0.10",
     "nuxt": "~4.5.2",
     "vue": "^3.5.18",
     "vue-router": "~5.3.1"
   },
   "devDependencies": {
+    "@vite-pwa/nuxt": "^1.1.1",
     "typescript": "~5.9.3",
     "vitest": "^4.1.9",
     "vue-tsc": "^3.0.0"

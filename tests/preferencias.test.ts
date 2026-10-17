@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { normalizarPreferencias, PREFERENCIAS_PREDETERMINADAS } from '../app/utils/preferencias'
+import {
+  aFilaPreferencias,
+  AVISO_PREDETERMINADO,
+  desdeFilaPreferencias,
+  normalizarPreferencias,
+  PREFERENCIAS_PREDETERMINADAS,
+} from '../app/utils/preferencias'
 
 describe('normalizarPreferencias', () => {
   it('devuelve las preferencias recomendadas si no hay nada guardado', () => {
@@ -61,5 +67,38 @@ describe('normalizarPreferencias', () => {
   it('completa lo que falta e ignora claves desconocidas', () => {
     const resultado = normalizarPreferencias({ altoContraste: true, colorFavorito: 'rojo' })
     expect(resultado).toEqual({ ...PREFERENCIAS_PREDETERMINADAS, altoContraste: true })
+  })
+})
+
+describe('filas de la tabla preferencias', () => {
+  it('ida y vuelta: lo que se guarda es lo que se lee', () => {
+    const preferencias = { ...PREFERENCIAS_PREDETERMINADAS, altoContraste: true, tamanoTexto: 175 as const }
+    const aviso = { canalAviso: 'visual' as const, antelacionHoras: 48 as const }
+    expect(desdeFilaPreferencias(aFilaPreferencias(preferencias, aviso))).toEqual({ preferencias, aviso })
+  })
+
+  it('usa nombres de columna en snake_case', () => {
+    const fila = aFilaPreferencias(PREFERENCIAS_PREDETERMINADAS, AVISO_PREDETERMINADO)
+    expect(fila).toEqual({
+      tamano_texto: 125,
+      alto_contraste: false,
+      reducir_movimiento: true,
+      lectura_voz: false,
+      velocidad_voz: 0.9,
+      lenguaje_simple: true,
+      canal_aviso: 'ambos',
+      antelacion_horas: 24,
+    })
+  })
+
+  it('acepta la velocidad como texto (así puede llegar un numeric de Postgres)', () => {
+    expect(desdeFilaPreferencias({ velocidad_voz: '1.2' }).preferencias.velocidadVoz).toBe(1.2)
+  })
+
+  it('si la fila falta o trae valores raros, usa lo recomendado', () => {
+    expect(desdeFilaPreferencias(null)).toEqual({ preferencias: PREFERENCIAS_PREDETERMINADAS, aviso: AVISO_PREDETERMINADO })
+    const resultado = desdeFilaPreferencias({ canal_aviso: 'paloma', antelacion_horas: 5, velocidad_voz: null })
+    expect(resultado.aviso).toEqual(AVISO_PREDETERMINADO)
+    expect(resultado.preferencias.velocidadVoz).toBe(0.9)
   })
 })

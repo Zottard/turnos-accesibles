@@ -53,13 +53,15 @@ const AYUDAS = [
         </div>
 
         <div class="portada__acciones">
-          <Boton to="/buscar">Buscar un turno</Boton>
+          <Boton to="/asistente">Pedir un turno paso a paso</Boton>
+          <Boton to="/buscar" variante="secundario">Buscar un turno</Boton>
           <Boton to="/accesibilidad#preferencias" variante="secundario">Configurar accesibilidad</Boton>
         </div>
         <LeerEnVoz objetivo-id="que-es" />
-        <Aviso tipo="info" titulo="Próximamente">
-          <p>La búsqueda de turnos llega en la próxima versión. Ya podés probar la accesibilidad.</p>
-        </Aviso>
+        <p class="portada__nota">
+          Podés buscar turnos sin cuenta. Si <NuxtLink to="/registrarme">creás una cuenta</NuxtLink>,
+          guardamos cómo preferís ver la página.
+        </p>
 
         <!-- Dibujo decorativo: un turno confirmado rodeado de formas de colores. -->
         <div class="portada__dibujo" aria-hidden="true">
@@ -153,6 +155,10 @@ const AYUDAS = [
 .portada__bajada {
   margin-top: var(--espacio-3);
   font-size: 1.15rem;
+  color: var(--texto-suave);
+}
+
+.portada__nota {
   color: var(--texto-suave);
 }
 
